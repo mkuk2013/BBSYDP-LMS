@@ -1,0 +1,2530 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>BBSYDP STUDENT's LMS | Enterprise Learning System</title>
+
+    <!-- Core Libraries -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class',
+            theme: {
+                extend: {
+                    colors: {
+                        indigo: { 50: '#f5f3ff', 100: '#ede9fe', 200: '#ddd6fe', 300: '#c4b5fd', 400: '#a78bfa', 500: '#8b5cf6', 600: '#7c3aed', 700: '#6d28d9', 800: '#5b21b6', 900: '#4c1d95', 950: '#2e1065' },
+                        intel: { 50: '#ecfeff', 100: '#cffafe', 200: '#a5f3fc', 300: '#67e8f9', 400: '#22d3ee', 500: '#06b6d4', 600: '#0891b2', 700: '#0e7490', 800: '#155e75', 900: '#164e63', 950: '#083344' },
+                        slate: { 50: '#f8fafc', 100: '#f1f5f9', 200: '#e2e8f0', 300: '#cbd5e1', 400: '#94a3b8', 500: '#64748b', 600: '#475569', 700: '#334155', 800: '#1e293b', 900: '#0f172a', 950: '#020617' }
+                    },
+                    fontFamily: {
+                        sans: ['Outfit', 'Inter', 'sans-serif'],
+                    },
+                    borderRadius: {
+                        '3xl': '24px',
+                        '4xl': '32px',
+                    }
+                }
+            }
+        }
+    </script>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.5.31/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+
+        :root {
+            --plus-indigo: #6366f1;
+            --plus-indigo-glow: rgba(99, 102, 241, 0.15);
+            --plus-cyan: #22d3ee;
+            --plus-bg: #f8fafc;
+            --plus-card: #ffffff;
+            --plus-border: rgba(99, 102, 241, 0.1);
+            --plus-text: #0f172a;
+            --plus-text-muted: #64748b;
+        }
+
+        .dark {
+            --plus-bg: #0b1120;
+            --plus-card: #1e293b;
+            --plus-border: rgba(255, 255, 255, 0.1);
+            --plus-text: #f1f5f9;
+            --plus-text-muted: #94a3b8;
+            --plus-indigo-glow: rgba(99, 102, 241, 0.3);
+        }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: var(--plus-bg);
+            color: var(--plus-text);
+            line-height: 1.5;
+            font-size: 13px;
+            transition: background 0.3s ease;
+        }
+
+        .v-card {
+            background-color: var(--plus-card);
+            border: 1px solid var(--plus-border);
+            border-radius: 20px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .v-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 12px 20px -5px var(--plus-indigo-glow);
+            border-color: var(--plus-indigo);
+        }
+
+        .sidebar {
+            width: 220px;
+            height: 100vh;
+            position: fixed;
+            left: 0;
+            top: 0;
+            background-color: var(--plus-card);
+            border-right: 1px solid var(--plus-border);
+            z-index: 1000;
+            padding: 20px 8px;
+        }
+
+        .content-main {
+            margin-left: 220px;
+            padding: 24px;
+            min-height: 100vh;
+            background-color: var(--plus-bg);
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            /* Center horizontally */
+        }
+
+        .content-wrapper {
+            width: 100%;
+            max-width: 1280px;
+            /* Centered container width */
+            margin: 0 auto;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 14px 20px;
+            margin-bottom: 8px;
+            border-radius: 16px;
+            font-weight: 700;
+            color: var(--plus-text-muted);
+            text-transform: uppercase;
+            font-size: 0.75rem;
+            letter-spacing: 0.1em;
+            transition: all 0.3s ease;
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.05);
+            color: var(--plus-indigo);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(135deg, var(--plus-indigo) 0%, #4338ca 100%);
+            color: #ffffff !important;
+            box-shadow: 0 8px 16px -4px var(--plus-indigo-glow);
+        }
+
+        .btn-command {
+            background: linear-gradient(135deg, var(--plus-indigo) 0%, #4338ca 100%);
+            color: white;
+            padding: 14px 28px;
+            border-radius: 18px;
+            font-weight: 800;
+            text-transform: uppercase;
+            letter-spacing: 0.15em;
+            font-size: 0.7rem;
+            box-shadow: 0 10px 15px -3px var(--plus-indigo-glow);
+            transition: all 0.3s ease;
+        }
+
+        .btn-command:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 20px 25px -5px var(--plus-indigo-glow);
+            filter: brightness(1.1);
+        }
+
+        .glow-border {
+            position: relative;
+        }
+
+        .glow-border::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            padding: 1px;
+            background: linear-gradient(45deg, var(--plus-indigo), transparent, var(--plus-cyan));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            opacity: 0.3;
+            transition: opacity 0.3s ease;
+        }
+
+        .glow-border:hover::after {
+            opacity: 1;
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                transform: translateX(-100%);
+            }
+
+            .sidebar.open {
+                transform: translateX(0);
+                box-shadow: 20px 0 50px rgba(0, 0, 0, 0.1);
+            }
+
+            .content-main {
+                margin-left: 0;
+                padding: 24px;
+            }
+        }
+
+        .chat-bubble {
+            box-shadow: 0 4px 15px -3px rgba(0, 0, 0, 0.05);
+            transition: all 0.2s ease;
+        }
+
+        .chat-bubble:hover {
+            transform: scale(1.01);
+        }
+
+        .online-indicator {
+            position: relative;
+        }
+
+        .online-indicator::after {
+            content: '';
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background: #10b981;
+            border-radius: 50%;
+            border: 2px solid var(--plus-card);
+            bottom: 0;
+            right: 0;
+            box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .custom-scrollbar::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb {
+            background: rgba(99, 102, 241, 0.2);
+            border-radius: 10px;
+        }
+
+        .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+            background: var(--plus-indigo);
+        }
+
+        .filter-btn {
+            opacity: 0.5;
+            cursor: pointer;
+            border: 1px solid transparent;
+        }
+
+        .filter-btn.active {
+            opacity: 1;
+            background: var(--plus-indigo);
+            color: white;
+            border-color: var(--plus-indigo);
+            box-shadow: 0 4px 12px var(--plus-indigo-glow);
+        }
+
+        .filter-btn:hover:not(.active) {
+            opacity: 0.8;
+            background: rgba(99, 102, 241, 0.1);
+        }
+    </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-[#0b1120] text-slate-950 dark:text-slate-100 font-sans">
+
+    <!-- GLOBAL LOADER -->
+    <div id="global-loader" class="fixed inset-0 bg-white dark:bg-[#0b1120] z-[9999] flex items-center justify-center">
+        <div class="flex flex-col items-center gap-4">
+            <div class="w-12 h-12 border-4 border-indigo-500 border-t-transparent rounded-full animate-spin"></div>
+            <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-500 animate-pulse">Syncing
+                Session...</p>
+        </div>
+    </div>
+
+    <!-- 1. AUTHENTICATION -->
+    <div id="auth-wrapper"
+        class="hidden min-h-screen flex items-center justify-center p-4 bg-slate-50 dark:bg-[#0b1120]">
+        <div
+            class="v-card w-full max-w-[380px] p-8 shadow-2xl bg-white dark:bg-[#1e293b] animate-in fade-in zoom-in duration-500">
+            <div class="text-center mb-6">
+                <div
+                    class="inline-flex items-center justify-center w-16 h-16 bg-indigo-600 text-white rounded-2xl mb-4 shadow-xl shadow-indigo-900/10">
+                    <i data-lucide="shield-half" class="w-8 h-8"></i>
+                </div>
+                <h1 class="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">
+                    BBSYDP <span class="text-indigo-500">LMS</span></h1>
+                <p class="text-slate-500 dark:text-slate-400 mt-2 font-bold uppercase tracking-widest text-[8px]">
+                    Student Learning Portal</p>
+            </div>
+
+            <div id="auth-tabs"
+                class="flex p-1 bg-slate-100 dark:bg-[#0b1120] rounded-xl mb-6 border dark:border-slate-800">
+                <button onclick="switchAuth('student')" id="tab-student"
+                    class="flex-1 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all bg-white dark:bg-[#1e293b] shadow-sm text-slate-900 dark:text-slate-100">Student</button>
+                <button onclick="switchAuth('admin')" id="tab-admin"
+                    class="flex-1 py-2.5 rounded-lg text-[9px] font-black uppercase tracking-widest transition-all text-slate-500">Admin</button>
+            </div>
+
+            <form id="auth-form" class="space-y-4">
+                <div id="auth-error"
+                    class="hidden text-rose-500 text-[10px] font-bold uppercase tracking-[0.05em] text-center bg-rose-50 dark:bg-rose-950/30 p-3 rounded-lg border border-rose-100 dark:border-rose-900/40">
+                </div>
+                <div id="name-field" class="hidden space-y-1.5">
+                    <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Full Name</label>
+                    <input type="text" id="auth-name"
+                        class="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold text-sm text-slate-900 dark:text-slate-100"
+                        placeholder="Enter your full name">
+                </div>
+                <div class="space-y-1.5">
+                    <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Email
+                        Address</label>
+                    <input type="email" id="auth-email" required
+                        class="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold text-sm text-slate-900 dark:text-slate-100"
+                        placeholder="name@example.com">
+                </div>
+                <div class="space-y-1.5">
+                    <div class="flex justify-between items-center">
+                        <label
+                            class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Password</label>
+                        <a href="#" class="text-[8px] font-black uppercase tracking-widest text-indigo-600">Forgot?</a>
+                    </div>
+                    <input type="password" id="auth-pass" required
+                        class="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold text-sm text-slate-900 dark:text-slate-100"
+                        placeholder="••••••••">
+                </div>
+
+                <button type="submit" id="auth-btn"
+                    class="w-full btn-command text-white py-3.5 rounded-xl transition-all flex items-center justify-center gap-2 mt-2">
+                    <span>Sign In</span>
+                    <i data-lucide="log-in" class="w-3.5 h-3.5"></i>
+                </button>
+
+                <p id="auth-footer"
+                    class="text-center text-[9px] font-black uppercase tracking-widest text-slate-400 mt-6">
+                    New here? <button onclick="toggleMode()" class="text-indigo-500 hover:underline">Create
+                        Account</button>
+                </p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Mobile Sidebar Overlay -->
+    <div id="sidebar-overlay" onclick="toggleSidebar()"></div>
+
+    <!-- 2. DASHBOARD LAYOUT -->
+    <div id="dashboard-layout" class="hidden">
+        <!-- Sidebar -->
+        <aside class="sidebar flex flex-col transition-all duration-300">
+            <div class="px-4 mb-8 flex items-center justify-between">
+                <div class="flex items-center gap-3">
+                    <div
+                        class="w-10 h-10 bg-indigo-600 rounded-xl flex items-center justify-center text-white shadow-xl shadow-indigo-500/20">
+                        <i data-lucide="shield-half" class="w-6 h-6"></i>
+                    </div>
+                    <div>
+                        <h1 class="font-black text-xl tracking-tighter uppercase leading-none">BBSYDP</h1>
+                        <p class="text-[7px] font-black tracking-[0.2em] text-indigo-500 uppercase mt-1">Learning Portal
+                        </p>
+                    </div>
+                </div>
+                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-400">
+                    <i data-lucide="x" class="w-6 h-6"></i>
+                </button>
+            </div>
+
+            <nav class="flex-1 space-y-1">
+                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-6 mb-2">Menu
+                </div>
+                <button onclick="switchTab('dashboard')" class="nav-item w-full active" id="nav-dashboard">
+                    <i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard
+                </button>
+                <button onclick="switchTab('tasks')" class="nav-item w-full" id="nav-tasks">
+                    <i data-lucide="clipboard-list" class="w-5 h-5"></i> My Tasks
+                </button>
+                <button onclick="switchTab('resources')" class="nav-item w-full" id="nav-resources">
+                    <i data-lucide="folder-open" class="w-5 h-5"></i> Resources
+                </button>
+                <button onclick="switchTab('leaderboard')" class="nav-item w-full" id="nav-leaderboard">
+                    <i data-lucide="trophy" class="w-5 h-5"></i> Leaderboard
+                </button>
+                <button onclick="switchTab('chat')" class="nav-item w-full" id="nav-chat">
+                    <div class="relative">
+                        <i data-lucide="message-square" class="w-5 h-5"></i>
+                        <span id="global-inbox-badge"
+                            class="hidden absolute -top-1 -right-1 w-2.5 h-2.5 bg-rose-500 rounded-full border-2 border-white dark:border-slate-900"></span>
+                    </div>
+                    Community Hub
+                </button>
+
+                <div class="pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
+                    <div
+                        class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-6 mb-3 flex justify-between items-center">
+                        Community Status
+                        <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                    </div>
+                    <div id="presence-list" class="px-4 space-y-1 max-h-[150px] overflow-y-auto custom-scrollbar">
+                        <div class="text-[8px] text-slate-400 px-2 italic">Syncing presence...</div>
+                    </div>
+                </div>
+
+                <div id="admin-nav" class="hidden pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
+                    <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-6 mb-2">Admin Panel
+                    </div>
+                    <button onclick="switchTab('grading')" class="nav-item w-full">
+                        <i data-lucide="award" class="w-5 h-5"></i> Grade Tasks
+                    </button>
+                    <button onclick="switchTab('users')" class="nav-item w-full">
+                        <i data-lucide="users" class="w-5 h-5"></i> Students
+                    </button>
+                </div>
+            </nav>
+
+            <div class="mt-auto px-6 border-t border-slate-100 dark:border-slate-800 pt-6">
+                <button onclick="switchTab('profile')" class="nav-item w-full mb-4">
+                    <i data-lucide="user-cog" class="w-5 h-5"></i> Profile
+                </button>
+                <button onclick="handleLogout()"
+                    class="nav-item w-full text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10">
+                    <i data-lucide="log-out" class="w-5 h-5"></i> Logout
+                </button>
+            </div>
+        </aside>
+
+        <main class="content-main">
+            <div class="content-wrapper">
+                <!-- Top Navigation Bar -->
+                <header class="flex justify-between items-center mb-6 gap-4">
+                    <div class="flex items-center gap-4">
+                        <button onclick="toggleSidebar()"
+                            class="lg:hidden p-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <i data-lucide="menu" class="w-5 h-5 text-indigo-500"></i>
+                        </button>
+                        <div>
+                            <h2 class="text-2xl font-black tracking-tighter uppercase leading-none" id="page-title">
+                                Dashboard</h2>
+                            <div class="flex items-center gap-2 mt-1.5 font-bold">
+                                <span class="w-1.5 h-1.5 rounded-full bg-indigo-500 animate-pulse"></span>
+                                <span class="text-[9px] text-slate-400 uppercase tracking-widest leading-none">System
+                                    Online</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-3">
+                        <p class="hidden md:block text-right mr-2 border-r border-slate-100 dark:border-slate-800 pr-4">
+                            <span class="block text-xs font-black uppercase text-slate-400 leading-none mb-1">Status:
+                                Active</span>
+                            <span class="block text-[11px] font-black uppercase text-indigo-500 leading-none"
+                                id="user-name">Accessing...</span>
+                        </p>
+                        <div id="student-level-ui" class="hidden items-center gap-3">
+                            <div class="text-right">
+                                <span
+                                    class="block text-[8px] font-black uppercase text-slate-400 leading-none">Level</span>
+                                <span id="rank-name"
+                                    class="block text-[10px] font-black uppercase text-amber-500 leading-none">Rookie</span>
+                            </div>
+                            <div
+                                class="w-20 h-2 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden shadow-inner flex items-center px-0.5">
+                                <div id="xp-bar"
+                                    class="h-1 bg-gradient-to-r from-amber-400 to-orange-500 rounded-full transition-all duration-1000"
+                                    style="width: 20%"></div>
+                            </div>
+                        </div>
+                        <button id="admin-notif-btn" onclick="switchTab('grading')"
+                            class="hidden relative p-4 v-card border-0 shadow-sm text-slate-600 dark:text-slate-400 hover:text-amber-500 transition-all group">
+                            <i data-lucide="bell" class="w-5 h-5 group-hover:animate-bounce"></i>
+                            <span id="notif-badge"
+                                class="hidden absolute top-3 right-3 w-4 h-4 bg-rose-500 text-white text-[8px] font-black flex items-center justify-center rounded-full border-2 border-white dark:border-[#1e293b]">0</span>
+                        </button>
+                        <button onclick="toggleDarkMode()"
+                            class="p-4 v-card border-0 shadow-sm text-slate-600 dark:text-slate-400 hover:text-indigo-500">
+                            <i data-lucide="moon" id="theme-icon-dark" class="w-5 h-5"></i>
+                            <i data-lucide="sun" id="theme-icon-light" class="w-5 h-5 hidden"></i>
+                        </button>
+                        <button onclick="openCreateTaskModal()" id="create-task-btn"
+                            class="hidden btn-command px-6 py-4 rounded-2xl">
+                            <i data-lucide="plus-circle" class="w-4 h-4"></i> Add Task
+                        </button>
+                    </div>
+                </header>
+
+                <!-- 1. Strategy Overview -->
+                <div id="view-dashboard" class="content-view animate-in fade-in duration-500">
+                    <!-- Notification Center (Student Only) -->
+                    <div id="student-alerts" class="hidden mb-6">
+                        <div class="v-card p-4 border-l-4 border-l-indigo-500 flex items-center justify-between gap-6">
+                            <div class="flex items-center gap-4">
+                                <div
+                                    class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
+                                    <i data-lucide="lightbulb" class="w-5 h-5 animate-pulse"></i>
+                                </div>
+                                <div>
+                                    <h4 class="font-black uppercase tracking-tight text-xs">Learning Tip</h4>
+                                    <p class="text-[10px] text-slate-500 font-medium" id="student-alert-msg">Complete
+                                        tasks
+                                        to improve grades.</p>
+                                </div>
+                            </div>
+                            <button onclick="switchTab('tasks')"
+                                class="btn-command px-4 py-2 rounded-lg text-[9px]">View
+                                Tasks</button>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
+                        <div class="v-card p-4 flex items-center gap-4 glow-border group">
+                            <div
+                                class="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white shadow-lg">
+                                <i data-lucide="target" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p id="stat-label-1"
+                                    class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">
+                                    Pending Tasks</p>
+                                <h3 class="text-2xl font-black tracking-tighter" id="stat-active">0</h3>
+                            </div>
+                        </div>
+                        <div class="v-card p-4 flex items-center gap-4 glow-border group">
+                            <div
+                                class="w-12 h-12 bg-cyan-500/10 text-cyan-500 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-cyan-500 group-hover:text-white shadow-lg">
+                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p id="stat-label-2"
+                                    class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">
+                                    Completed Tasks</p>
+                                <h3 class="text-2xl font-black tracking-tighter" id="stat-completed">0</h3>
+                            </div>
+                        </div>
+                        <div class="v-card p-4 flex items-center gap-4 glow-border group sm:col-span-2 lg:col-span-1">
+                            <div
+                                class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white shadow-lg">
+                                <i data-lucide="activity" class="w-6 h-6"></i>
+                            </div>
+                            <div>
+                                <p id="stat-label-3"
+                                    class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">
+                                    Average Grade</p>
+                                <h3 class="text-2xl font-black tracking-tighter" id="stat-score">0%</h3>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                        <div class="v-card p-4">
+                            <div class="flex justify-between items-center mb-4">
+                                <h3 class="font-black text-xs uppercase tracking-tighter">Recent Activities</h3>
+                                <button onclick="switchTab('tasks')"
+                                    class="text-[9px] font-black uppercase text-indigo-500 tracking-widest hover:underline">View
+                                    All</button>
+                            </div>
+                            <div id="recent-activity-list" class="space-y-2">
+                                <!-- Activities -->
+                            </div>
+                        </div>
+                        <div class="v-card p-4 flex flex-col justify-center min-h-[220px]">
+                            <canvas id="performanceChart" class="max-h-[160px]"></canvas>
+                            <p class="text-center text-[8px] font-black text-slate-400 mt-2 uppercase tracking-widest">
+                                Performance Graph</p>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2. Tasks View -->
+                <div id="view-tasks" class="content-view hidden animate-in slide-in-from-bottom-4 duration-500">
+                    <!-- Advanced Filter Bar -->
+                    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
+                        <div
+                            class="flex items-center gap-2 p-1.5 bg-white dark:bg-[#1e293b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800">
+                            <button onclick="filterTasks('all')"
+                                class="filter-btn active text-[9px] font-black uppercase px-4 py-2 rounded-xl transition-all"
+                                data-filter="all">All Tasks</button>
+                            <button onclick="filterTasks('pending')"
+                                class="filter-btn text-[9px] font-black uppercase px-4 py-2 rounded-xl transition-all"
+                                data-filter="pending">Pending</button>
+                            <button onclick="filterTasks('completed')"
+                                class="filter-btn text-[9px] font-black uppercase px-4 py-2 rounded-xl transition-all"
+                                data-filter="completed">Completed</button>
+                            <button onclick="filterTasks('expired')"
+                                class="filter-btn text-[9px] font-black uppercase px-4 py-2 rounded-xl transition-all"
+                                data-filter="expired">Expired</button>
+                        </div>
+                    </div>
+                    <div id="task-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        <!-- Tasks -->
+                    </div>
+                </div>
+
+                <!-- 3. Intelligence View -->
+                <div id="view-resources" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                        <div class="v-card p-4 group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div
+                                    class="w-8 h-8 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="video" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4
+                                        class="font-black text-slate-900 dark:text-white uppercase tracking-tight text-xs">
+                                        Theory Session</h4>
+                                    <p class="text-[8px] font-black uppercase text-slate-400 mt-0.5 tracking-widest">
+                                        Foundation Principles</p>
+                                </div>
+                            </div>
+                            <button
+                                class="text-[8px] font-black uppercase text-indigo-500 tracking-[0.2em] flex items-center gap-1 group-hover:gap-2 transition-all">Access
+                                Module <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i></button>
+                        </div>
+                        <div class="v-card p-4 group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div
+                                    class="w-8 h-8 bg-cyan-50 dark:bg-cyan-900/30 text-cyan-600 dark:text-cyan-400 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="book-open" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4
+                                        class="font-black text-slate-900 dark:text-white uppercase tracking-tight text-xs">
+                                        Advanced Intel</h4>
+                                    <p class="text-[8px] font-black uppercase text-slate-400 mt-0.5 tracking-widest">
+                                        Tactical Implementation</p>
+                                </div>
+                            </div>
+                            <button
+                                class="text-[8px] font-black uppercase text-indigo-500 tracking-[0.2em] flex items-center gap-1 group-hover:gap-2 transition-all">Download
+                                Intel <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i></button>
+                        </div>
+                        <div class="v-card p-4 group">
+                            <div class="flex items-center gap-3 mb-3">
+                                <div
+                                    class="w-8 h-8 bg-emerald-50 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded-lg flex items-center justify-center">
+                                    <i data-lucide="code-2" class="w-4 h-4"></i>
+                                </div>
+                                <div>
+                                    <h4
+                                        class="font-black text-slate-900 dark:text-white uppercase tracking-tight text-xs">
+                                        Practice Tasks</h4>
+                                    <p class="text-[8px] font-black uppercase text-slate-400 mt-0.5 tracking-widest">
+                                        Learn
+                                        by Doing</p>
+                                </div>
+                            </div>
+                            <button
+                                class="text-[8px] font-black uppercase text-indigo-500 tracking-[0.2em] flex items-center gap-1 group-hover:gap-2 transition-all">Start
+                                Practice <i data-lucide="chevron-right" class="w-2.5 h-2.5"></i></button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 4. Leaderboard View -->
+                <div id="view-leaderboard" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                    <div class="v-card overflow-hidden">
+                        <div
+                            class="p-5 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex justify-between items-center">
+                            <div>
+                                <h3 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">Student
+                                    Ranking
+                                </h3>
+                                <p class="text-indigo-100/70 text-[8px] font-black uppercase tracking-widest">Best
+                                    Performers</p>
+                            </div>
+                            <div
+                                class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
+                                <i data-lucide="trophy" class="w-5 h-5 text-white"></i>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-bold text-xs">
+                                <thead
+                                    class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <tr>
+                                        <th class="px-5 py-3">Rank</th>
+                                        <th class="px-5 py-3">Student</th>
+                                        <th class="px-5 py-3 text-center">Tasks</th>
+                                        <th class="px-5 py-3 text-center">Grade</th>
+                                        <th class="px-5 py-3 text-right">Progress</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="leaderboard-body" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                    <!-- Rows -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 5. Admin Review Center -->
+                <div id="view-grading" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                    <div class="v-card overflow-hidden">
+                        <div
+                            class="p-5 border-b border-slate-100 dark:border-slate-800/50 flex justify-between items-center text-xs">
+                            <h3 class="font-black text-slate-900 dark:text-slate-100 uppercase tracking-tighter">Grading
+                                Queue</h3>
+                            <span
+                                class="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/20"
+                                id="pending-count">0 Submissions</span>
+                        </div>
+                        <div id="grading-list" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                            <!-- Submissions Injected -->
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 6. Admin Student Directory -->
+                <div id="view-users" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                    <div class="v-card overflow-hidden">
+                        <div
+                            class="p-4 border-b border-slate-100 dark:border-slate-800/50 flex flex-col md:flex-row gap-3 items-center justify-between">
+                            <div class="relative w-full md:max-w-xs">
+                                <i data-lucide="search"
+                                    class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5"></i>
+                                <input type="text" id="user-search" placeholder="Search..."
+                                    class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
+                            </div>
+                            <button onclick="downloadAllReports()"
+                                class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5">
+                                <i data-lucide="download" class="w-3 h-3"></i> Export All
+                            </button>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-bold">
+                                <thead
+                                    class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <tr>
+                                        <th class="px-5 py-3">Student Name</th>
+                                        <th class="px-5 py-3 text-center">Tasks</th>
+                                        <th class="px-5 py-3 text-center">Grade</th>
+                                        <th class="px-6 py-3 text-center">Status</th>
+                                        <th class="px-5 py-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="user-table-body"
+                                    class="divide-y divide-slate-100 dark:divide-slate-800/50 text-[11px]">
+                                    <!-- Row Injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <!-- 7. Global Chat View -->
+                <div id="view-chat" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                    <div class="v-card h-[calc(100vh-180px)] flex flex-col md:flex-row overflow-hidden">
+                        <!-- Left: Chat Sidebar -->
+                        <div
+                            class="hidden md:flex w-64 border-r border-slate-100 dark:border-slate-800 flex-col bg-slate-50/50 dark:bg-slate-800/10">
+                            <div
+                                class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-[#1e293b]">
+                                <h3 class="font-black text-[10px] uppercase tracking-widest text-slate-400">Hub Sidebar
+                                </h3>
+                                <button onclick="exitPrivateChat()" id="back-to-global-btn"
+                                    class="hidden text-[8px] font-black uppercase text-indigo-500 hover:underline">Exit
+                                    Chat</button>
+                            </div>
+
+                            <div class="flex-1 overflow-y-auto custom-scrollbar flex flex-col">
+                                <div class="p-3">
+                                    <h4
+                                        class="font-black text-[9px] uppercase tracking-widest text-slate-400 mb-3 ml-2 flex items-center gap-2">
+                                        <span class="w-1 h-1 rounded-full bg-emerald-500"></span> Online Now
+                                    </h4>
+                                    <div id="chat-presence-list" class="space-y-1">
+                                        <div class="text-[8px] text-slate-400 px-2 italic">Syncing...</div>
+                                    </div>
+                                </div>
+
+                                <div class="p-3 border-t border-slate-100 dark:border-slate-800 mt-2">
+                                    <h4
+                                        class="font-black text-[9px] uppercase tracking-widest text-slate-400 mb-3 ml-2 flex items-center gap-2">
+                                        <span class="w-1 h-1 rounded-full bg-indigo-500"></span> Active Chats
+                                    </h4>
+                                    <div id="active-conversations-list" class="space-y-1">
+                                        <div class="text-[8px] text-slate-400 px-2 italic text-center py-4">No recent
+                                            messages</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Main: Chat Interface -->
+                        <div class="flex-1 flex flex-col min-w-0">
+                            <div
+                                class="p-4 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-white dark:bg-[#1e293b]">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-indigo-500 text-white flex items-center justify-center shadow-lg shadow-indigo-500/20"
+                                        id="hub-header-icon">
+                                        <i data-lucide="globe" class="w-5 h-5"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="font-black text-xs uppercase tracking-tighter" id="hub-title">
+                                            Community
+                                            Hub</h3>
+                                        <p class="text-[7px] font-black text-slate-400 uppercase tracking-widest"
+                                            id="global-typing-status">Public Channel Active</p>
+                                    </div>
+                                </div>
+                                <!-- Chat Mode Badge -->
+                                <div class="flex items-center gap-2">
+                                    <div id="global-badge"
+                                        class="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5">
+                                        <i data-lucide="shield" class="w-3 h-3"></i> Public
+                                    </div>
+                                    <button onclick="exitPrivateChat()" id="pvt-exit-header"
+                                        class="hidden px-3 py-1 bg-rose-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest flex items-center gap-1.5 animate-in fade-in zoom-in">
+                                        <i data-lucide="x-circle" class="w-3 h-3"></i> Close Chat
+                                    </button>
+                                </div>
+                            </div>
+
+                            <div id="global-chat-container"
+                                class="flex-1 overflow-y-auto p-6 space-y-4 custom-scrollbar bg-slate-50/30 dark:bg-slate-900/10">
+                                <div
+                                    class="text-center py-10 text-slate-400 text-[9px] font-black uppercase tracking-widest opacity-50 italic">
+                                    Connecting to hub...</div>
+                            </div>
+
+                            <div class="p-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-[#1e293b]">
+                                <div class="relative">
+                                    <input type="text" id="global-chat-input"
+                                        class="w-full pl-6 pr-16 py-4 bg-slate-100 dark:bg-[#0b1120] border-0 rounded-2xl text-[11px] font-medium focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 dark:text-slate-100"
+                                        placeholder="Say something to everyone...">
+                                    <button onclick="sendHubMessage()"
+                                        class="absolute right-2 top-2 p-2.5 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all">
+                                        <i data-lucide="send" class="w-4 h-4"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Selected Private Chat (Hidden by default, will reuse global chat container if needed) -->
+                <!-- Removing the dedicated inbox view as requested -->
+
+                <!-- Private Chat Modal (Quick Access) -->
+                <div class="modal fade" id="quickChatModal" tabindex="-1">
+                    <div class="modal-dialog modal-dialog-centered">
+                        <div
+                            class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
+                            <div class="modal-header border-0 p-4 bg-slate-50 dark:bg-slate-800/20">
+                                <div class="flex items-center gap-3">
+                                    <div id="quick-chat-avatar"
+                                        class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black">
+                                        ?</div>
+                                    <h5 class="modal-title font-black text-sm tracking-tight text-slate-900 dark:text-slate-100"
+                                        id="quick-chat-name">Chat</h5>
+                                </div>
+                                <button type="button" class="btn-close dark:btn-close-white"
+                                    data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body p-0">
+                                <div id="quick-messages-container"
+                                    class="h-80 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50/10"></div>
+                                <div class="p-4 border-t border-slate-100 dark:border-slate-800">
+                                    <div class="relative">
+                                        <input type="text" id="quick-chat-input"
+                                            class="w-full pl-4 pr-12 py-3 bg-slate-100 dark:bg-[#0b1120] border-0 rounded-xl text-[10px] font-medium outline-none"
+                                            placeholder="Send a private message...">
+                                        <button onclick="sendQuickPrivateMessage()"
+                                            class="absolute right-2 top-1.5 p-1.5 bg-indigo-600 text-white rounded-lg shadow-lg shadow-indigo-500/20">
+                                            <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> <!-- End of content-wrapper -->
+        </main>
+    </div>
+
+    <!-- MODALS -->
+
+    <!-- Create Task Modal -->
+    <div class="modal fade" id="createTaskModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content v-card border-0 shadow-2xl p-2 overflow-hidden bg-white dark:bg-[#1e293b]">
+                <div class="modal-header border-0 p-5 pb-0">
+                    <h5 class="modal-title font-black text-xl tracking-tight text-slate-900 dark:text-slate-100">Create
+                        New
+                        Task</h5>
+                    <button type="button" class="btn-close dark:btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-5 pt-4">
+                    <form id="create-task-form" class="space-y-4">
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Task
+                                Title</label>
+                            <input type="text" id="new-task-title" required
+                                class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold"
+                                placeholder="e.g., JavaScript Project">
+                        </div>
+                        <div class="space-y-1.5">
+                            <label
+                                class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Description</label>
+                            <textarea id="new-task-desc" required
+                                class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-sm font-semibold"
+                                rows="3" placeholder="Enter task details..."></textarea>
+                        </div>
+                        <div class="grid grid-cols-2 gap-4">
+                            <div class="space-y-1.5">
+                                <label
+                                    class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Deadline</label>
+                                <input type="datetime-local" id="new-task-date"
+                                    class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-[11px] font-semibold">
+                            </div>
+                            <div class="space-y-1.5">
+                                <label
+                                    class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Reference</label>
+                                <div
+                                    class="relative w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 flex items-center justify-between">
+                                    <span id="ref-file-name" class="text-[10px] text-slate-500 truncate pr-2">Attach
+                                        file</span>
+                                    <input type="file" id="new-task-ref"
+                                        class="absolute inset-0 opacity-0 cursor-pointer"
+                                        onchange="$('#ref-file-name').text(this.files[0].name)">
+                                    <i data-lucide="paperclip" class="w-3.5 h-3.5 text-slate-400"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="space-y-1.5">
+                            <label class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Hints
+                                (Optional)</label>
+                            <input type="text" id="new-task-hints"
+                                class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-[11px] font-semibold"
+                                placeholder="Helpful tips...">
+                        </div>
+                        <button type="submit" id="task-submit-btn" class="w-full btn-command mt-2">Create Task</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Task Detail/Submit Modal -->
+    <div class="modal fade" id="taskDetailModal" tabindex="-1">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
+                <div class="modal-header border-0 p-8 pb-0 flex flex-col items-start gap-4">
+                    <div class="flex justify-between w-full items-start">
+                        <div
+                            class="inline-flex items-center gap-2 px-3 py-1 bg-indigo-100 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 rounded-full text-[10px] font-black uppercase tracking-widest mb-2">
+                            <i data-lucide="info" class="w-3 h-3"></i> Task Info
+                        </div>
+                        <button type="button" class="btn-close dark:btn-close-white" data-bs-dismiss="modal"></button>
+                    </div>
+                    <div>
+                        <h5 class="modal-title font-black text-3xl text-slate-900 dark:text-white" id="detail-title">
+                            Task Detail</h5>
+                        <p class="text-sm text-slate-500 font-medium mt-2 flex items-center gap-2">
+                            <i data-lucide="timer" class="w-4 h-4 text-indigo-500"></i> Time Remaining: <span
+                                id="detail-timer" class="text-slate-900 dark:text-slate-100 font-bold">--</span>
+                        </p>
+                    </div>
+                </div>
+                <div class="modal-body p-8 pt-6">
+                    <div class="prose prose-sm dark:prose-invert text-slate-600 dark:text-slate-400 mb-6 p-6 bg-slate-50 dark:bg-slate-800/50 rounded-2xl border border-slate-100 dark:border-slate-800 whitespace-pre-wrap leading-relaxed shadow-inner"
+                        id="detail-desc"></div>
+
+                    <div id="detail-guidance" class="hidden mb-8 space-y-4">
+                        <div
+                            class="p-5 rounded-2xl bg-amber-50 dark:bg-amber-900/20 border border-amber-100 dark:border-amber-900/50">
+                            <div class="flex items-center gap-2 mb-2 text-amber-700 dark:text-amber-400">
+                                <i data-lucide="lightbulb" class="w-4 h-4"></i>
+                                <span class="text-[10px] font-black uppercase tracking-widest">Teacher's Hint</span>
+                            </div>
+                            <p class="text-xs text-amber-800 dark:text-amber-300 font-medium italic" id="detail-hints">
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Submit Section -->
+                    <div id="submission-section">
+                        <form id="submit-form" class="space-y-6">
+                            <input type="hidden" id="submit-id">
+                            <div
+                                class="group relative bg-slate-50 dark:bg-slate-800/30 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-10 text-center hover:border-indigo-500 transition-all cursor-pointer overflow-hidden">
+                                <div
+                                    class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity">
+                                </div>
+                                <input type="file" id="submit-file" required
+                                    class="absolute inset-0 opacity-0 cursor-pointer z-10"
+                                    onchange="$('#file-name').text(this.files[0].name)">
+                                <div class="relative z-0">
+                                    <div
+                                        class="w-16 h-16 bg-white dark:bg-slate-800 shadow-xl rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                        <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+                                    </div>
+                                    <p class="font-black text-slate-900 dark:text-white uppercase tracking-tight">Upload
+                                        Your File</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2"
+                                        id="file-name">Allowed: PDF, ZIP, IMG (max 5mb)</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full btn-command">Submit Task</button>
+                        </form>
+                    </div>
+
+                    <!-- Status Messages -->
+                    <div id="admin-view-msg"
+                        class="hidden p-8 bg-blue-50 dark:bg-blue-900/20 text-blue-600 dark:text-blue-400 rounded-3xl text-center border border-blue-100 dark:border-blue-900/50">
+                        <i data-lucide="shield-check" class="w-10 h-10 mx-auto mb-4 opacity-50"></i>
+                        <h4 class="font-black text-lg">Admin View</h4>
+                        <p class="text-sm mt-1 font-medium italic">You are currently viewing this task as a teacher.</p>
+                        <button onclick="openEditFromDetail()"
+                            class="btn-command mt-6 px-8 py-3 rounded-xl mx-auto flex items-center justify-center gap-2">
+                            <i data-lucide="edit-3" class="w-4 h-4"></i> Edit Task Details
+                        </button>
+                    </div>
+
+                    <!-- Graded Result -->
+                    <div id="result-section" class="hidden text-center py-10 animate-in zoom-in duration-500">
+                        <div
+                            class="w-20 h-20 bg-emerald-100 dark:bg-emerald-900/40 text-emerald-600 dark:text-emerald-400 rounded-full flex items-center justify-center mx-auto mb-6 shadow-xl shadow-emerald-500/10">
+                            <i data-lucide="check" class="w-10 h-10"></i>
+                        </div>
+                        <h3 class="text-3xl font-black text-slate-900 dark:text-white uppercase tracking-tighter">
+                            Task Graded</h3>
+                        <div class="flex items-center justify-center gap-4 my-8">
+                            <div
+                                class="p-8 bg-slate-50 dark:bg-slate-800/80 rounded-[32px] border border-slate-100 dark:border-slate-800 shadow-inner">
+                                <p class="text-[10px] font-black text-slate-400 uppercase tracking-[0.2em] mb-3">
+                                    Your Grade</p>
+                                <div class="text-6xl font-black text-indigo-500 tracking-tighter"><span
+                                        id="result-grade">0</span><span class="text-2xl text-slate-400">/100</span>
+                                </div>
+                            </div>
+                        </div>
+                        <div
+                            class="max-w-md mx-auto p-6 bg-white dark:bg-slate-900 rounded-2xl border border-slate-100 dark:border-slate-800 italic text-slate-500 mb-8 font-medium">
+                            "<span id="result-feedback"></span>"
+                        </div>
+                        <button onclick="downloadReport()"
+                            class="btn-command px-10 py-5 rounded-2xl flex items-center justify-center gap-3 mx-auto shadow-2xl mb-8">
+                            <i data-lucide="file-text" class="w-5 h-5"></i> Download Result PDF
+                        </button>
+                    </div>
+
+                    <!-- 🗣️ DISCUSSION HUB (NEW) -->
+                    <div class="mt-12 pt-12 border-t border-slate-100 dark:border-slate-800">
+                        <div class="flex items-center gap-3 mb-6">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-500">
+                                <i data-lucide="message-square" class="w-5 h-5"></i>
+                            </div>
+                            <div>
+                                <h4 class="text-sm font-black uppercase tracking-tighter">Discussion Hub</h4>
+                                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Real-time Task
+                                    Support</p>
+                            </div>
+                        </div>
+
+                        <div id="comments-container"
+                            class="space-y-4 max-h-[300px] overflow-y-auto mb-6 pr-2 custom-scrollbar flex flex-col">
+                            <div
+                                class="text-center py-8 text-slate-400 text-[9px] font-bold uppercase tracking-widest italic opacity-50">
+                                Loading discussion...</div>
+                        </div>
+
+                        <div class="relative group">
+                            <textarea id="comment-input" rows="1"
+                                class="w-full p-4 pr-16 bg-slate-50 dark:bg-[#0b1120] border border-slate-100 dark:border-slate-800 rounded-2xl text-[11px] font-medium outline-none focus:ring-2 focus:ring-indigo-500 transition-all resize-none text-slate-900 dark:text-slate-100"
+                                placeholder="Type a message or ask a question..."></textarea>
+                            <button onclick="postComment()"
+                                class="absolute right-3 bottom-2.5 p-2 bg-indigo-600 text-white rounded-xl shadow-lg shadow-indigo-500/20 hover:scale-105 active:scale-95 transition-all">
+                                <i data-lucide="send" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LOGIC -->
+    <script type="module">
+        const SUPABASE_URL = "https://oaycnrsbrgancgrxhztd.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9heWNucnNicmdhbmNncnhoenRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNjIyMzIsImV4cCI6MjA4MTczODIzMn0.Md8TTNA7nY504_STka-04BM9WAoVZ32J_-JCirAGgC4";
+        const { createClient } = supabase;
+        const client = createClient(SUPABASE_URL, SUPABASE_KEY);
+        const { jsPDF } = window.jspdf;
+
+        let currentUser = null, userProfile = null, syncInterval = null, performanceChart = null;
+        let activeTab = 'dashboard', currentTask = null, currentSub = null, editingTaskId = null;
+        let isInitializing = false;
+        window.tempInputState = {};
+        window.allSubmissions = []; window.allTasks = [];
+
+        // --- UI NAVIGATION ---
+        window.toggleSidebar = () => {
+            $('.sidebar').toggleClass('open');
+            $('#sidebar-overlay').toggleClass('show');
+        };
+
+        // Close sidebar on tab switch (mobile only)
+        function closeSidebarOnMobile() {
+            if (window.innerWidth <= 1024) {
+                $('.sidebar').removeClass('open');
+                $('#sidebar-overlay').removeClass('show');
+            }
+        }
+
+        // --- THEME ENGINE ---
+        window.toggleDarkMode = () => {
+            const isDark = document.documentElement.classList.toggle('dark');
+            localStorage.setItem('theme', isDark ? 'dark' : 'light');
+            updateThemeIcons();
+        };
+
+        function updateThemeIcons() {
+            const isDark = document.documentElement.classList.contains('dark');
+            $('#theme-icon-dark').toggleClass('hidden', isDark);
+            $('#theme-icon-light').toggleClass('hidden', !isDark);
+        }
+
+        if (localStorage.getItem('theme') === 'dark' || (!('theme' in localStorage) && window.matchMedia('(prefers-color-scheme: dark)').matches)) {
+            document.documentElement.classList.add('dark');
+        }
+        updateThemeIcons();
+
+        // --- AUTH LOGIC ---
+        window.switchAuth = (role) => {
+            $('#auth-form').data('role', role);
+            $('#auth-error').addClass('hidden').text('');
+
+            const activeClass = "bg-white dark:bg-[#1e293b] shadow-sm text-slate-900 dark:text-slate-100";
+            const inactiveClass = "text-slate-500";
+
+            if (role === 'admin') {
+                $('#tab-admin').addClass(activeClass).removeClass(inactiveClass);
+                $('#tab-student').removeClass(activeClass).addClass(inactiveClass);
+            } else {
+                $('#tab-student').addClass(activeClass).removeClass(inactiveClass);
+                $('#tab-admin').removeClass(activeClass).addClass(inactiveClass);
+            }
+        };
+
+        // --- SESSION MANAGEMENT ---
+        async function checkSession() {
+            if (isInitializing) return;
+            try {
+                const { data: { session } } = await client.auth.getSession();
+                if (session) {
+                    await handleUserSession(session.user);
+                } else {
+                    finishInitialization(false);
+                }
+            } catch (err) {
+                console.error("Session check failed:", err);
+                finishInitialization(false);
+            }
+        }
+
+        async function handleUserSession(user) {
+            if (!user) { finishInitialization(false); return; }
+            // Avoid double initialization for same user
+            if (isInitializing && currentUser?.id === user.id) return;
+            isInitializing = true;
+
+            // --- CACHE-FIRST STRATEGY ---
+            // Try to load profile from local storage immediately to avoid waiting for DB
+            let loadedFromCache = false;
+            const cachedParams = localStorage.getItem('supabase_profile_cache');
+            if (cachedParams) {
+                try {
+                    const parsed = JSON.parse(cachedParams);
+                    if (parsed.uid === user.id) {
+                        console.log("Using cached profile for instant load.");
+                        currentUser = user;
+                        userProfile = parsed;
+                        // Initialize UI immediately with cached data
+                        initDashboard();
+                        loadedFromCache = true;
+                    }
+                } catch (e) { localStorage.removeItem('supabase_profile_cache'); }
+            }
+
+            // --- BACKGROUND SYNC ---
+            try {
+                // We still fetch fresh data, but we don't block the UI if we have cache
+                // If NO cache, we must wait (with timeout)
+
+                const profilePromise = client.from('profiles').select('*').eq('uid', user.id).maybeSingle();
+
+                let profile, error;
+
+                if (loadedFromCache) {
+                    // If cached, just fetch in background (no timeout needed since UI is ready)
+                    const res = await profilePromise;
+                    profile = res.data; error = res.error;
+                } else {
+                    // If NOT cached, we must wait, so use the timeout safety
+                    const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Connection timed out. If this is the first time today, the database might be waking up (can take ~1 min). Please try again.")), 60000));
+                    const res = await Promise.race([profilePromise, timeoutPromise]);
+                    profile = res.data; error = res.error;
+                }
+
+                if (error) throw error;
+
+                if (!profile) {
+                    if (loadedFromCache) console.warn("Background sync: Profile not found on server, but cache exists.");
+                    else {
+                        await client.auth.signOut();
+                        throw new Error("Profile Not Found. Please register again.");
+                    }
+                } else {
+                    // Success: Update cache with fresh data
+                    localStorage.setItem('supabase_profile_cache', JSON.stringify(profile));
+
+                    // If we weren't using cache, OR if critical data changed (like role), update UI
+                    if (!loadedFromCache || (userProfile && userProfile.role !== profile.role)) {
+                        currentUser = user;
+                        userProfile = profile;
+                        // Only re-init if we didn't already init (or if role changed significantly)
+                        if (!loadedFromCache) initDashboard();
+                        else location.reload(); // Reload if role changed while using cached version
+                    }
+                }
+            } catch (err) {
+                console.error("Session Sync Error:", err);
+
+                // Only fail hard if we don't have cached data to fall back on
+                if (!loadedFromCache) {
+                    isInitializing = false;
+                    currentUser = null;
+                    userProfile = null;
+                    finishInitialization(false);
+
+                    const btn = $('#auth-btn');
+                    btn.prop('disabled', false);
+                    const originalText = $('#name-field').hasClass('hidden') ? 'Sign In' : 'Create Account';
+                    btn.find('span').text(originalText);
+
+                    if ($('#auth-wrapper').is(':visible')) {
+                        $('#auth-error').text(err.message).removeClass('hidden');
+                    } else {
+                        showToast(err.message);
+                    }
+                } else {
+                    console.log("Network failed, but keeping session active via cache.");
+                }
+            }
+        }
+
+        function finishInitialization(isLoggedIn) {
+            $('#global-loader').fadeOut(300);
+            if (isLoggedIn) {
+                $('#auth-wrapper').addClass('hidden');
+                $('#dashboard-layout').removeClass('hidden').css('display', 'flex');
+            } else {
+                $('#dashboard-layout').addClass('hidden');
+                $('#auth-wrapper').removeClass('hidden');
+            }
+        }
+
+        client.auth.onAuthStateChange(async (event, session) => {
+            console.log("Supabase Auth Event:", event);
+            if (event === 'SIGNED_IN' && session) {
+                await handleUserSession(session.user);
+            } else if (event === 'SIGNED_OUT') {
+                currentUser = null;
+                userProfile = null;
+                isInitializing = false;
+                finishInitialization(false);
+            }
+        });
+
+        $(document).ready(() => {
+            switchAuth('student');
+            checkSession();
+            // Safety timeout
+            setTimeout(() => {
+                if ($('#global-loader').is(':visible')) {
+                    console.warn("Initialization taking longer than expected...");
+                    finishInitialization(!!currentUser);
+                }
+            }, 8000);
+        });
+
+        window.toggleMode = () => {
+            $('#auth-error').addClass('hidden').text('');
+            const isReg = $('#auth-btn span').text() === "Create Account";
+            if (isReg) {
+                $('#name-field').addClass('hidden');
+                $('#auth-tabs').removeClass('hidden');
+                $('#auth-btn span').text('Sign In');
+                $('#auth-footer').html('New here? <button onclick="toggleMode()" class="text-indigo-500 font-black uppercase tracking-widest text-[9px] hover:underline">Create Account</button>');
+            } else {
+                switchAuth('student');
+                $('#name-field').removeClass('hidden');
+                $('#auth-tabs').addClass('hidden');
+                $('#auth-btn span').text('Create Account');
+                $('#auth-footer').html('Already have an account? <button onclick="toggleMode()" class="text-indigo-500 font-black uppercase tracking-widest text-[9px] hover:underline">Sign In</button>');
+            }
+        };
+
+        $('#auth-form').on('submit', async (e) => {
+            e.preventDefault();
+            const btn = $('#auth-btn'); const originalText = btn.find('span').text();
+            const errorElement = $('#auth-error');
+            errorElement.addClass('hidden').text('');
+
+            btn.prop('disabled', true).find('span').text('Verifying...');
+            const role = $('#auth-form').data('role'); const email = $('#auth-email').val(); const pass = $('#auth-pass').val();
+
+            try {
+                if (originalText === 'Create Account') {
+                    const { data, error } = await client.auth.signUp({ email, password: pass });
+                    if (error) throw error;
+                    await client.from('profiles').insert([{ uid: data.user.id, name: $('#auth-name').val(), email, role: 'student', status: 'approved' }]);
+                    showToast("Account created! Please sign in.");
+                    toggleMode();
+                    // Reset button manually since we are staying on auth screen but switched mode
+                    btn.prop('disabled', false).find('span').text('Sign In');
+                } else {
+                    const { error } = await client.auth.signInWithPassword({ email, password: pass });
+                    if (error) throw error;
+                    // handleUserSession will be triggered by onAuthStateChange
+                    // Safety: if dashboard doesn't open in 8s, reset button
+                    setTimeout(() => {
+                        if ($('#auth-wrapper').is(':visible') && btn.prop('disabled')) {
+                            btn.prop('disabled', false).find('span').text('Sign In');
+                        }
+                    }, 8000);
+                }
+            } catch (err) {
+                errorElement.text(err.message).removeClass('hidden');
+                btn.prop('disabled', false).find('span').text(originalText);
+            }
+        });
+
+        function initDashboard() {
+            finishInitialization(true);
+            isInitializing = false;
+            $('#user-name').text(userProfile.name); $('#user-role').text(userProfile.role.toUpperCase());
+            $('#user-initial').text(userProfile.name.charAt(0));
+
+            // Dynamic Sidebar Labels
+            if (userProfile.role === 'admin') {
+                $('#admin-nav').removeClass('hidden');
+                $('#create-task-btn').removeClass('hidden');
+                $('#admin-notif-btn').removeClass('hidden');
+                $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> Student Tasks');
+            } else {
+                $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> My Tasks');
+            }
+
+            switchTab('dashboard'); startSync();
+            initChart();
+            setupRealtime();
+            // fetchGlobalMessages(); // Removed, now called by exitPrivateChat when switching to chat tab
+            lucide.createIcons();
+        }
+
+        window.switchTab = (tab) => {
+            activeTab = tab;
+            closeSidebarOnMobile();
+            $('.content-view').addClass('hidden'); $(`#view-${tab}`).removeClass('hidden');
+            $('.nav-item').removeClass('active');
+            $(`.nav-item[onclick*="${tab}"]`).addClass('active');
+
+            const titles = {
+                dashboard: "My Dashboard",
+                tasks: userProfile.role === 'admin' ? "Student Tasks" : "My Tasks",
+                resources: "Learning Resources",
+                leaderboard: "Leaderboard",
+                chat: "Community Chat",
+                grading: "Grade Tasks",
+                users: "Student List",
+                profile: "My Profile"
+            };
+            $('#page-title').text(titles[tab] || "Dashboard");
+
+            if (tab === 'profile') {
+                $('#profile-name').val(userProfile.name);
+                $('#profile-email').val(userProfile.email);
+                $('#profile-initial').text(userProfile.name.charAt(0));
+            }
+
+            if (tab === 'chat') {
+                $('#global-inbox-badge').addClass('hidden'); // Clear badge when entering chat
+                exitPrivateChat(); // Ensure global chat is shown initially
+            }
+
+            fetchData();
+            if (tab === 'dashboard' && performanceChart) updateChart();
+        };
+
+        window.handleLogout = async () => {
+            try {
+                await client.auth.signOut();
+            } catch (err) {
+                console.error("Logout error (ignoring to force exit):", err);
+            } finally {
+                localStorage.clear(); // Clear local storage including theme but ensures session is gone
+                location.reload();
+            }
+        };
+
+        function startSync() { fetchData(); syncInterval = setInterval(fetchData, 5000); }
+
+        async function fetchData() {
+            const { data: tasks, error: taskError } = await client.from('tasks').select('*').order('deadline', { ascending: true });
+            const { data: subs, error: subError } = await client.from('submissions').select('*');
+
+            if (taskError || subError) {
+                console.error("Data Load Error:", taskError, subError);
+                if (taskError?.code === '42P01' || subError?.code === '42P01') {
+                    showToast("CRITICAL: Database tables missing! Please run 'setup_direct_messages.sql' in Supabase.");
+                } else {
+                    // suppress network errors since we have a retry loop or other indicators
+                    console.warn("Retrying fetch due to error...");
+                }
+                return;
+            }
+
+            if (tasks && subs) {
+                window.allTasks = tasks; window.allSubmissions = subs;
+                renderStats(tasks, subs);
+                if (activeTab === 'tasks') renderTasks(tasks, subs);
+                if (activeTab === 'leaderboard') renderLeaderboard(subs);
+                if (userProfile.role === 'admin') {
+                    if (activeTab === 'grading') renderGrading(subs);
+                    if (activeTab === 'users') fetchUsers();
+                }
+            }
+        }
+
+        function renderStats(tasks, subs) {
+            const isStudent = userProfile.role === 'student';
+
+            if (isStudent) {
+                const mySubs = subs.filter(s => s.student_id === currentUser.id);
+                const total = tasks.length;
+                const completed = mySubs.filter(s => s.status === 'graded').length;
+                const progressPct = total ? Math.round((mySubs.length / total) * 100) : 0;
+                const avgScore = mySubs.filter(s => s.status === 'graded').reduce((a, b) => a + (parseInt(b.grade) || 0), 0) / (mySubs.filter(s => s.status === 'graded').length || 1);
+
+                $('#stat-label-1').text("Pending Tasks"); $('#stat-active').text(total - mySubs.length);
+                $('#stat-label-2').text("Completed"); $('#stat-completed').text(completed);
+                $('#stat-label-3').text("Avg. Grade"); $('#stat-score').text(Math.round(avgScore) + '%');
+
+                // Notification Logic
+                $('#student-alerts').removeClass('hidden');
+                let msg = "Keep up the good work! Check your tasks regularly.";
+                let accentColor = "indigo";
+                if (progressPct < 30) { msg = "Reminder: Please complete your pending assignments."; accentColor = "rose"; }
+                if (progressPct >= 80) { msg = "Great job! You are almost done with all your tasks."; accentColor = "cyan"; }
+                // Level System Logic
+                const totalXP = mySubs.filter(s => s.status === 'graded').reduce((a, b) => a + (parseInt(b.grade) || 0), 0);
+                const level = Math.floor(totalXP / 100) + 1;
+                const xpProgress = totalXP % 100;
+                const ranks = ["Newbie", "Apprentice", "Novice", "Scholar", "Expert", "Master", "Legend"];
+                const rankName = ranks[Math.min(level - 1, ranks.length - 1)];
+
+                if (userProfile.role === 'student') {
+                    $('#student-level-ui').removeClass('hidden').addClass('flex');
+                    $('#rank-name').text(`${rankName} (Lvl ${level})`);
+                    $('#xp-bar').css('width', `${xpProgress}%`);
+                }
+
+                $('#student-alert-msg').text(msg);
+                $('#student-alerts > div').removeClass('border-l-indigo-500 border-l-rose-500 border-l-cyan-500 bg-indigo-500/5 bg-rose-500/5 bg-cyan-500/5').addClass(`border-l-${accentColor}-500 bg-${accentColor}-500/5`);
+
+                // Recent Activity
+                const list = $('#recent-activity-list').empty();
+                if (!mySubs.length) list.html('<div class="text-center py-10 text-slate-400 font-black uppercase tracking-widest text-[9px] italic border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">No recent activity found</div>');
+                mySubs.slice(0, 4).forEach(s => {
+                    const isGraded = s.status === 'graded';
+                    list.append(`
+                        <div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#1e293b] border border-slate-100 dark:border-slate-800 hover:border-indigo-500/50 transition-all group">
+                            <div class="w-12 h-12 rounded-xl ${isGraded ? 'bg-emerald-500/10 text-emerald-500' : 'bg-indigo-500/10 text-indigo-500'} flex items-center justify-center transition-transform group-hover:scale-105 shadow-sm">
+                                <i data-lucide="${isGraded ? 'check-circle' : 'clock'}" class="w-5 h-5"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-black text-slate-900 dark:text-indigo-400 truncate uppercase tracking-tight leading-none mb-1.5">${s.task_title}</p>
+                                <p class="text-[8px] text-slate-400 font-black uppercase tracking-[0.15em] leading-none">${s.status}</p>
+                            </div>
+                            ${isGraded ? `<div class="font-black text-base text-indigo-500 tracking-tighter">${s.grade}%</div>` : ''}
+                        </div>
+                    `);
+                });
+            } else {
+                // ADMIN DASHBOARD LOGIC
+                $('#stat-label-1').text("Active Tasks"); $('#stat-active').text(tasks.length);
+                $('#stat-label-2').text("Total Submissions"); $('#stat-completed').text(subs.length);
+                const pending = subs.filter(s => s.status === 'submitted').length;
+                $('#stat-label-3').text("Pending Review"); $('#stat-score').text(pending);
+                $('#student-alerts').addClass('hidden');
+
+                // Update Notification Badge
+                const badge = $('#notif-badge');
+                if (pending > 0) {
+                    badge.text(pending).removeClass('hidden');
+                } else {
+                    badge.addClass('hidden');
+                }
+
+                // Global Recent Activity for Admins
+                const list = $('#recent-activity-list').empty();
+                const latest = subs.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at)).slice(0, 4);
+                if (!latest.length) list.html('<div class="text-center py-10 text-slate-400 font-black uppercase tracking-widest text-[9px] italic border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">No student activity found</div>');
+                latest.forEach(s => {
+                    const isGraded = s.status === 'graded';
+                    list.append(`
+                        <div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-[#1e293b] border border-slate-100 dark:border-slate-800 hover:border-indigo-500/50 transition-all group cursor-pointer" onclick="switchTab('grading')">
+                            <div class="w-10 h-10 rounded-xl ${isGraded ? 'bg-emerald-500/10 text-emerald-500' : 'bg-amber-500/10 text-amber-500'} flex items-center justify-center shadow-sm">
+                                <i data-lucide="user" class="w-4 h-4"></i>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <p class="text-[10px] font-black text-slate-900 dark:text-indigo-400 truncate uppercase tracking-tight leading-none mb-1.5">${s.student_name}</p>
+                                <p class="text-[8px] text-slate-400 font-black uppercase tracking-[0.15em] leading-none">Submitted: ${s.task_title}</p>
+                            </div>
+                            <div class="text-[7px] font-black bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 px-2 py-1 rounded-md uppercase tracking-tighter">${s.status}</div>
+                        </div>
+                    `);
+                });
+            }
+            lucide.createIcons();
+        }
+
+        window.filterTasks = (type) => {
+            $('.filter-btn').removeClass('active');
+            $(`.filter-btn[data-filter="${type}"]`).addClass('active');
+            window.currentTaskFilter = type;
+            renderTasks(window.allTasks, window.allSubmissions, type);
+        };
+
+        function renderTasks(tasks, subs, filter = 'all') {
+            const container = $('#task-grid').empty();
+            let filteredTasks = tasks;
+
+            if (filter === 'pending') {
+                filteredTasks = tasks.filter(t => !subs.find(s => s.student_id === currentUser?.id && s.task_id === t.id));
+            } else if (filter === 'completed') {
+                filteredTasks = tasks.filter(t => subs.find(s => s.student_id === currentUser?.id && s.task_id === t.id));
+            } else if (filter === 'expired') {
+                filteredTasks = tasks.filter(t => t.deadline && new Date().getTime() > new Date(t.deadline).getTime());
+            }
+
+            filteredTasks.forEach(t => {
+                const isExpired = t.deadline ? (new Date().getTime() > new Date(t.deadline).getTime()) : false;
+                const sub = subs.find(s => s.student_id === currentUser?.id && s.task_id === t.id);
+                let badgeClass = sub ? (sub.status === 'graded' ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-cyan-500 text-white shadow-cyan-500/20') : (isExpired ? 'bg-rose-500 text-white shadow-rose-500/20' : 'bg-indigo-600 text-white shadow-indigo-500/20');
+                let badgeText = sub ? (sub.status === 'graded' ? `SCORE: ${sub.grade}%` : 'SUBMITTED') : (isExpired ? 'EXPIRED' : 'ACTIVE');
+
+                const adminControls = userProfile.role === 'admin' ? `
+                    <div class="flex gap-4 mt-6 pt-6 border-t border-slate-100 dark:border-slate-800">
+                        <button onclick="event.stopPropagation(); openEditTaskModal('${t.id}')" class="flex-1 py-3 rounded-lg bg-slate-50 dark:bg-slate-800/80 text-[8px] font-black uppercase tracking-widest hover:bg-indigo-600 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
+                            <i data-lucide="edit-2" class="w-3 h-3"></i> Edit
+                        </button>
+                        <button onclick="event.stopPropagation(); deleteTask('${t.id}')" class="flex-1 py-3 rounded-lg bg-slate-50 dark:bg-slate-800/80 text-[8px] font-black uppercase tracking-widest hover:bg-rose-500 hover:text-white transition-all shadow-sm flex items-center justify-center gap-2">
+                             <i data-lucide="trash-2" class="w-3 h-3"></i> Delete
+                        </button>
+                    </div>
+                ` : '';
+
+                container.append(`
+                    <div class="v-card p-5 group cursor-pointer border hover:border-indigo-500 hover:shadow-xl transition-all duration-500 bg-white dark:bg-[#1e293b] animate-in fade-in slide-in-from-bottom-4 glow-border" onclick="openDetail('${t.id}')">
+                        <div class="flex justify-between items-start mb-4 gap-3">
+                            <span class="px-3 py-1 rounded-lg text-[7px] font-black uppercase tracking-[0.15em] ${badgeClass} shadow-md transition-transform group-hover:scale-105">${badgeText}</span>
+                            <div class="text-[7px] font-black text-slate-400 uppercase tracking-[0.15em] flex items-center gap-1 bg-slate-50 dark:bg-[#2d3748] px-2 py-1.5 rounded-lg shadow-inner whitespace-nowrap">
+                                <i data-lucide="calendar" class="w-2.5 h-2.5 text-indigo-500"></i> ${t.deadline ? new Date(t.deadline).toLocaleDateString() : 'No Deadline'}
+                            </div>
+                        </div>
+                        <h4 class="font-black text-lg text-slate-900 dark:text-indigo-400 mb-2 group-hover:text-indigo-500 transition-colors uppercase tracking-tighter leading-none">${t.title}</h4>
+                        <p class="text-[9px] text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 font-medium leading-relaxed tracking-tight uppercase">${t.description}</p>
+                        <div class="w-full h-1.5 bg-slate-100 dark:bg-[#0b1120] rounded-full overflow-hidden shadow-inner flex items-center px-0.5">
+                            <div class="h-1 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-[1.5s]" style="width: ${sub ? '100%' : '30%'}"></div>
+                        </div>
+                        ${adminControls}
+                    </div>
+                `);
+            });
+            lucide.createIcons();
+        }
+
+        function renderLeaderboard(subs) {
+            const container = $('#leaderboard-body').empty();
+            const students = Array.from(new Set(subs.map(s => s.student_id)));
+            const rankings = students.map(sid => {
+                const sSubs = subs.filter(s => s.student_id === sid && s.status === 'graded');
+                const sName = subs.find(s => s.student_id === sid).student_name;
+                return {
+                    name: sName,
+                    count: sSubs.length,
+                    avg: sSubs.length ? Math.round(sSubs.reduce((a, b) => a + b.grade, 0) / sSubs.length) : 0
+                };
+            }).sort((a, b) => b.avg - a.avg);
+
+            rankings.forEach((r, i) => {
+                container.append(`
+                    <tr class="hover:bg-slate-50 dark:hover:bg-[#1e293b]/50 transition-colors border-b border-slate-50 dark:border-slate-800/50">
+                        <td class="px-6 py-4">
+                            <div class="w-8 h-8 rounded-lg ${i < 3 ? 'bg-indigo-600 text-white font-black shadow-lg shadow-indigo-500/20' : 'bg-slate-100 dark:bg-[#2d3748] text-slate-400 font-bold'} flex items-center justify-center text-[10px] tracking-tighter">#0${i + 1}</div>
+                        </td>
+                        <td class="px-6 py-4">
+                            <div class="font-black text-slate-900 dark:text-indigo-400 uppercase tracking-tight text-xs">${r.name}</div>
+                        </td>
+                        <td class="px-6 py-4 font-black text-slate-400 text-[9px] uppercase tracking-widest text-center">${r.count} Tasks</td>
+                        <td class="px-6 py-4 text-center"><span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 rounded-lg font-black text-xs shadow-sm">${r.avg}%</span></td>
+                        <td class="px-6 py-4 text-right"><i data-lucide="zap" class="w-3.5 h-3.5 text-cyan-500 ml-auto opacity-70"></i></td>
+                    </tr>
+                `);
+            });
+            lucide.createIcons();
+        }
+
+        // Helper to force download for Cloudinary raw files
+        function formatDownloadUrl(url) {
+            if (!url) return "#";
+            if (url.includes("cloudinary.com") && url.includes("/raw/upload/")) {
+                return url.replace("/raw/upload/", "/raw/upload/fl_attachment/");
+            }
+            return url;
+        }
+
+        function renderGrading(subs) {
+            // Prevent UI refresh if admin is currently typing
+            if ($('#grading-list input:focus, #grading-list textarea:focus').length > 0) return;
+
+            const container = $('#grading-list').empty();
+            const pending = subs.filter(s => s.status === 'submitted');
+            const graded = subs.filter(s => s.status === 'graded').sort((a, b) => new Date(b.graded_at) - new Date(a.graded_at));
+
+            if (!pending.length && !graded.length) {
+                container.html('<div class="p-16 text-center text-slate-400 font-black uppercase tracking-[0.2em] text-[9px] italic">Status: No submissions found.</div>');
+                return;
+            }
+
+            // 1. PENDING SECTION
+            if (pending.length) {
+                container.append(`<div class="px-8 py-4 bg-amber-50 dark:bg-amber-900/10 text-amber-600 dark:text-amber-400 text-[10px] font-black uppercase tracking-[0.2em] border-y border-amber-100 dark:border-amber-900/20">Pending Reviews (${pending.length})</div>`);
+                pending.forEach(s => {
+                    container.append(`
+                        <div class="p-8 hover:bg-slate-50 dark:hover:bg-[#1e293b]/50 transition-all flex flex-col md:flex-row gap-6 items-start border-b border-slate-100 dark:border-slate-800/50">
+                            <div class="flex-1">
+                                <h5 class="font-black text-slate-900 dark:text-indigo-400 text-xl tracking-tighter uppercase mb-1">${s.student_name}</h5>
+                                <p class="text-[9px] text-indigo-500 font-black uppercase tracking-[0.15em] mb-4 flex items-center gap-1.5 truncate">
+                                    <i data-lucide="target" class="w-2.5 h-2.5"></i> Task: ${s.task_title}
+                                </p>
+                                <div class="flex flex-wrap gap-2.5">
+                                    <a href="${formatDownloadUrl(s.content)}" target="_blank" rel="noopener noreferrer" class="btn-command px-3 py-2 rounded-lg text-[8px] flex items-center gap-1.5 transition-all"><i data-lucide="eye" class="w-3 h-3"></i> View / Download File</a>
+                                    <span class="text-[8px] text-slate-400 font-black flex items-center gap-1.5 uppercase tracking-widest bg-slate-100 dark:bg-[#2d3748] px-3 py-2 rounded-lg"><i data-lucide="clock" class="w-3 h-3 text-indigo-500"></i> Submitted: ${new Date(s.submitted_at).toLocaleDateString()}</span>
+                                </div>
+                            </div>
+                            <div class="w-full md:w-auto flex flex-col gap-3">
+                                <div class="flex gap-2">
+                                    <input type="number" id="grade-${s.id}" class="w-24 p-3 bg-slate-50 dark:bg-[#0b1120] border border-slate-100 dark:border-slate-800 rounded-lg text-base font-black outline-none text-slate-900 dark:text-slate-100" placeholder="GRADE">
+                                    <button onclick="window.submitGrade('${s.id}')" class="btn-command px-6 py-3 rounded-lg text-[10px] font-black uppercase tracking-[0.2em] shadow-lg shadow-indigo-600/20">Commit</button>
+                                </div>
+                                <textarea id="feedback-${s.id}" class="w-full p-3 bg-slate-50 dark:bg-[#0b1120] border border-slate-100 dark:border-slate-800 rounded-lg text-[10px] font-bold outline-none text-slate-900 dark:text-slate-100" placeholder="LEAVE FEEDBACK..." rows="2"></textarea>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+
+            // 2. GRADED HISTORY SECTION
+            if (graded.length) {
+                container.append(`<div class="px-8 py-4 bg-indigo-50 dark:bg-indigo-900/10 text-indigo-600 dark:text-indigo-400 text-[10px] font-black uppercase tracking-[0.2em] border-y border-indigo-100 dark:border-indigo-900/20 mt-8">Review History (${graded.length})</div>`);
+                graded.forEach(s => {
+                    container.append(`
+                        <div class="p-8 hover:bg-slate-50 dark:hover:bg-[#1e293b]/50 transition-all flex flex-col md:flex-row gap-6 items-start border-b border-slate-100 dark:border-slate-800/50 opacity-80">
+                            <div class="flex-1">
+                                <h5 class="font-black text-slate-900 dark:text-slate-100 text-lg tracking-tighter uppercase mb-1">${s.student_name} <span class="ml-2 px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded text-[8px] border border-emerald-500/20">GRADED</span></h5>
+                                <p class="text-[9px] text-slate-500 font-bold uppercase tracking-[0.15em] mb-4 flex items-center gap-1.5 truncate">
+                                    <i data-lucide="target" class="w-2.5 h-2.5"></i> Task: ${s.task_title}
+                                </p>
+                                <div class="flex flex-wrap gap-2.5">
+                                    <a href="${formatDownloadUrl(s.content)}" target="_blank" rel="noopener noreferrer" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-500 px-3 py-2 rounded-lg text-[8px] font-black flex items-center gap-1.5 transition-all"><i data-lucide="external-link" class="w-3 h-3"></i> View Original</a>
+                                    <div class="text-[8px] text-slate-400 font-black uppercase tracking-widest px-3 py-2">Feedback: <span class="text-slate-500 italic">"${s.feedback || 'N/A'}"</span></div>
+                                </div>
+                            </div>
+                            <div class="w-full md:w-auto flex flex-col items-center justify-center p-4 bg-indigo-50/50 dark:bg-indigo-900/10 rounded-2xl border border-indigo-100/50 dark:border-indigo-900/30">
+                                <div class="text-2xl font-black text-indigo-500 tracking-tighter">${s.grade}%</div>
+                                <div class="text-[7px] font-black text-slate-400 uppercase tracking-widest mt-1">FINAL GRADE</div>
+                            </div>
+                        </div>
+                    `);
+                });
+            }
+            lucide.createIcons();
+        }
+        async function fetchUsers() { const { data: users } = await client.from('profiles').select('uid, name, role').order('created_at', { ascending: false }); renderUsers(users || []); }
+
+        function renderUsers(users) {
+            const container = $('#user-table-body').empty();
+            const query = $('#user-search').val().toLowerCase();
+            users.filter(u => u.role === 'student' && (u.name.toLowerCase().includes(query) || u.email.toLowerCase().includes(query))).forEach(u => {
+                const uSubs = window.allSubmissions.filter(s => s.student_id === u.uid);
+                const avg = uSubs.length ? Math.round(uSubs.filter(s => s.status === 'graded').reduce((a, b) => a + b.grade, 0) / uSubs.filter(s => s.status === 'graded').length || 0) : 0;
+                container.append(`
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors border-b border-slate-50 dark:border-slate-800/50 text-xs">
+                        <td class="px-6 py-4">
+                            <div class="font-black text-slate-900 dark:text-indigo-400 uppercase tracking-tight text-sm mb-0.5">${u.name}</div>
+                            <div class="text-[8px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5 truncate"><i data-lucide="mail" class="w-2.5 h-2.5 text-indigo-500"></i> ${u.email}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="font-black text-indigo-500 text-xs tracking-tight">${uSubs.length}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="font-black text-slate-900 dark:text-white text-xs">${avg}%</div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <span class="px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] shadow-sm ${u.status === 'approved' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}">${u.status}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap">
+                             ${u.status === 'pending' ? `<button onclick="approveUser('${u.uid}')" class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all"><i data-lucide="shield-check" class="w-4 h-4"></i></button>` : ''}
+                            <button onclick="adminResetPassword('${u.uid}')" class="p-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Reset Credentials"><i data-lucide="key-round" class="w-4 h-4"></i></button>
+                            <button onclick="generateResult('${u.uid}', '${u.name}', ${uSubs.length}, ${avg})" class="p-2 text-cyan-500 hover:bg-cyan-50 dark:hover:bg-cyan-500/10 rounded-lg transition-all" title="Intelligence Report"><i data-lucide="file-text" class="w-4 h-4"></i></button>
+                            <button onclick="deleteUser('${u.uid}')" class="p-2 text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all" title="Purge Record"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                        </td>
+                    </tr>
+                `);
+            });
+            lucide.createIcons();
+        }
+
+        function getTaskDeadlineDefault() {
+            const date = new Date();
+            date.setDate(date.getDate() + 1); // Set to tomorrow
+            date.setHours(9, 30, 0, 0); // Set to 9:30 AM
+
+            // Format to local ISO (YYYY-MM-DDTHH:mm)
+            const pad = (n) => n.toString().padStart(2, '0');
+            return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+        }
+
+        window.openCreateTaskModal = () => {
+            editingTaskId = null;
+            $('#create-task-form')[0].reset();
+            $('#new-task-date').val(getTaskDeadlineDefault());
+            $('#ref-file-name').text('Attach a helpful file');
+            $('#task-submit-btn').text('Create Task');
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('createTaskModal')).show();
+        };
+
+        window.openEditTaskModal = (id) => {
+            const task = window.allTasks.find(t => t.id === id);
+            if (!task) return;
+            editingTaskId = id;
+            $('#new-task-title').val(task.title);
+            $('#new-task-desc').val(task.description);
+            $('#new-task-hints').val(task.hints || '');
+            $('#new-task-date').val(task.deadline ? task.deadline.substring(0, 16) : '');
+            $('#task-submit-btn').text('Update Task');
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('createTaskModal')).show();
+        };
+
+        window.openEditFromDetail = () => {
+            const id = currentTask.id;
+            bootstrap.Modal.getOrCreateInstance(document.getElementById('taskDetailModal')).hide();
+            setTimeout(() => openEditTaskModal(id), 400); // Wait for hide animation
+        };
+
+        window.deleteTask = async (id) => {
+            if (confirm("Are you sure you want to delete this task?")) {
+                await client.from('tasks').delete().eq('id', id);
+                fetchData(); showToast("Task deleted successfully.");
+            }
+        };
+
+        window.adminResetPassword = async (uid) => {
+            const newPass = prompt("Enter new password for this student:");
+            if (newPass) {
+                showToast("Password reset request sent.");
+                alert("The student will be asked to update their password. Reset Key: " + Math.random().toString(36).substring(7).toUpperCase());
+            }
+        };
+
+        window.setupRealtime = () => {
+            // Task Comments Realtime
+            client.channel('public:task_comments').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'task_comments' }, payload => {
+                if (currentTask && payload.new.task_id === currentTask.id) fetchComments(currentTask.id);
+            }).subscribe();
+
+            // Global Chat Realtime
+            client.channel('public:global_messages').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'global_messages' }, payload => {
+                if (chatMode === 'global') fetchGlobalMessages();
+            }).subscribe();
+
+            // Direct Messages Realtime (for consolidated hub)
+            client.channel('public:hub_updates').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'direct_messages' }, async payload => {
+                const m = payload.new;
+                if (m.receiver_id === currentUser.id) {
+                    if (chatMode === 'private' && selectedPvtUid === m.sender_id) {
+                        fetchPrivateMessagesConsolidated(m.sender_id);
+                    } else {
+                        // Fetch sender name for the notification
+                        const { data: senderProfile } = await client.from('profiles').select('name').eq('uid', m.sender_id).maybeSingle();
+                        const senderName = senderProfile ? senderProfile.name : 'Someone';
+
+                        $('#global-inbox-badge').removeClass('hidden');
+                        showToast(`New message from ${senderName}`);
+                    }
+                    updateActiveConversations();
+                }
+            }).subscribe();
+
+            // --- PRESENCE & TYPING ---
+            const presenceChannel = client.channel('online-users', {
+                config: { presence: { key: currentUser.id } }
+            });
+
+            presenceChannel
+                .on('presence', { event: 'sync' }, () => {
+                    const state = presenceChannel.presenceState();
+                    updatePresenceUI(state);
+                })
+                .on('presence', { event: 'join' }, ({ key, newPresences }) => { console.log('join', key, newPresences) })
+                .on('presence', { event: 'leave' }, ({ key, leftPresences }) => { console.log('leave', key, leftPresences) })
+                .subscribe(async (status) => {
+                    if (status === 'SUBSCRIBED') {
+                        await presenceChannel.track({
+                            user_id: currentUser.id,
+                            user_name: userProfile.name,
+                            role: userProfile.role,
+                            online_at: new Date().toISOString(),
+                        });
+                    }
+                });
+
+            // Typing Indicators (Broadcast) - Using presence channel for efficiency
+            presenceChannel.on('broadcast', { event: 'typing' }, ({ payload }) => {
+                if (payload.target_id === currentTask?.id) {
+                    $('#typing-tmp').remove();
+                    $('#comments-container').append(`<div id="typing-tmp" class="text-[7px] font-black text-slate-400 italic mb-2 uppercase tracking-widest">${payload.user_name} is typing...</div>`);
+                    setTimeout(() => $('#typing-tmp').remove(), 2000);
+                } else if (!payload.target_id && chatMode === 'global') {
+                    $('#global-typing-status').text(`${payload.user_name} is typing...`).addClass('text-indigo-500');
+                    setTimeout(() => $('#global-typing-status').text('Public Channel Active').removeClass('text-indigo-500'), 2000);
+                } else if (payload.target_id === currentUser.id && chatMode === 'private') {
+                    // Logic for private chat typing if needed
+                }
+            });
+
+            window.broadcastTyping = (targetId = null) => { // targetId can be taskId or private chat UID
+                presenceChannel.send({ type: 'broadcast', event: 'typing', payload: { user_name: userProfile.name, target_id: targetId } });
+            };
+        };
+
+        async function updatePresenceUI(onlineState) {
+            const { data: allUsers } = await client.from('profiles').select('uid, name, role').order('name');
+            const sidebarContainer = $('#presence-list').empty();
+            const hubChatContainer = $('#chat-presence-list').empty();
+            const onlineIds = Object.keys(onlineState);
+
+            allUsers.forEach(u => {
+                const isOnline = onlineIds.includes(u.uid);
+                const isAdmin = u.role === 'admin';
+                const statusColor = isOnline ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]' : 'bg-slate-300 dark:bg-slate-700';
+
+                const itemHtml = `
+                    <div onclick="openDirectChat('${u.uid}', '${u.name}')" class="flex items-center justify-between px-3 py-1.5 rounded-lg hover:bg-indigo-50 dark:hover:bg-indigo-900/10 transition-all cursor-pointer group">
+                        <div class="flex items-center gap-2 truncate">
+                            <div class="w-1.5 h-1.5 rounded-full ${statusColor}"></div>
+                            <span class="text-[9px] font-bold ${isAdmin ? 'text-indigo-600 dark:text-indigo-400' : 'text-slate-600 dark:text-slate-400'} group-hover:text-indigo-500 truncate">${u.name}</span>
+                        </div>
+                        ${isAdmin ? '<span class="text-[6px] font-black bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-400 px-1 rounded uppercase">Staff</span>' : ''}
+                    </div>
+                `;
+                sidebarContainer.append(itemHtml);
+
+                if (isOnline && u.uid !== currentUser.id) {
+                    hubChatContainer.append(`
+                        <div onclick="openDirectChat('${u.uid}', '${u.name}')" class="flex items-center gap-2 p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800/80 cursor-pointer transition-all">
+                            <div class="w-1.5 h-1.5 rounded-full bg-emerald-500"></div>
+                            <span class="text-[8px] font-black uppercase tracking-tight text-slate-600 dark:text-slate-400">${u.name}</span>
+                        </div>
+                    `);
+                }
+            });
+
+            if (hubChatContainer.is(':empty')) {
+                hubChatContainer.html('<div class="text-[8px] text-slate-400 px-2 italic text-center py-2">Solo session</div>');
+            }
+            updateActiveConversations();
+        }
+
+        window.fetchGlobalMessages = async () => {
+            const { data, error } = await client.from('global_messages').select('*').order('created_at', { ascending: false }).limit(50);
+            if (error) { console.error("Fetch Hub Error:", error); return; }
+
+            const container = $('#global-chat-container').empty();
+            if (!data || data.length === 0) {
+                container.html('<div class="text-center py-10 text-slate-400 text-[9px] font-black uppercase tracking-widest opacity-50 italic">No messages yet. Say hello to everyone! 👋</div>');
+                return;
+            }
+
+            [...data].reverse().forEach(m => {
+                const isMe = m.user_id === currentUser.id;
+                const isAdmin = m.role === 'admin';
+                container.append(`
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} group mb-4">
+                        <span onclick="openDirectChat('${m.user_id}', '${m.user_name}')" class="text-[7px] font-black uppercase mb-1 px-1 ${isAdmin ? 'text-rose-500' : 'text-indigo-500'} cursor-pointer hover:underline">${m.user_name} ${isAdmin ? '[Teacher]' : ''}</span>
+                        <div class="chat-bubble max-w-[80%] p-3 rounded-2xl text-[10px] font-medium shadow-sm border border-slate-100 dark:border-slate-800 ${isMe ? 'bg-indigo-600 text-white border-transparent rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-none'}">
+                            ${m.content}
+                        </div>
+                        <span class="text-[6px] text-slate-400 font-bold mt-1 opacity-100 transition-opacity">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                `);
+            });
+            container.scrollTop(container[0].scrollHeight);
+        };
+
+        window.sendGlobalMessage = async () => {
+            const el = $('#global-chat-input');
+            const content = el.val().trim();
+            if (!content) return;
+            el.val('');
+            const { error } = await client.from('global_messages').insert([{ user_id: currentUser.id, user_name: userProfile.name, role: userProfile.role, content }]);
+            if (error) {
+                console.error("Insert Error:", error);
+                alert("Message Failed: " + error.message);
+                el.val(content); // Restore message
+            }
+        };
+
+        $('#global-chat-input').on('keydown', () => broadcastTyping());
+        $('#comment-input').on('keydown', () => broadcastTyping(currentTask?.id));
+
+        window.openDetail = async (taskId) => {
+            // Updated to maybeSingle() to avoid 406 errors when no data exists
+            const { data: task, error: tErr } = await client.from('tasks').select('*').eq('id', taskId).maybeSingle();
+            const { data: sub, error: sErr } = await client.from('submissions').select('*').eq('task_id', taskId).eq('student_id', currentUser?.id).maybeSingle();
+
+            if (tErr || !task) {
+                console.error("Task Error:", tErr);
+                showToast("Error loading mission details.");
+                return;
+            }
+
+            currentTask = task; currentSub = sub;
+
+            $('#detail-title').text(task.title);
+            $('#detail-desc').text(task.description);
+            $('#submit-id').val(taskId);
+
+            // Operational Guidance & Assets
+            if (task.hints || task.reference_asset) {
+                $('#detail-guidance').removeClass('hidden');
+                if (task.hints) { $('#detail-hints').text(task.hints).parent().removeClass('hidden'); }
+                else { $('#detail-hints').parent().addClass('hidden'); }
+
+                if (task.reference_asset) {
+                    $('#detail-ref-link').attr('href', task.reference_asset);
+                    $('#detail-ref-container').removeClass('hidden');
+                } else {
+                    $('#detail-ref-container').addClass('hidden');
+                }
+            } else {
+                $('#detail-guidance').addClass('hidden');
+            }
+
+            if (window.taskTimerInterval) clearInterval(window.taskTimerInterval);
+            if (sub) {
+                const statusText = sub.status === 'graded' ? "TASK GRADED" : "TASK SUBMITTED";
+                $('#detail-timer').text(statusText).parent().removeClass('text-rose-500').addClass('text-emerald-500');
+            } else if (!task.deadline) {
+                $('#detail-timer').text("NO DEADLINE SET").parent().removeClass('text-rose-500 text-emerald-500');
+            } else {
+                window.taskTimerInterval = setInterval(() => {
+                    const now = new Date(); const dl = new Date(task.deadline);
+                    const diff = dl - now;
+                    if (diff < 0) {
+                        $('#detail-timer').text("TASK EXPIRED").parent().addClass('text-rose-500').removeClass('text-emerald-500');
+                        clearInterval(window.taskTimerInterval);
+                    } else {
+                        const h = Math.floor(diff / (1000 * 60 * 60));
+                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+                        const s = Math.floor((diff % (1000 * 60)) / 1000);
+                        $('#detail-timer').text(`${h}h ${m}m ${s}s Remaining`).parent().removeClass('text-rose-500 text-emerald-500');
+                    }
+                }, 1000);
+            }
+
+            $('#submission-section, #result-section, #admin-view-msg').addClass('hidden');
+
+            if (userProfile.role === 'admin') $('#admin-view-msg').removeClass('hidden');
+            else if (sub) {
+                if (sub.status === 'graded') {
+                    $('#result-grade').text(sub.grade);
+                    $('#result-feedback').text(sub.feedback);
+                    // Add commited status even after graded for confirmation
+                    if (!$('#result-section .sub-confirm-msg').length) {
+                        $('#result-section').append('<div class="sub-confirm-msg p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl mt-6 text-[9px] font-black uppercase text-slate-400">DATABASE RECORD: ' + sub.task_title + '</div>');
+                    }
+                    $('#result-section').removeClass('hidden');
+                }
+                else {
+                    $('#submission-section').html(`
+                        <div class="p-10 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-3xl text-center font-black uppercase tracking-[0.2em] text-[10px] border border-indigo-100 dark:border-indigo-900/50 flex flex-col items-center gap-4">
+                            <i data-lucide="shield-check" class="w-6 h-6"></i> 
+                            <div>
+                                <p class="text-[8px] opacity-70 mb-1">RECORD FOUND IN DATABASE</p>
+                                <p class="text-xs">COMMITTED: ${sub.task_title}</p>
+                            </div>
+                            <p class="text-[8px] bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 rounded-full mt-2">UNDER REVIEW BY TEACHER</p>
+                            <a href="${formatDownloadUrl(sub.content)}" target="_blank" rel="noopener noreferrer" class="text-[8px] font-black uppercase text-indigo-500 hover:underline mt-2 flex items-center gap-1">
+                                <i data-lucide="external-link" class="w-2.5 h-2.5"></i> View Your Submission
+                            </a>
+                        </div>
+                    `).removeClass('hidden');
+                }
+            } else {
+                const isExpired = new Date().getTime() > new Date(task.deadline).getTime();
+                if (isExpired) $('#submission-section').html('<div class="p-10 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-3xl text-center font-black uppercase tracking-[0.2em] text-[10px] border border-rose-100 dark:border-rose-900/50">Task Deadline Expired</div>').removeClass('hidden');
+                else {
+                    $('#submission-section').html(`
+                        <form id="submit-form" class="space-y-6">
+                            <input type="hidden" id="submit-id" value="${taskId}">
+                            <div class="group relative bg-slate-50 dark:bg-slate-800/30 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-10 text-center hover:border-indigo-500 transition-all cursor-pointer overflow-hidden">
+                                <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                <input type="file" id="submit-file" required class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="$('#file-name').text(this.files[0].name)">
+                                <div class="relative z-0">
+                                    <div class="w-16 h-16 bg-white dark:bg-slate-800 shadow-xl rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-4 group-hover:scale-110 transition-transform">
+                                        <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+                                    </div>
+                                    <p class="font-black text-slate-900 dark:text-white uppercase tracking-tight">Upload Your File</p>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2" id="file-name">Allowed: PDF, ZIP, IMG (max 5mb)</p>
+                                </div>
+                            </div>
+                            <button type="submit" class="w-full btn-command">Submit Task</button>
+                        </form>
+                    `).removeClass('hidden');
+                }
+            }
+            lucide.createIcons();
+
+            fetchComments(taskId);
+            new bootstrap.Modal('#taskDetailModal').show();
+        };
+
+        window.fetchComments = async (taskId) => {
+            const { data: comments } = await client.from('task_comments').select('*').eq('task_id', taskId).order('created_at', { ascending: true });
+            renderComments(comments || []);
+        };
+
+        function renderComments(comments) {
+            const container = $('#comments-container').empty();
+            if (!comments.length) {
+                container.html('<div class="text-center py-8 text-slate-400 text-[9px] font-bold uppercase tracking-widest italic opacity-50">No messages yet. Start the conversation!</div>');
+                return;
+            }
+            comments.forEach(c => {
+                const isAdmin = c.role === 'admin';
+                const isMe = c.user_id === currentUser.id;
+                container.append(`
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2">
+                        <div class="flex items-center gap-2 mb-1 px-1">
+                            <span class="text-[8px] font-black uppercase ${isAdmin ? 'text-rose-500' : 'text-indigo-500'}">${c.user_name}</span>
+                            <span class="text-[7px] text-slate-400 font-bold">${new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                        </div>
+                        <div class="max-w-[85%] p-3 rounded-2xl text-xs font-medium ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-none shadow-sm'}">
+                            ${c.content}
+                        </div>
+                    </div>
+                `);
+            });
+            container.scrollTop(container[0].scrollHeight);
+            lucide.createIcons();
+        }
+
+        window.postComment = async () => {
+            const content = $('#comment-input').val().trim();
+            if (!content) return;
+            const taskId = currentTask.id;
+            $('#comment-input').val('');
+
+            const { error } = await client.from('task_comments').insert([{
+                task_id: taskId,
+                user_id: currentUser.id,
+                user_name: userProfile.name,
+                role: userProfile.role,
+                content: content
+            }]);
+
+            if (!error) fetchComments(taskId);
+        };
+
+        $(document).on('submit', '#submit-form', async (e) => {
+            e.preventDefault();
+            const btn = $('#submit-form button');
+            btn.prop('disabled', true).text('SYNCING WITH CLOUD...');
+
+            const file = document.getElementById('submit-file').files[0];
+            const taskId = $('#submit-id').val();
+
+            if (!file) return;
+
+            const CLOUD_NAME = "dlm3iaqjn";
+            const UPLO_PRESET = "lms_assignments";
+
+            try {
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLO_PRESET);
+
+                const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                const uploadData = await response.json();
+
+                if (uploadData.error) {
+                    throw new Error(uploadData.error.message);
+                }
+
+                const cloudFileUrl = uploadData.secure_url;
+
+                const { error: dbErr } = await client.from('submissions').insert([{
+                    task_id: taskId,
+                    task_title: currentTask.title,
+                    student_id: currentUser.id,
+                    student_name: userProfile.name,
+                    content: cloudFileUrl,
+                    status: 'submitted',
+                    submitted_at: new Date().toISOString()
+                }]);
+
+                if (dbErr) throw dbErr;
+
+                bootstrap.Modal.getInstance('#taskDetailModal').hide();
+                fetchData();
+                showToast("Assignment Securely Saved to Cloud!");
+
+                confetti({
+                    particleCount: 150,
+                    spread: 70,
+                    origin: { y: 0.6 },
+                    colors: ['#6366f1', '#22d3ee', '#8b5cf6']
+                });
+            } catch (err) {
+                alert("❌ Cloud Configuration Error: " + err.message + "\n\n(Tip: Ensure your Cloudinary Preset is set to 'Unsigned')");
+                console.error("Cloudinary Error:", err);
+            } finally {
+                btn.prop('disabled', false).text('Submit Task');
+            }
+        });
+
+        $('#profile-form').on('submit', async (e) => {
+            e.preventDefault();
+            const name = $('#profile-name').val();
+            const nPass = $('#profile-new-pass').val();
+            const cPass = $('#profile-confirm-pass').val();
+            const btn = $('#profile-form button');
+            btn.prop('disabled', true).text('COMMITTING UPDATES...');
+
+            try {
+                if (nPass && nPass !== cPass) throw new Error("Passwords do not match.");
+
+                // Update Profile Table
+                const { error: pErr } = await client.from('profiles').update({ name }).eq('uid', currentUser.id);
+                if (pErr) throw pErr;
+
+                // Update Auth User
+                if (nPass) {
+                    const { error: aErr } = await client.auth.updateUser({ password: nPass });
+                    if (aErr) throw aErr;
+                }
+
+                userProfile.name = name;
+                initDashboard(); // Refresh UI headers
+                showToast("Profile updated successfully.");
+                $('#profile-new-pass, #profile-confirm-pass').val('');
+            } catch (err) { alert(err.message); } finally { btn.prop('disabled', false).text('Save Changes'); }
+        });
+
+        $('#create-task-form').on('submit', async (e) => {
+            e.preventDefault();
+            const btn = $('#task-submit-btn');
+            const isEditing = !!editingTaskId;
+            btn.prop('disabled', true).text('PROCESSING...');
+
+            const dateVal = $('#new-task-date').val();
+            const taskData = {
+                title: $('#new-task-title').val(),
+                description: $('#new-task-desc').val(),
+                hints: $('#new-task-hints').val(),
+                deadline: dateVal ? new Date(dateVal).toISOString() : null
+            };
+
+            const refFile = document.getElementById('new-task-ref').files[0];
+
+            const executeSave = async (data) => {
+                try {
+                    if (isEditing) {
+                        const { error } = await client.from('tasks').update(data).eq('id', editingTaskId);
+                        if (error) throw error;
+                        showToast("Task updated successfully.");
+                    } else {
+                        const { error } = await client.from('tasks').insert([data]);
+                        if (error) throw error;
+                        showToast("New task created.");
+                    }
+                    bootstrap.Modal.getOrCreateInstance(document.getElementById('createTaskModal')).hide();
+                    fetchData();
+                    editingTaskId = null;
+                } catch (err) {
+                    alert("System Error: " + err.message);
+                } finally {
+                    btn.prop('disabled', false).text(isEditing ? 'Update Task' : 'Create Task');
+                }
+            };
+
+            if (refFile) {
+                try {
+                    const CLOUD_NAME = "dlm3iaqjn";
+                    const UPLO_PRESET = "lms_assignments";
+                    const formData = new FormData();
+                    formData.append('file', refFile);
+                    formData.append('upload_preset', UPLO_PRESET);
+
+                    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    const uploadData = await response.json();
+                    if (uploadData.error) throw new Error(uploadData.error.message);
+
+                    taskData.reference_asset = uploadData.secure_url;
+                    await executeSave(taskData);
+                } catch (err) {
+                    alert("Reference File Error: " + err.message);
+                    btn.prop('disabled', false).text(isEditing ? 'Update Task' : 'Create Task');
+                }
+            } else {
+                await executeSave(taskData);
+            }
+        });
+
+        window.approveUser = async (uid) => { await client.from('profiles').update({ status: 'approved' }).eq('uid', uid); fetchUsers(); };
+        window.deleteUser = async (uid) => { if (confirm("Delete this student?")) { await client.from('profiles').delete().eq('uid', uid); fetchUsers(); } };
+        window.submitGrade = async (sid) => {
+            const g = $(`#grade-${sid}`).val();
+            const f = $(`#feedback-${sid}`).val();
+            if (g) {
+                await client.from('submissions').update({ grade: parseInt(g), feedback: f, status: 'graded' }).eq('id', sid);
+                fetchData();
+                showToast("Grade saved successfully.");
+            }
+        };
+        window.downloadReport = () => { const doc = new jsPDF(); doc.text(`Grade Report: ${currentTask.title}`, 20, 20); doc.text(`Student: ${userProfile.name}`, 20, 30); doc.text(`Score: ${currentSub.grade}/100`, 20, 40); doc.text(`Feedback: ${currentSub.feedback}`, 20, 50); doc.save(`REPORT_${userProfile.name}.pdf`); };
+
+        function initChart() {
+            const canvas = document.getElementById('performanceChart');
+            if (!canvas) return;
+
+            // Fix: Destroy existing chart instance to prevent "Canvas already in use" error
+            if (performanceChart) {
+                performanceChart.destroy();
+                performanceChart = null;
+            }
+
+            const ctx = canvas.getContext('2d');
+            performanceChart = new Chart(ctx, {
+                type: 'doughnut',
+                data: { labels: ['Completed', 'Active'], datasets: [{ data: [0, 1], backgroundColor: ['#0ea5e9', '#e2e8f0'], borderWeight: 0, hoverOffset: 4 }] },
+                options: { cutout: '80%', plugins: { legend: { display: false } } }
+            });
+        }
+
+        function updateChart() {
+            const done = window.allSubmissions.filter(s => s.student_id === currentUser?.id).length;
+            const active = window.allTasks.length - done;
+            if (performanceChart) {
+                performanceChart.data.datasets[0].data = [done, active > 0 ? active : 0];
+                performanceChart.update();
+            }
+        }
+
+        function showToast(msg) {
+            const toast = $(`<div class="fixed bottom-10 right-10 bg-slate-900 dark:bg-[#1e293b] text-white px-8 py-4 rounded-2xl shadow-2xl z-[5000] font-black uppercase text-[10px] tracking-widest animate-in slide-in-from-bottom-5 border border-white/10 backdrop-blur-xl flex items-center gap-3"><i data-lucide="bell" class="w-4 h-4 text-indigo-400"></i>${msg}</div>`);
+            $('body').append(toast);
+            lucide.createIcons();
+            setTimeout(() => toast.fadeOut(() => toast.remove()), 3000);
+        }
+
+        window.generateResult = (uid, name, count, avg) => {
+            const doc = new jsPDF();
+            const date = new Date();
+            const monthName = date.toLocaleString('default', { month: 'long' });
+            doc.setFillColor(79, 70, 229);
+            doc.rect(0, 0, 210, 40, 'F');
+            doc.setTextColor(255, 255, 255);
+            doc.setFontSize(22);
+            doc.text("STUDENT PERFORMANCE REPORT", 105, 20, null, null, "center");
+            doc.setFontSize(14);
+            doc.text(`${monthName} ${date.getFullYear()}`, 105, 30, null, null, "center");
+            doc.setTextColor(0, 0, 0);
+            doc.setFontSize(12);
+            doc.text(`Student: ${name}`, 14, 55);
+            doc.text(`Total Tasks: ${count}`, 14, 65);
+            doc.text(`Average Grade: ${avg}%`, 14, 75);
+            const studentSubs = window.allSubmissions.filter(s => s.student_id === uid && s.status === 'graded');
+            const data = studentSubs.map(s => [s.task_title, new Date(s.submitted_at).toLocaleDateString(), s.grade + "%", s.feedback]);
+            doc.autoTable({ startY: 85, head: [['Task', 'Date', 'Score', 'Teacher Feedback']], body: data, theme: 'grid', headStyles: { fillColor: [79, 70, 229] } });
+            doc.save(`RESULT_${name}.pdf`);
+        };
+
+        window.downloadAllReports = () => { showToast("Initiating batch export..."); /* Implement batch if needed */ };
+        $('#user-search').on('input', () => fetchUsers());
+        // --- CONSOLIDATED HUB LOGIC (GLOBAL + PRIVATE) ---
+        let chatMode = 'global'; // 'global' or 'private'
+        let selectedPvtUid = null;
+
+        window.openDirectChat = async (uid, name) => {
+            if (uid === currentUser.id) return;
+            chatMode = 'private';
+            selectedPvtUid = uid;
+
+            // Update UI State
+            $('#hub-title').text(name);
+            $('#global-badge').addClass('hidden');
+            $('#pvt-exit-header, #back-to-global-btn').removeClass('hidden');
+            $('#hub-header-icon').html(`<div class="w-10 h-10 rounded-xl bg-indigo-600 text-white flex items-center justify-center font-black">${name.charAt(0)}</div>`);
+            $('#global-typing-status').text('Encrypted Direct Line');
+
+            // Clear and reload messages
+            $('#global-chat-container').empty().html('<div class="text-center py-10 text-slate-400 text-[9px] font-black uppercase tracking-widest opacity-50 italic">Loading conversation...</div>');
+            fetchPrivateMessagesConsolidated(uid);
+
+            // Highlight in sidebar
+            $('.chat-sidebar-item').removeClass('bg-indigo-50 dark:bg-indigo-900/20 shadow-sm border-indigo-200');
+            $(`[data-chat-uid="${uid}"]`).addClass('bg-indigo-50 dark:bg-indigo-900/20 shadow-sm border-indigo-200');
+
+            // Clear notifications and mark as read
+            $(`[data-chat-uid="${uid}"] .unread-dot`).remove();
+
+            try {
+                const { error } = await client.from('direct_messages').update({ is_read: true }).eq('sender_id', uid).eq('receiver_id', currentUser.id);
+                if (error) console.error("Error marking messages as read:", error);
+
+                // Refresh the sidebar to ensure the unread state is synchronized with DB
+                updateActiveConversations();
+            } catch (err) {
+                console.error("Exception marking read:", err);
+            }
+
+            lucide.createIcons();
+        };
+
+        window.exitPrivateChat = () => {
+            chatMode = 'global';
+            selectedPvtUid = null;
+
+            $('#hub-title').text('Community Hub');
+            $('#global-badge').removeClass('hidden');
+            $('#pvt-exit-header, #back-to-global-btn').addClass('hidden');
+            $('#hub-header-icon').html('<i data-lucide="globe" class="w-5 h-5"></i>');
+            $('#global-typing-status').text('Public Channel Active');
+
+            $('.chat-sidebar-item').removeClass('bg-indigo-50 dark:bg-indigo-900/20 shadow-sm border-indigo-200');
+
+            fetchGlobalMessages();
+            lucide.createIcons();
+        };
+
+        async function fetchPrivateMessagesConsolidated(otherUid) {
+            if (chatMode !== 'private' || selectedPvtUid !== otherUid) return;
+
+            // Updated query syntax for better robustness
+            const { data, error } = await client
+                .from('direct_messages')
+                .select('*')
+                .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${otherUid}),and(sender_id.eq.${otherUid},receiver_id.eq.${currentUser.id})`)
+                .order('created_at', { ascending: true });
+
+            const container = $('#global-chat-container');
+
+            if (error) {
+                console.error("Private Chat Error:", error);
+                container.html(`<div class="flex flex-col items-center justify-center h-full gap-2">
+                    <div class="text-rose-500 font-black uppercase tracking-widest text-[10px]">Connection Error</div>
+                    <div class="text-[9px] text-slate-400 max-w-[200px] text-center">${error.message}</div>
+                    <button onclick="fetchPrivateMessagesConsolidated('${otherUid}')" class="mt-2 text-indigo-500 hover:underline text-[9px] font-bold uppercase">Retry</button>
+                </div>`);
+                return;
+            }
+
+            container.empty();
+            if (!data || data.length === 0) {
+                container.html('<div class="text-center py-10 text-slate-400 text-[9px] font-black uppercase tracking-widest opacity-50 italic">No messages yet. Send a private wave! 👋</div>');
+                return; // Added return to prevent loop execution on empty data
+            }
+
+            data.forEach(m => {
+                const isMe = m.sender_id === currentUser.id;
+                container.append(`
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-4 animate-in fade-in slide-in-from-bottom-2">
+                         <div class="chat-bubble max-w-[80%] p-3 rounded-2xl text-[10px] font-medium shadow-sm border border-slate-100 dark:border-slate-800 ${isMe ? 'bg-indigo-600 text-white border-transparent rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-none'}">
+                            ${m.content}
+                        </div>
+                        <span class="text-[6px] text-slate-400 font-bold mt-1">${new Date(m.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                    </div>
+                `);
+            });
+            container.scrollTop(container[0].scrollHeight);
+        }
+
+        async function updateActiveConversations() {
+            const { data: dms } = await client.from('direct_messages').select('*').or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`).order('created_at', { ascending: false });
+            if (!dms) return;
+
+            const uids = [...new Set(dms.map(m => m.sender_id === currentUser.id ? m.receiver_id : m.sender_id))];
+            const container = $('#active-conversations-list').empty();
+
+            if (uids.length === 0) {
+                container.html('<div class="text-[8px] text-slate-400 px-2 italic text-center py-4">No recent chats</div>');
+                return;
+            }
+
+            for (const uid of uids) {
+                const { data: profile } = await client.from('profiles').select('name, role').eq('uid', uid).maybeSingle();
+                if (!profile) continue;
+
+                const lastMsg = dms.find(m => (m.sender_id === uid && m.receiver_id === currentUser.id) || (m.receiver_id === uid && m.sender_id === currentUser.id));
+                const unread = dms.filter(m => m.sender_id === uid && m.receiver_id === currentUser.id && !m.is_read).length;
+
+                container.append(`
+                    <div onclick="openDirectChat('${uid}', '${profile.name}')" data-chat-uid="${uid}" class="chat-sidebar-item flex items-center gap-3 p-2 rounded-xl cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800/80 transition-all border border-transparent ${selectedPvtUid === uid ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200' : ''}">
+                        <div class="w-8 h-8 rounded-lg bg-indigo-500/10 text-indigo-500 flex items-center justify-center font-black text-xs">${profile.name.charAt(0)}</div>
+                        <div class="flex-1 min-w-0">
+                            <p class="text-[9px] font-black uppercase tracking-tight truncate ${profile.role === 'admin' ? 'text-rose-500' : 'text-slate-700 dark:text-slate-300'}">${profile.name}</p>
+                            <p class="text-[7px] text-slate-400 truncate font-medium">${lastMsg.content}</p>
+                        </div>
+                        ${unread > 0 ? `<span class="unread-dot w-2 h-2 bg-indigo-500 rounded-full"></span>` : ''}
+                    </div>
+                `);
+            }
+            lucide.createIcons();
+        }
+
+        // Updated send message logic
+        window.sendHubMessage = async () => {
+            const input = $('#global-chat-input');
+            const content = input.val().trim();
+            if (!content) return;
+            input.val('');
+
+            if (chatMode === 'global') {
+                const { error } = await client.from('global_messages').insert([{ user_id: currentUser.id, user_name: userProfile.name, role: userProfile.role, content }]);
+                if (error) { showToast("Message Failed"); input.val(content); }
+            } else {
+                const { error } = await client.from('direct_messages').insert([{ sender_id: currentUser.id, receiver_id: selectedPvtUid, content: content }]);
+                if (error) { showToast("DM Failed"); input.val(content); }
+                else { fetchPrivateMessagesConsolidated(selectedPvtUid); updateActiveConversations(); }
+            }
+        };
+
+        // Re-routing old functions to new consolidated hub
+        window.sendGlobalMessage = window.sendHubMessage;
+        // window.openQuickChat = window.openDirectChat; // This was already done in the instruction, but it's not a direct replacement for the modal.
+        // The modal's openQuickChat should still open the modal, but the underlying logic for fetching messages
+        // and sending should be consolidated.
+
+        // The quick chat modal's openQuickChat function needs to be distinct from openDirectChat
+        // as it opens a modal, not changes the main chat view.
+        // Let's keep the original quickChatModal logic but ensure it uses the consolidated message fetching/sending.
+        window.openQuickChatModal = (uid, name) => { // Renamed to avoid conflict
+            if (uid === currentUser.id) return;
+            $('#quick-chat-name').empty().append(`<span onclick="openDirectChat('${uid}', '${name}'); bootstrap.Modal.getInstance(document.getElementById('quickChatModal')).hide();" class="cursor-pointer hover:underline">${name}</span>`);
+            $('#quick-chat-avatar').text(name.charAt(0));
+            $('#quick-chat-input').data('receiver', uid);
+            const modal = bootstrap.Modal.getOrCreateInstance(document.getElementById('quickChatModal'));
+            modal.show();
+            fetchPrivateMessagesForModal(uid, '#quick-messages-container');
+            lucide.createIcons();
+        };
+
+        async function fetchPrivateMessagesForModal(otherUid, containerId) {
+            const { data, error } = await client
+                .from('direct_messages')
+                .select('*')
+                .or(`and(sender_id.eq.${currentUser.id},receiver_id.eq.${otherUid}),and(sender_id.eq.${otherUid},receiver_id.eq.${currentUser.id})`)
+                .order('created_at', { ascending: true });
+
+            if (error) return;
+            const container = $(containerId).empty();
+            data.forEach(m => {
+                const isMe = m.sender_id === currentUser.id;
+                container.append(`
+                    <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} mb-2">
+                        <div class="max-w-[85%] p-2.5 rounded-xl text-[10px] font-medium ${isMe ? 'bg-indigo-600 text-white rounded-tr-none' : 'bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-none shadow-sm'}">
+                            ${m.content}
+                        </div>
+                    </div>
+                `);
+            });
+            container.scrollTop(container[0].scrollHeight);
+        }
+
+        window.sendQuickPrivateMessage = async () => {
+            const input = $('#quick-chat-input');
+            const receiverId = input.data('receiver');
+            const content = input.val().trim();
+            if (!content) return;
+            input.val('');
+            const { error } = await client.from('direct_messages').insert([{
+                sender_id: currentUser.id,
+                receiver_id: receiverId,
+                content: content
+            }]);
+            if (!error) {
+                fetchPrivateMessagesForModal(receiverId, '#quick-messages-container');
+                updateActiveConversations(); // Update sidebar if new message
+            }
+        };
+
+        $('#global-chat-input').on('keydown', function (e) {
+            if (e.key === 'Enter') sendHubMessage();
+            else broadcastTyping(chatMode === 'private' ? selectedPvtUid : null);
+        });
+
+        const oldSwitchTab = window.switchTab;
+        window.switchTab = (tab) => {
+            if (tab === 'chat') $('#global-inbox-badge').addClass('hidden');
+            oldSwitchTab(tab);
+        };
+    </script>
+</body>
+
+</html>
