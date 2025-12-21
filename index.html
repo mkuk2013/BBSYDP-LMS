@@ -2294,10 +2294,7 @@
                     if (sub.status === 'graded') {
                         $('#result-grade').text(sub.grade);
                         $('#result-feedback').text(sub.feedback);
-                        // Add commited status even after graded for confirmation
-                        if (!$('#result-section .sub-confirm-msg').length) {
-                            $('#result-section').append('<div class="sub-confirm-msg p-4 bg-slate-50 dark:bg-slate-800/50 rounded-xl mt-6 text-[9px] font-black uppercase text-slate-400">DATABASE RECORD: ' + sub.task_title + '</div>');
-                        }
+
                         $('#result-section').removeClass('hidden');
                     }
                     else {
