@@ -1951,7 +1951,7 @@
                     });
                     if (error) throw error;
                     bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
-                    alert(`Recovery link sent to ${email}!\n\nTargeting: ${window.location.origin}\n\nIMPORTANT: If the email link opens Localhost instead of this site, you MUST add "${window.location.origin}" to your Supabase Dashboard > Authentication > URL Configuration > Redirect URLs.`);
+                    alert(`Recovery link sent to ${email}!`);
                 } catch (err) {
                     alert("Error: " + err.message);
                 } finally {
