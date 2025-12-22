@@ -1672,6 +1672,10 @@
             const client = createClient(SUPABASE_URL, SUPABASE_KEY);
             const { jsPDF } = window.jspdf;
 
+            // NEW: Capture Recovery Mode IMMEDIATELY before hash is cleared
+            window.isRecoveryMode = window.location.hash && window.location.hash.includes('type=recovery');
+            if (window.isRecoveryMode) console.log("Global Recovery Flag Set: TRUE");
+
             let currentUser = null, userProfile = null, syncInterval = null, performanceChart = null;
             let activeTab = 'dashboard', currentTask = null, currentSub = null, editingTaskId = null;
             let isInitializing = false;
@@ -1730,7 +1734,7 @@
 
             async function handleUserSession(user) {
                 // If recovery mode, skip login logic and stay on auth screen
-                if (window.location.hash && window.location.hash.includes('type=recovery')) {
+                if (window.isRecoveryMode) {
                     console.log("Recovery Mode Detected: Skipping Dashboard Init");
                     finishInitialization(false);
                     return;
@@ -1859,7 +1863,7 @@
                 switchAuth('student');
 
                 // Explicitly check for Recovery Hash to ensure Modal opens
-                if (window.location.hash && window.location.hash.includes('type=recovery')) {
+                if (window.isRecoveryMode) {
                     console.log("Manual Recovery detection triggered.");
                     setTimeout(() => {
                         const modalEl = document.getElementById('resetPasswordModal');
