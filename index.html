@@ -1729,6 +1729,13 @@
             }
 
             async function handleUserSession(user) {
+                // If recovery mode, skip login logic and stay on auth screen
+                if (window.location.hash && window.location.hash.includes('type=recovery')) {
+                    console.log("Recovery Mode Detected: Skipping Dashboard Init");
+                    finishInitialization(false);
+                    return;
+                }
+
                 if (!user) { finishInitialization(false); return; }
                 // Avoid double initialization for same user
                 if (isInitializing && currentUser?.id === user.id) return;
@@ -1962,8 +1969,9 @@
                     const { error } = await client.auth.updateUser({ password: pass });
                     if (error) throw error;
 
+                    await client.auth.signOut(); // Ensure fresh login
                     bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
-                    alert("Success! Your password has been updated. The page will now refresh.");
+                    alert("Password has been changed. Now login with updated password.");
                     // Reload to root to clear recovery hash and fix any UI overlays
                     window.location.href = window.location.pathname;
                 } catch (err) {
