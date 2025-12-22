@@ -1934,10 +1934,13 @@
                 btn.prop('disabled', true).text('Sending Link...');
                 try {
                     console.log("Sending reset to:", email);
-                    const { error } = await client.auth.resetPasswordForEmail(email);
+                    // Dynamically set redirect URL to current site (Localhost or Netlify)
+                    const { error } = await client.auth.resetPasswordForEmail(email, {
+                        redirectTo: window.location.origin
+                    });
                     if (error) throw error;
                     bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
-                    alert(`Recovery link sent to ${email}!\n\nCheck your inbox (and spam folder). Click the link to set a new password.`);
+                    alert(`Recovery link sent to ${email}!\n\nTargeting: ${window.location.origin}\n\nIMPORTANT: If the email link opens Localhost instead of this site, you MUST add "${window.location.origin}" to your Supabase Dashboard > Authentication > URL Configuration > Redirect URLs.`);
                 } catch (err) {
                     alert("Error: " + err.message);
                 } finally {
@@ -1960,8 +1963,9 @@
                     if (error) throw error;
 
                     bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
-                    alert("Success! Your password has been updated.");
-                    window.location.hash = '';
+                    alert("Success! Your password has been updated. The page will now refresh.");
+                    // Reload to root to clear recovery hash and fix any UI overlays
+                    window.location.href = window.location.pathname;
                 } catch (err) {
                     alert("Update Failed: " + err.message);
                 } finally {
