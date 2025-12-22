@@ -1433,6 +1433,8 @@
                         </div>
                         <button type="submit" id="forgot-btn" class="w-full btn-command py-3 rounded-xl text-xs">Send
                             Recovery Link</button>
+                        <div id="forgot-msg"
+                            class="text-center mt-3 text-[10px] font-black uppercase tracking-widest hidden"></div>
                     </form>
                 </div>
             </div>
@@ -1459,6 +1461,8 @@
                         <button type="submit" id="reset-pass-btn"
                             class="w-full btn-command py-3 rounded-xl text-xs shadow-lg shadow-indigo-500/20">Update
                             Password</button>
+                        <div id="reset-msg"
+                            class="text-center mt-3 text-[10px] font-black uppercase tracking-widest hidden"></div>
                     </form>
                 </div>
             </div>
@@ -1939,7 +1943,11 @@
             window.submitForgotPassword = async (e) => {
                 e.preventDefault();
                 const btn = $('#forgot-btn');
+                const msgEl = $('#forgot-msg');
                 const email = $('#forgot-email').val().trim();
+
+                msgEl.addClass('hidden').removeClass('text-rose-500');
+
                 if (!email) return;
 
                 btn.prop('disabled', true).text('Sending Link...');
@@ -1950,10 +1958,14 @@
                         redirectTo: window.location.origin
                     });
                     if (error) throw error;
-                    bootstrap.Modal.getInstance(document.getElementById('forgotPasswordModal')).hide();
-                    alert(`Recovery link sent to ${email}!`);
+
+                    // Show success message inline in RED as requested
+                    msgEl.text(`Recovery link sent to ${email}!`)
+                        .addClass('text-rose-500')
+                        .removeClass('hidden');
+
                 } catch (err) {
-                    alert("Error: " + err.message);
+                    msgEl.text("Error: " + err.message).addClass('text-rose-500').removeClass('hidden');
                 } finally {
                     btn.prop('disabled', false).text('Send Recovery Link');
                 }
@@ -1965,8 +1977,15 @@
             window.submitResetPassword = async (e) => {
                 e.preventDefault();
                 const btn = $('#reset-pass-btn');
+                const msgEl = $('#reset-msg');
                 const pass = $('#reset-new-pass').val();
-                if (pass.length < 6) return alert("Password must be at least 6 characters");
+
+                msgEl.addClass('hidden').removeClass('text-rose-500');
+
+                if (pass.length < 6) {
+                    msgEl.text("Password must be at least 6 characters").addClass('text-rose-500').removeClass('hidden');
+                    return;
+                }
 
                 btn.prop('disabled', true).text('Updating...');
                 try {
@@ -1974,13 +1993,19 @@
                     if (error) throw error;
 
                     await client.auth.signOut(); // Ensure fresh login
-                    bootstrap.Modal.getInstance(document.getElementById('resetPasswordModal')).hide();
-                    alert("Password has been changed. Now login with updated password.");
-                    // Reload to root to clear recovery hash and fix any UI overlays
-                    window.location.href = window.location.pathname;
+
+                    // Show success inline in RED as requested
+                    msgEl.text("Password has been changed. Now login with updated password.")
+                        .addClass('text-rose-500')
+                        .removeClass('hidden');
+
+                    // Delay reload so user sees the message
+                    setTimeout(() => {
+                        window.location.href = window.location.pathname;
+                    }, 3000);
+
                 } catch (err) {
-                    alert("Update Failed: " + err.message);
-                } finally {
+                    msgEl.text("Update Failed: " + err.message).addClass('text-rose-500').removeClass('hidden');
                     btn.prop('disabled', false).text('Update Password');
                 }
             };
