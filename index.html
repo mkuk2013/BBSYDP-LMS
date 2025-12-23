@@ -242,17 +242,19 @@
         }
 
         /* Tabs Styling from Uiverse.io by Pradeepsaranbishnoi */
-        .tabs {
-            display: flex;
+        .task-tabs-container {
+            display: inline-flex;
             position: relative;
             background-color: #fff;
             box-shadow: 0 0 1px 0 rgba(24, 94, 224, 0.15), 0 6px 12px 0 rgba(24, 94, 224, 0.15);
             padding: 0.75rem;
             border-radius: 99px;
+            margin: 0 auto;
+            /* Center horizontally */
             width: fit-content;
         }
 
-        .tabs * {
+        .task-tabs-container * {
             z-index: 2;
         }
 
@@ -905,26 +907,46 @@
 
                 <!-- 1. Strategy Overview -->
                 <div id="view-dashboard" class="content-view animate-in fade-in duration-500">
-                    <!-- Notification Center (Student Only) -->
-                    <div id="student-alerts" class="hidden mb-6">
-                        <div class="v-card p-4 border-l-4 border-l-indigo-500 flex items-center justify-between gap-6">
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/30 flex items-center justify-center text-indigo-600">
-                                    <i data-lucide="lightbulb" class="w-5 h-5 animate-pulse"></i>
-                                </div>
-                                <div>
-                                    <h4 class="font-black uppercase tracking-tight text-xs">Learning Tip</h4>
-                                    <p class="text-[10px] text-slate-500 font-medium" id="student-alert-msg">Complete
-                                        tasks
-                                        to improve grades.</p>
-                                </div>
+
+                    <!-- Professional Greeting Banner -->
+
+                    <div class="mb-8 relative overflow-hidden rounded-3xl shadow-2xl shadow-indigo-500/20 border border-white/10"
+                        style="background-color: #4b44d4;">
+                        <!-- Background Pattern -->
+                        <div class="absolute inset-0 opacity-10"
+                            style="background-image: radial-gradient(#6366f1 1px, transparent 1px); background-size: 20px 20px;">
+                        </div>
+                        <div
+                            class="absolute -right-10 -top-10 w-64 h-64 bg-indigo-600 rounded-full blur-[100px] opacity-20">
+                        </div>
+
+                        <div
+                            class="relative z-10 p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-2">
+                                    Workspace Dashboard</p>
+                                <h2 class="text-3xl md:text-4xl font-black text-white tracking-tighter leading-none"
+                                    id="dynamic-greeting-text">
+                                    Welcome Back
+                                </h2>
+                                <p class="text-xs text-indigo-100 font-medium mt-2 max-w-md">Ready to build something
+                                    amazing today? Check your pending tasks regarding Python & Web Development.</p>
                             </div>
-                            <button onclick="switchTab('tasks')"
-                                class="btn-command px-4 py-2 rounded-lg text-[9px]">View
-                                Tasks</button>
+                            <div class="text-right">
+                                <h3 class="text-3xl font-black text-white tracking-tight" id="live-clock">00:00</h3>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-200"
+                                    id="live-date">...</p>
+                            </div>
                         </div>
                     </div>
+
+                    <!-- Hidden Legacy Alert (Logic Preserved) -->
+                    <div id="student-alerts" class="hidden mb-6"></div>
+
+
+
+                    <!-- NEW: Notice Board (Global) -->
+
 
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
                         <div class="v-card p-4 flex items-center gap-4 glow-border group">
@@ -1001,313 +1023,330 @@
                                 <!-- Activities -->
                             </div>
                         </div>
-                        <div class="v-card p-4 flex flex-col justify-center min-h-[220px]">
-                            <canvas id="performanceChart" class="max-h-[160px]"></canvas>
-                            <p class="text-center text-[8px] font-black text-slate-400 mt-2 uppercase tracking-widest">
-                                Performance Graph</p>
+                        <div class="space-y-4">
+                            <!-- Performance Chart -->
+                            <div class="v-card p-4 flex flex-col justify-center min-h-[220px]">
+                                <div class="flex justify-between items-center mb-2">
+                                    <h3 class="font-black text-xs uppercase tracking-tighter">Perf. Analytics</h3>
+                                    <span
+                                        class="text-[9px] font-black uppercase text-emerald-500 tracking-widest animate-pulse">Live</span>
+                                </div>
+                                <canvas id="performanceChart" class="max-h-[160px]"></canvas>
+                            </div>
+
+
+
+
+                        </div>
+
+
+
+
+                    </div>
+                </div>
+            </div>
+
+            <!-- 2. Tasks View -->
+
+            <div id="view-tasks" class="content-view hidden animate-in slide-in-from-bottom-4 duration-500">
+                <!-- Advanced Filter Bar -->
+                <div class="w-full mb-8 text-center">
+                    <div class="task-tabs-container">
+                        <input type="radio" id="radio-1" name="tabs" checked onchange="filterTasks('all')">
+                        <label class="tab" for="radio-1">All Tasks</label>
+
+                        <input type="radio" id="radio-2" name="tabs" onchange="filterTasks('pending')">
+                        <label class="tab" for="radio-2">Pending</label>
+
+                        <input type="radio" id="radio-3" name="tabs" onchange="filterTasks('completed')">
+                        <label class="tab" for="radio-3">Completed</label>
+
+                        <input type="radio" id="radio-4" name="tabs" onchange="filterTasks('expired')">
+                        <label class="tab" for="radio-4">Expired</label>
+                    </div>
+                </div>
+                <div id="task-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Tasks -->
+                </div>
+            </div>
+
+            <!-- 3. Intelligence View -->
+            <div id="view-resources" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                <!-- Resource Header & Filter -->
+                <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+                    <div>
+                        <h3 class="text-xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">
+                            Learning Library</h3>
+                        <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Curated materials
+                            for your growth</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
+                        <div class="relative">
+                            <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
+                            <input type="text" id="resource-search" placeholder="Search resources..."
+                                class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 dark:text-white">
+                        </div>
+                        <button onclick="openCreateResourceModal()" id="add-resource-btn"
+                            class="hidden btn-command px-4 py-2 rounded-xl text-[9px] flex items-center gap-2 whitespace-nowrap">
+                            <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Material
+                        </button>
+                    </div>
+
+                    <!-- New Centered Filter Tabs for Resources -->
+                    <div class="w-full mt-4 mb-8 text-center">
+                        <div class="task-tabs-container">
+                            <input type="radio" id="res-radio-1" name="res-tabs" checked
+                                onchange="filterResources('all')">
+                            <label class="tab" for="res-radio-1">All</label>
+
+                            <input type="radio" id="res-radio-2" name="res-tabs" onchange="filterResources('video')">
+                            <label class="tab" for="res-radio-2">Videos</label>
+
+                            <input type="radio" id="res-radio-3" name="res-tabs" onchange="filterResources('doc')">
+                            <label class="tab" for="res-radio-3">Docs</label>
                         </div>
                     </div>
                 </div>
 
-                <!-- 2. Tasks View -->
-                <div id="view-tasks" class="content-view hidden animate-in slide-in-from-bottom-4 duration-500">
-                    <!-- Advanced Filter Bar -->
-                    <div class="flex flex-wrap items-center justify-between gap-4 mb-8">
-                        <div class="tabs">
-                            <input type="radio" id="radio-1" name="tabs" checked onchange="filterTasks('all')">
-                            <label class="tab" for="radio-1">All Tasks</label>
-
-                            <input type="radio" id="radio-2" name="tabs" onchange="filterTasks('pending')">
-                            <label class="tab" for="radio-2">Pending</label>
-
-                            <input type="radio" id="radio-3" name="tabs" onchange="filterTasks('completed')">
-                            <label class="tab" for="radio-3">Completed</label>
-
-                            <input type="radio" id="radio-4" name="tabs" onchange="filterTasks('expired')">
-                            <label class="tab" for="radio-4">Expired</label>
-                        </div>
-                    </div>
-                    <div id="task-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Tasks -->
-                    </div>
+                <!-- Dynamic Resource Grid -->
+                <div id="resource-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                    <!-- Injected via JS -->
                 </div>
+            </div>
 
-                <!-- 3. Intelligence View -->
-                <div id="view-resources" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
-                    <!-- Resource Header & Filter -->
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+            <!-- 4. Leaderboard View -->
+            <div id="view-leaderboard" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                <div class="v-card overflow-hidden">
+                    <div
+                        class="p-5 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex justify-between items-center">
                         <div>
-                            <h3 class="text-xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">
-                                Learning Library</h3>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Curated materials
-                                for your growth</p>
+                            <h3 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">Student
+                                Ranking
+                            </h3>
+                            <p class="text-indigo-100/70 text-[8px] font-black uppercase tracking-widest">Best
+                                Performers</p>
                         </div>
-                        <div class="flex flex-col sm:flex-row gap-3 w-full md:w-auto">
-                            <div class="relative">
-                                <i data-lucide="search" class="absolute left-3 top-2.5 w-4 h-4 text-slate-400"></i>
-                                <input type="text" id="resource-search" placeholder="Search resources..."
-                                    class="w-full sm:w-64 pl-10 pr-4 py-2 bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-slate-900 dark:text-white">
-                            </div>
-                            <button onclick="openCreateResourceModal()" id="add-resource-btn"
-                                class="hidden btn-command px-4 py-2 rounded-xl text-[9px] flex items-center gap-2 whitespace-nowrap">
-                                <i data-lucide="plus" class="w-3.5 h-3.5"></i> Add Material
+                        <div class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
+                            <i data-lucide="trophy" class="w-5 h-5 text-white"></i>
+                        </div>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left font-bold text-xs">
+                            <thead
+                                class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                <tr>
+                                    <th class="px-5 py-3">Rank</th>
+                                    <th class="px-5 py-3">Student</th>
+                                    <th class="px-5 py-3 text-center">Tasks</th>
+                                    <th class="px-5 py-3 text-center">Grade</th>
+                                    <th class="px-5 py-3 text-right">Progress</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboard-body" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                                <!-- Rows -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+
+            <!-- 5. Admin Review Center -->
+            <div id="view-grading" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                <div class="v-card overflow-hidden">
+                    <div
+                        class="p-5 border-b border-slate-100 dark:border-slate-800/50 flex justify-between items-center text-xs">
+                        <h3 class="font-black text-slate-900 dark:text-slate-100 uppercase tracking-tighter">Grading
+                            Queue</h3>
+                        <span
+                            class="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/20"
+                            id="pending-count">0 Submissions</span>
+                    </div>
+                    <div id="grading-list" class="divide-y divide-slate-100 dark:divide-slate-800/50">
+                        <!-- Submissions Injected -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- 6. Admin Student Directory -->
+            <div id="view-users" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                <div class="v-card overflow-hidden">
+                    <div
+                        class="p-4 border-b border-slate-100 dark:border-slate-800/50 flex flex-col md:flex-row gap-3 items-center justify-between">
+                        <div class="relative w-full md:max-w-xs">
+                            <i data-lucide="search"
+                                class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5"></i>
+                            <input type="text" id="user-search" placeholder="Search..."
+                                class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
+                        </div>
+                        <div class="flex gap-2">
+                            <button onclick="window.approveAllUsers()"
+                                class="px-4 py-2.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
+                                <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approve All
                             </button>
-                            <div
-                                class="flex bg-white dark:bg-slate-900 p-1 rounded-xl border border-slate-100 dark:border-slate-800">
-                                <button onclick="filterResources('all')"
-                                    class="res-filter-btn active px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                                    data-category="all">All</button>
-                                <button onclick="filterResources('video')"
-                                    class="res-filter-btn px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                                    data-category="video">Videos</button>
-                                <button onclick="filterResources('doc')"
-                                    class="res-filter-btn px-3 py-1.5 rounded-lg text-[9px] font-black uppercase tracking-wider text-slate-500 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all"
-                                    data-category="doc">Docs</button>
-                            </div>
+                            <button onclick="downloadAllReports()"
+                                class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
+                                <i data-lucide="download" class="w-3 h-3"></i> Export All
+                            </button>
                         </div>
                     </div>
-
-                    <!-- Dynamic Resource Grid -->
-                    <div id="resource-grid" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                        <!-- Injected via JS -->
+                    <div class="overflow-x-auto">
+                        <table class="w-full text-left font-bold">
+                            <thead
+                                class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                <tr>
+                                    <th class="px-5 py-3">Student Name</th>
+                                    <th class="px-5 py-3 text-center">Tasks</th>
+                                    <th class="px-5 py-3 text-center">Grade</th>
+                                    <th class="px-6 py-3 text-center">Status</th>
+                                    <th class="px-5 py-3 text-right">Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="user-table-body"
+                                class="divide-y divide-slate-100 dark:divide-slate-800/50 text-[11px]">
+                                <!-- Row Injected -->
+                            </tbody>
+                        </table>
                     </div>
                 </div>
+            </div>
 
-                <!-- 4. Leaderboard View -->
-                <div id="view-leaderboard" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+
+            <!-- Selected Private Chat (Hidden by default, will reuse global chat container if needed) -->
+            <!-- Removing the dedicated inbox view as requested -->
+
+            <!-- 8. Profile View -->
+            <div id="view-profile" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                <div class="max-w-2xl mx-auto">
                     <div class="v-card overflow-hidden">
                         <div
-                            class="p-5 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex justify-between items-center">
-                            <div>
-                                <h3 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">Student
-                                    Ranking
-                                </h3>
-                                <p class="text-indigo-100/70 text-[8px] font-black uppercase tracking-widest">Best
-                                    Performers</p>
-                            </div>
-                            <div
-                                class="w-10 h-10 bg-white/10 rounded-xl flex items-center justify-center backdrop-blur-md">
-                                <i data-lucide="trophy" class="w-5 h-5 text-white"></i>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left font-bold text-xs">
-                                <thead
-                                    class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
-                                    <tr>
-                                        <th class="px-5 py-3">Rank</th>
-                                        <th class="px-5 py-3">Student</th>
-                                        <th class="px-5 py-3 text-center">Tasks</th>
-                                        <th class="px-5 py-3 text-center">Grade</th>
-                                        <th class="px-5 py-3 text-right">Progress</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="leaderboard-body" class="divide-y divide-slate-100 dark:divide-slate-800/50">
-                                    <!-- Rows -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 5. Admin Review Center -->
-                <div id="view-grading" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
-                    <div class="v-card overflow-hidden">
-                        <div
-                            class="p-5 border-b border-slate-100 dark:border-slate-800/50 flex justify-between items-center text-xs">
-                            <h3 class="font-black text-slate-900 dark:text-slate-100 uppercase tracking-tighter">Grading
-                                Queue</h3>
-                            <span
-                                class="px-3 py-1.5 bg-amber-500 text-white rounded-lg text-[9px] font-black uppercase tracking-widest shadow-lg shadow-amber-500/20"
-                                id="pending-count">0 Submissions</span>
-                        </div>
-                        <div id="grading-list" class="divide-y divide-slate-100 dark:divide-slate-800/50">
-                            <!-- Submissions Injected -->
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 6. Admin Student Directory -->
-                <div id="view-users" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
-                    <div class="v-card overflow-hidden">
-                        <div
-                            class="p-4 border-b border-slate-100 dark:border-slate-800/50 flex flex-col md:flex-row gap-3 items-center justify-between">
-                            <div class="relative w-full md:max-w-xs">
-                                <i data-lucide="search"
-                                    class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5"></i>
-                                <input type="text" id="user-search" placeholder="Search..."
-                                    class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="window.approveAllUsers()"
-                                    class="px-4 py-2.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
-                                    <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approve All
-                                </button>
-                                <button onclick="downloadAllReports()"
-                                    class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
-                                    <i data-lucide="download" class="w-3 h-3"></i> Export All
-                                </button>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left font-bold">
-                                <thead
-                                    class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
-                                    <tr>
-                                        <th class="px-5 py-3">Student Name</th>
-                                        <th class="px-5 py-3 text-center">Tasks</th>
-                                        <th class="px-5 py-3 text-center">Grade</th>
-                                        <th class="px-6 py-3 text-center">Status</th>
-                                        <th class="px-5 py-3 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="user-table-body"
-                                    class="divide-y divide-slate-100 dark:divide-slate-800/50 text-[11px]">
-                                    <!-- Row Injected -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Selected Private Chat (Hidden by default, will reuse global chat container if needed) -->
-                <!-- Removing the dedicated inbox view as requested -->
-
-                <!-- 8. Profile View -->
-                <div id="view-profile" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
-                    <div class="max-w-2xl mx-auto">
-                        <div class="v-card overflow-hidden">
-                            <div
-                                class="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-6">
-                                <input type="file" id="profile-upload" class="hidden" accept="image/*">
-                                <div class="relative group cursor-pointer" onclick="$('#profile-upload').click()">
-                                    <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-indigo-500/30 overflow-hidden ring-4 ring-white dark:ring-slate-800"
-                                        id="profile-avatar-display">
-                                        <span id="profile-initial-lg">?</span>
-                                    </div>
-                                    <div
-                                        class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
-                                    </div>
-                                    <div
-                                        class="absolute bottom-1 right-1 bg-indigo-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-800">
-                                        <i data-lucide="edit-2" class="w-3 h-3"></i>
-                                    </div>
+                            class="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-6">
+                            <input type="file" id="profile-upload" class="hidden" accept="image/*">
+                            <div class="relative group cursor-pointer" onclick="$('#profile-upload').click()">
+                                <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-indigo-500/30 overflow-hidden ring-4 ring-white dark:ring-slate-800"
+                                    id="profile-avatar-display">
+                                    <span id="profile-initial-lg">?</span>
                                 </div>
-                                <div class="text-center sm:text-left">
-                                    <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1"
-                                        id="profile-page-name">
-                                        My Account</h3>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Update
-                                        your personal profile & avatar</p>
-                                    <p class="text-[8px] text-indigo-500 font-bold uppercase tracking-widest mt-2 hidden"
-                                        id="upload-status">Uploading...</p>
+                                <div
+                                    class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                </div>
+                                <div
+                                    class="absolute bottom-1 right-1 bg-indigo-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-800">
+                                    <i data-lucide="edit-2" class="w-3 h-3"></i>
                                 </div>
                             </div>
-                            <div class="p-8">
-                                <form id="profile-form" class="space-y-6">
-                                    <div class="space-y-2">
-                                        <label
-                                            class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Full
-                                            Name</label>
-                                        <div class="relative">
-                                            <i data-lucide="user"
-                                                class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                            <input type="text" id="profile-name" required
-                                                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
-                                        </div>
-                                    </div>
-                                    <div class="space-y-2">
-                                        <label
-                                            class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Email
-                                            Address</label>
-                                        <div class="relative opacity-70">
-                                            <i data-lucide="mail"
-                                                class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                            <input type="email" id="profile-email" disabled
-                                                class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-900/50 border border-transparent dark:border-slate-800/50 rounded-xl text-sm font-bold text-slate-500 cursor-not-allowed">
-                                        </div>
-                                        <p class="text-[9px] text-slate-400 italic px-1">Email cannot be changed
-                                            directly.</p>
-                                    </div>
-                                    <div class="pt-6 border-t border-slate-100 dark:border-slate-800">
-                                        <h4
-                                            class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">
-                                            Security</h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div class="space-y-2">
-                                                <label
-                                                    class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">New
-                                                    Password</label>
-                                                <div class="relative">
-                                                    <i data-lucide="lock"
-                                                        class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                                    <input type="password" id="profile-new-pass"
-                                                        class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
-                                                        placeholder="Minimum 6 chars">
-                                                </div>
-                                            </div>
-                                            <div class="space-y-2">
-                                                <label
-                                                    class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Confirm
-                                                    Password</label>
-                                                <div class="relative">
-                                                    <i data-lucide="check-circle-2"
-                                                        class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                                    <input type="password" id="profile-confirm-pass"
-                                                        class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
-                                                        placeholder="Re-enter password">
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    <div class="pt-4 flex justify-end">
-                                        <button type="submit"
-                                            class="btn-command px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/20 text-xs flex items-center gap-2">
-                                            <i data-lucide="save" class="w-4 h-4"></i> Save Changes
-                                        </button>
-                                    </div>
-                                </form>
+                            <div class="text-center sm:text-left">
+                                <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1"
+                                    id="profile-page-name">
+                                    My Account</h3>
+                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Update
+                                    your personal profile & avatar</p>
+                                <p class="text-[8px] text-indigo-500 font-bold uppercase tracking-widest mt-2 hidden"
+                                    id="upload-status">Uploading...</p>
                             </div>
                         </div>
-                    </div>
-                </div>
-
-                <!-- Private Chat Modal (Quick Access) -->
-                <div class="modal fade" id="quickChatModal" tabindex="-1">
-                    <div class="modal-dialog modal-dialog-centered">
-                        <div
-                            class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
-                            <div class="modal-header border-0 p-4 bg-slate-50 dark:bg-slate-800/20">
-                                <div class="flex items-center gap-3">
-                                    <div id="quick-chat-avatar"
-                                        class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black">
-                                        ?</div>
-                                    <h5 class="modal-title font-black text-sm tracking-tight text-slate-900 dark:text-slate-100"
-                                        id="quick-chat-name">Chat</h5>
-                                </div>
-                                <button type="button" class="btn-close dark:btn-close-white"
-                                    data-bs-dismiss="modal"></button>
-                            </div>
-                            <div class="modal-body p-0">
-                                <div id="quick-messages-container"
-                                    class="h-80 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50/10"></div>
-                                <div class="p-4 border-t border-slate-100 dark:border-slate-800">
+                        <div class="p-8">
+                            <form id="profile-form" class="space-y-6">
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Full
+                                        Name</label>
                                     <div class="relative">
-                                        <input type="text" id="quick-chat-input"
-                                            class="w-full pl-4 pr-12 py-3 bg-slate-100 dark:bg-[#0b1120] border-0 rounded-xl text-[10px] font-medium outline-none"
-                                            placeholder="Send a private message...">
-                                        <button onclick="sendQuickPrivateMessage()"
-                                            class="absolute right-2 top-1.5 p-1.5 bg-indigo-600 text-white rounded-lg shadow-lg shadow-indigo-500/20">
-                                            <i data-lucide="send" class="w-3.5 h-3.5"></i>
-                                        </button>
+                                        <i data-lucide="user"
+                                            class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                        <input type="text" id="profile-name" required
+                                            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
                                     </div>
+                                </div>
+                                <div class="space-y-2">
+                                    <label
+                                        class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Email
+                                        Address</label>
+                                    <div class="relative opacity-70">
+                                        <i data-lucide="mail"
+                                            class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                        <input type="email" id="profile-email" disabled
+                                            class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-900/50 border border-transparent dark:border-slate-800/50 rounded-xl text-sm font-bold text-slate-500 cursor-not-allowed">
+                                    </div>
+                                    <p class="text-[9px] text-slate-400 italic px-1">Email cannot be changed
+                                        directly.</p>
+                                </div>
+                                <div class="pt-6 border-t border-slate-100 dark:border-slate-800">
+                                    <h4
+                                        class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">
+                                        Security</h4>
+                                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                        <div class="space-y-2">
+                                            <label
+                                                class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">New
+                                                Password</label>
+                                            <div class="relative">
+                                                <i data-lucide="lock"
+                                                    class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                                <input type="password" id="profile-new-pass"
+                                                    class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                                                    placeholder="Minimum 6 chars">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label
+                                                class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Confirm
+                                                Password</label>
+                                            <div class="relative">
+                                                <i data-lucide="check-circle-2"
+                                                    class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                                <input type="password" id="profile-confirm-pass"
+                                                    class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                                                    placeholder="Re-enter password">
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                <div class="pt-4 flex justify-end">
+                                    <button type="submit"
+                                        class="btn-command px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/20 text-xs flex items-center gap-2">
+                                        <i data-lucide="save" class="w-4 h-4"></i> Save Changes
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Private Chat Modal (Quick Access) -->
+            <div class="modal fade" id="quickChatModal" tabindex="-1">
+                <div class="modal-dialog modal-dialog-centered">
+                    <div class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
+                        <div class="modal-header border-0 p-4 bg-slate-50 dark:bg-slate-800/20">
+                            <div class="flex items-center gap-3">
+                                <div id="quick-chat-avatar"
+                                    class="w-8 h-8 rounded-lg bg-indigo-600 text-white flex items-center justify-center text-xs font-black">
+                                    ?</div>
+                                <h5 class="modal-title font-black text-sm tracking-tight text-slate-900 dark:text-slate-100"
+                                    id="quick-chat-name">Chat</h5>
+                            </div>
+                            <button type="button" class="btn-close dark:btn-close-white"
+                                data-bs-dismiss="modal"></button>
+                        </div>
+                        <div class="modal-body p-0">
+                            <div id="quick-messages-container"
+                                class="h-80 overflow-y-auto p-4 space-y-3 custom-scrollbar bg-slate-50/10"></div>
+                            <div class="p-4 border-t border-slate-100 dark:border-slate-800">
+                                <div class="relative">
+                                    <input type="text" id="quick-chat-input"
+                                        class="w-full pl-4 pr-12 py-3 bg-slate-100 dark:bg-[#0b1120] border-0 rounded-xl text-[10px] font-medium outline-none"
+                                        placeholder="Send a private message...">
+                                    <button onclick="sendQuickPrivateMessage()"
+                                        class="absolute right-2 top-1.5 p-1.5 bg-indigo-600 text-white rounded-lg shadow-lg shadow-indigo-500/20">
+                                        <i data-lucide="send" class="w-3.5 h-3.5"></i>
+                                    </button>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div> <!-- End of content-wrapper -->
+                </div>
+            </div> <!-- End of content-wrapper -->
         </main>
     </div>
 
@@ -1779,61 +1818,47 @@
 
                 // --- CACHE-FIRST STRATEGY ---
                 // Try to load profile from local storage immediately to avoid waiting for DB
-                let loadedFromCache = false;
-                const cachedParams = localStorage.getItem('supabase_profile_cache');
-                if (cachedParams) {
-                    try {
-                        const parsed = JSON.parse(cachedParams);
-                        if (parsed.uid === user.id) {
-                            console.log("Using cached profile for instant load.");
-                            currentUser = user;
-                            userProfile = parsed;
-                            // Initialize UI immediately with cached data
-                            initDashboard();
-                            loadedFromCache = true;
-                        }
-                    } catch (e) { localStorage.removeItem('supabase_profile_cache'); }
-                }
-
                 // --- BACKGROUND SYNC ---
+                let loadedFromCache = false;
+
                 try {
-                    // We still fetch fresh data, but we don't block the UI if we have cache
-                    // If NO cache, we must wait (with timeout)
+                    // Check cache availability for this user ID
+                    const cachedParams = localStorage.getItem('supabase_profile_cache');
 
-                    const profilePromise = client.from('profiles').select('*').eq('uid', user.id).maybeSingle();
-
-                    let profile, error;
-
-                    if (loadedFromCache) {
-                        // If cached, just fetch in background (no timeout needed since UI is ready)
-                        const res = await profilePromise;
-                        profile = res.data; error = res.error;
-                    } else {
-                        // If NOT cached, we must wait, so use the timeout safety
-                        const timeoutPromise = new Promise((_, reject) => setTimeout(() => reject(new Error("Connection timed out. If this is the first time today, the database might be waking up (can take ~1 min). Please try again.")), 60000));
-                        const res = await Promise.race([profilePromise, timeoutPromise]);
-                        profile = res.data; error = res.error;
+                    if (cachedParams) {
+                        try {
+                            const parsed = JSON.parse(cachedParams);
+                            if (parsed.uid === user.id) {
+                                console.log("[Session] Instant load from cache.");
+                                currentUser = user;
+                                userProfile = parsed;
+                                initDashboard();
+                                loadedFromCache = true;
+                            }
+                        } catch (e) { localStorage.removeItem('supabase_profile_cache'); }
                     }
+
+                    // Attempt fresh fetch from server
+                    const { data: profile, error } = await client.from('profiles').select('*').eq('uid', user.id).maybeSingle();
 
                     if (error) throw error;
 
                     if (!profile) {
-                        if (loadedFromCache) console.warn("Background sync: Profile not found on server, but cache exists.");
+                        // Case: Profile missing on server
+                        if (loadedFromCache) console.warn("[Session] Profile missing on server, using cache.");
                         else {
                             await client.auth.signOut();
-                            throw new Error("Profile Not Found. Please register again.");
+                            throw new Error("User Profile Not Found.");
                         }
                     } else {
-                        // Success: Update cache with fresh data
+                        // Success: Update Cache
                         localStorage.setItem('supabase_profile_cache', JSON.stringify(profile));
 
-                        // If we weren't using cache, OR if critical data changed (like role), update UI
+                        // Refresh UI if we didn't use cache OR if critical role data changed
                         if (!loadedFromCache || (userProfile && userProfile.role !== profile.role)) {
                             currentUser = user;
                             userProfile = profile;
-                            // Only re-init if we didn't already init (or if role changed significantly)
-                            if (!loadedFromCache) initDashboard();
-                            else location.reload(); // Reload if role changed while using cached version
+                            initDashboard();
                         }
                     }
                 } catch (err) {
@@ -2147,11 +2172,29 @@
                     $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> My Tasks');
                     $('#add-resource-btn').addClass('hidden').removeClass('flex');
                 }
-                setTimeout(() => { if (window.fetchResources) window.fetchResources(); }, 500);
+
+
+                // setTimeout(() => { if (window.fetchResources) window.fetchResources(); }, 500); // Disabled to prevent 404 until table created
+
+                // --- Live Clock & Greeting ---
+                const updateClock = () => {
+                    const now = new Date();
+                    const hours = now.getHours();
+                    const greeting = hours < 12 ? "Good Morning" : hours < 18 ? "Good Afternoon" : "Good Evening";
+
+                    $('#live-clock').text(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }));
+                    $('#live-date').text(now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' }));
+                    $('#dynamic-greeting-text').text(`${greeting}, ${userProfile.name.split(' ')[0]}`);
+                };
+                updateClock();
+                setInterval(updateClock, 1000);
 
                 switchTab('dashboard'); startSync();
                 initChart();
                 setupRealtime();
+
+
+
                 lucide.createIcons();
             }
 
@@ -2242,7 +2285,9 @@
                         })
                     ]);
 
-                    window.allTasks = tasks; window.allSubmissions = subs;
+                    window.allTasks = tasks;
+                    window.allSubmissions = subs;
+
                     renderStats(tasks, subs);
                     if (activeTab === 'tasks') renderTasks(tasks, subs);
                     if (activeTab === 'leaderboard') renderLeaderboard(subs);
@@ -2521,6 +2566,14 @@
                 return url;
             }
 
+            // Helper to parse submission content (String vs JSON)
+            function parseSubmission(content) {
+                try {
+                    if (content.trim().startsWith('{')) return JSON.parse(content);
+                } catch (e) { }
+                return { file: content }; // Legacy fallback
+            }
+
             function renderGrading(subs) {
                 // Prevent UI refresh if admin is currently typing
                 if ($('#grading-list input:focus, #grading-list textarea:focus').length > 0) return;
@@ -2546,8 +2599,15 @@
                                     <i data-lucide="target" class="w-2.5 h-2.5"></i> Task: ${s.task_title}
                                 </p>
                                 <div class="flex flex-wrap gap-2.5">
-                                    <a href="${formatDownloadUrl(s.content)}" target="_blank" rel="noopener noreferrer" class="btn-command px-3 py-2 rounded-lg text-[8px] flex items-center gap-1.5 transition-all"><i data-lucide="eye" class="w-3 h-3"></i> View / Download File</a>
-                                    <span class="text-[8px] text-slate-400 font-black flex items-center gap-1.5 uppercase tracking-widest bg-slate-100 dark:bg-[#2d3748] px-3 py-2 rounded-lg"><i data-lucide="clock" class="w-3 h-3 text-indigo-500"></i> Submitted: ${new Date(s.submitted_at).toLocaleDateString()}</span>
+                                    ${(() => {
+                                const data = parseSubmission(s.content);
+                                let html = '';
+                                if (data.file) html += `<a href="${formatDownloadUrl(data.file)}" target="_blank" class="btn-command px-3 py-2 rounded-lg text-[8px] flex items-center gap-1.5 transition-all"><i data-lucide="file" class="w-3 h-3"></i> Download File</a>`;
+                                if (data.github) html += `<a href="${data.github}" target="_blank" class="px-3 py-2 rounded-lg bg-slate-900 text-white text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="github" class="w-3 h-3"></i> GitHub Repo</a>`;
+                                if (data.live) html += `<a href="${data.live}" target="_blank" class="px-3 py-2 rounded-lg bg-emerald-500 text-white text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5"><i data-lucide="globe" class="w-3 h-3"></i> Live Demo</a>`;
+                                return html || '<span class="text-rose-500 text-[9px] font-black">CORRUPT DATA</span>';
+                            })()}
+                                    <span class="text-[8px] text-slate-400 font-black flex items-center gap-1.5 uppercase tracking-widest bg-slate-100 dark:bg-[#2d3748] px-3 py-2 rounded-lg"><i data-lucide="clock" class="w-3 h-3 text-indigo-500"></i> ${new Date(s.submitted_at).toLocaleDateString()}</span>
                                 </div>
                             </div>
                             <div class="w-full md:w-auto flex flex-col gap-3">
@@ -2574,7 +2634,13 @@
                                     <i data-lucide="target" class="w-2.5 h-2.5"></i> Task: ${s.task_title}
                                 </p>
                                 <div class="flex flex-wrap gap-2.5">
-                                    <a href="${formatDownloadUrl(s.content)}" target="_blank" rel="noopener noreferrer" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-500 px-3 py-2 rounded-lg text-[8px] font-black flex items-center gap-1.5 transition-all"><i data-lucide="external-link" class="w-3 h-3"></i> View Original</a>
+                                    ${(() => {
+                                const data = parseSubmission(s.content);
+                                let html = '';
+                                if (data.file) html += `<a href="${formatDownloadUrl(data.file)}" target="_blank" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-500 px-3 py-2 rounded-lg text-[8px] font-black flex items-center gap-1.5 transition-all"><i data-lucide="file" class="w-3 h-3"></i> View File</a>`;
+                                if (data.github) html += `<a href="${data.github}" target="_blank" class="bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:text-indigo-500 px-3 py-2 rounded-lg text-[8px] font-black flex items-center gap-1.5 transition-all"><i data-lucide="github" class="w-3 h-3"></i> GitHub</a>`;
+                                return html;
+                            })()}
                                     <div class="text-[8px] text-slate-400 font-black uppercase tracking-widest px-3 py-2">Feedback: <span class="text-slate-500 italic">"${s.feedback || 'N/A'}"</span></div>
                                 </div>
                             </div>
@@ -2832,9 +2898,16 @@
                                 <p class="text-xs">COMMITTED: ${sub.task_title}</p>
                             </div>
                             <p class="text-[8px] bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 rounded-full mt-2">UNDER REVIEW BY TEACHER</p>
-                            <a href="${formatDownloadUrl(sub.content)}" target="_blank" rel="noopener noreferrer" class="text-[8px] font-black uppercase text-indigo-500 hover:underline mt-2 flex items-center gap-1">
-                                <i data-lucide="external-link" class="w-2.5 h-2.5"></i> View Your Submission
-                            </a>
+                            <div class="flex gap-2 justify-center mt-3">
+                                ${(() => {
+                                const data = parseSubmission(sub.content);
+                                let html = '';
+                                if (data.file) html += `<a href="${formatDownloadUrl(data.file)}" target="_blank" class="text-[8px] font-black uppercase text-indigo-500 hover:underline flex items-center gap-1"><i data-lucide="file" class="w-2.5 h-2.5"></i> File</a>`;
+                                if (data.github) html += `<a href="${data.github}" target="_blank" class="text-[8px] font-black uppercase text-slate-500 hover:text-indigo-500 flex items-center gap-1"><i data-lucide="github" class="w-2.5 h-2.5"></i> Code</a>`;
+                                if (data.live) html += `<a href="${data.live}" target="_blank" class="text-[8px] font-black uppercase text-emerald-500 hover:underline flex items-center gap-1"><i data-lucide="globe" class="w-2.5 h-2.5"></i> Live</a>`;
+                                return html;
+                            })()}
+                            </div>
                         </div >
                     `).removeClass('hidden');
                     }
@@ -2845,16 +2918,30 @@
                         $('#submission-section').html(`
                     < form id = "submit-form" class="space-y-6" >
                         <input type="hidden" id="submit-id" value="${taskId}">
-                            <div class="group relative bg-slate-50 dark:bg-slate-800/30 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-10 text-center hover:border-indigo-500 transition-all cursor-pointer overflow-hidden">
-                                <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
-                                <input type="file" id="submit-file" required class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="$('#file-name').text(this.files[0].name)">
-                                    <div class="relative z-0">
-                                        <div class="w-16 h-16 bg-white dark:bg-slate-800 shadow-xl rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-4 group-hover:scale-110 transition-transform">
-                                            <i data-lucide="upload-cloud" class="w-8 h-8"></i>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                <div class="space-y-4">
+                                    <div class="group relative bg-slate-50 dark:bg-slate-800/30 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-6 text-center hover:border-indigo-500 transition-all cursor-pointer overflow-hidden h-full flex flex-col items-center justify-center">
+                                        <div class="absolute inset-0 bg-indigo-500/5 opacity-0 group-hover:opacity-100 transition-opacity"></div>
+                                        <input type="file" id="submit-file" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="$('#file-name').text(this.files[0].name)">
+                                        <div class="relative z-0">
+                                            <div class="w-12 h-12 bg-white dark:bg-slate-800 shadow-xl rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-2 group-hover:scale-110 transition-transform">
+                                                <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                                            </div>
+                                            <p class="font-black text-slate-900 dark:text-white uppercase tracking-tight text-[10px]">Upload File</p>
+                                            <p class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1" id="file-name">Optional</p>
                                         </div>
-                                        <p class="font-black text-slate-900 dark:text-white uppercase tracking-tight">Upload Your File</p>
-                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-2" id="file-name">Allowed: PDF, ZIP, IMG (max 5mb)</p>
                                     </div>
+                                </div>
+                                <div class="space-y-3">
+                                    <div>
+                                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 block">GitHub Repository URL</label>
+                                        <input type="url" id="submit-github" placeholder="https://github.com/username/project" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 dark:text-white transition-colors">
+                                    </div>
+                                    <div>
+                                        <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Live Demo Link</label>
+                                        <input type="url" id="submit-live" placeholder="https://my-project.vercel.app" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 dark:text-white transition-colors">
+                                    </div>
+                                </div>
                             </div>
                             <button type="submit" class="w-full btn-command">Submit Task</button>
                         </form>
@@ -2915,40 +3002,48 @@
             $(document).on('submit', '#submit-form', async (e) => {
                 e.preventDefault();
                 const btn = $('#submit-form button');
-                btn.prop('disabled', true).text('SYNCING WITH CLOUD...');
+                btn.prop('disabled', true).text('PROCESSING...');
 
                 const file = document.getElementById('submit-file').files[0];
+                const github = $('#submit-github').val()?.trim();
+                const live = $('#submit-live').val()?.trim();
                 const taskId = $('#submit-id').val();
 
-                if (!file) return;
-
-                const CLOUD_NAME = "dlm3iaqjn";
-                const UPLO_PRESET = "lms_assignments";
+                if (!file && !github && !live) {
+                    showToast("Please upload a file OR provide a link.");
+                    btn.prop('disabled', false).text('Submit Task');
+                    return;
+                }
 
                 try {
-                    const formData = new FormData();
-                    formData.append('file', file);
-                    formData.append('upload_preset', UPLO_PRESET);
+                    let cloudFileUrl = null;
+                    const CLOUD_NAME = "dlm3iaqjn";
+                    const UPLO_PRESET = "lms_assignments";
 
-                    const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
-                        method: 'POST',
-                        body: formData
-                    });
-
-                    const uploadData = await response.json();
-
-                    if (uploadData.error) {
-                        throw new Error(uploadData.error.message);
+                    if (file) {
+                        const formData = new FormData();
+                        formData.append('file', file);
+                        formData.append('upload_preset', UPLO_PRESET);
+                        const response = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, { method: 'POST', body: formData });
+                        const uploadData = await response.json();
+                        if (uploadData.error) throw new Error(uploadData.error.message);
+                        cloudFileUrl = uploadData.secure_url;
                     }
 
-                    const cloudFileUrl = uploadData.secure_url;
+                    // Construct JSON Content
+                    const submissionData = {
+                        file: cloudFileUrl,
+                        github: github || null,
+                        live: live || null,
+                        timestamp: new Date().toISOString() // Metadata
+                    };
 
                     const { error: dbErr } = await client.from('submissions').insert([{
                         task_id: taskId,
                         task_title: currentTask.title,
                         student_id: currentUser.id,
                         student_name: userProfile.name,
-                        content: cloudFileUrl,
+                        content: JSON.stringify(submissionData),
                         status: 'submitted',
                         submitted_at: new Date().toISOString()
                     }]);
@@ -2957,21 +3052,18 @@
 
                     bootstrap.Modal.getInstance('#taskDetailModal').hide();
                     fetchData();
-                    showToast("Assignment Securely Saved to Cloud!");
+                    showToast("Work Submitted Successfully!");
+                    confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
 
-                    confetti({
-                        particleCount: 150,
-                        spread: 70,
-                        origin: { y: 0.6 },
-                        colors: ['#6366f1', '#22d3ee', '#8b5cf6']
-                    });
                 } catch (err) {
-                    alert("âŒ Cloud Configuration Error: " + err.message + "\n\n(Tip: Ensure your Cloudinary Preset is set to 'Unsigned')");
-                    console.error("Cloudinary Error:", err);
+                    console.error("Submission Error:", err);
+                    alert("Error: " + err.message);
                 } finally {
                     btn.prop('disabled', false).text('Submit Task');
                 }
             });
+
+
 
             // --- PROFILE AVATAR CROP & UPLOAD ---
             let cropper;
@@ -3240,7 +3332,15 @@
                 const ctx = canvas.getContext('2d');
                 performanceChart = new Chart(ctx, {
                     type: 'doughnut',
-                    data: { labels: ['Completed', 'Active'], datasets: [{ data: [0, 1], backgroundColor: ['#0ea5e9', '#e2e8f0'], borderWeight: 0, hoverOffset: 4 }] },
+                    data: {
+                        labels: ['Completed', 'Pending', 'To Do'],
+                        datasets: [{
+                            data: [0, 0, 1],
+                            backgroundColor: ['#10b981', '#f59e0b', '#e2e8f0'],
+                            borderWeight: 0,
+                            hoverOffset: 4
+                        }]
+                    },
                     options: {
                         responsive: true,
                         maintainAspectRatio: false,
@@ -3252,11 +3352,40 @@
             }
 
             function updateChart() {
-                const done = window.allSubmissions.filter(s => s.student_id === currentUser?.id).length;
-                const active = window.allTasks.length - done;
-                if (performanceChart) {
-                    performanceChart.data.datasets[0].data = [done, active > 0 ? active : 0];
-                    performanceChart.update('none'); // 'none' mode disables animation for smooth, lag-free updates
+                if (!currentUser) return;
+
+                // Ensure chart exists
+                if (!performanceChart) initChart();
+
+                if (userProfile.role === 'admin') {
+                    // --- ADMIN VIEW ---
+                    // Visualize: Global Graded vs Global Pending
+                    const allSubs = window.allSubmissions;
+                    const graded = allSubs.filter(s => s.status === 'graded').length;
+                    const pending = allSubs.filter(s => s.status === 'submitted').length;
+
+                    if (performanceChart) {
+                        performanceChart.data.labels = ['Graded', 'Pending Review', ''];
+                        performanceChart.data.datasets[0].data = [graded, pending, 0];
+                        // Green for Graded, Amber for Pending, Gray hidden
+                        performanceChart.data.datasets[0].backgroundColor = ['#10b981', '#f59e0b', 'transparent'];
+                        performanceChart.update();
+                    }
+                } else {
+                    // --- STUDENT VIEW ---
+                    const totalTasks = window.allTasks.length || 1;
+                    const mySubs = window.allSubmissions.filter(s => s.student_id === currentUser.id);
+
+                    const completed = mySubs.filter(s => s.status === 'graded').length;
+                    const submitted = mySubs.filter(s => s.status === 'submitted').length;
+                    const remaining = window.allTasks.length - (completed + submitted);
+
+                    if (performanceChart) {
+                        performanceChart.data.labels = ['Completed', 'Pending Review', 'To Do'];
+                        performanceChart.data.datasets[0].data = [completed, submitted, remaining > 0 ? remaining : 0];
+                        performanceChart.data.datasets[0].backgroundColor = ['#10b981', '#f59e0b', '#e2e8f0'];
+                        performanceChart.update();
+                    }
                 }
             }
 
@@ -3304,7 +3433,7 @@
                 try {
                     const { data, error } = await client.from('resources').select('*').order('created_at', { ascending: false });
                     if (error) {
-                        if (error.code === '42P01' && userProfile && userProfile.role === 'admin') showToast("Setup: Missing 'resources' table.");
+                        // Silent fail for missing table - feature just won't show data
                         window.learningResources = [];
                     } else {
                         window.learningResources = data || [];
@@ -3312,6 +3441,7 @@
                     if (window.renderResources) renderResources();
                 } catch (err) {
                     console.error("Resource fetch error:", err);
+                    window.learningResources = [];
                     if (window.renderResources) renderResources();
                 }
             };
@@ -3425,13 +3555,16 @@
 
 
 
+            window.currentResourceFilter = 'all';
+
             window.filterResources = (cat) => {
-                $('.res-filter-btn').removeClass('active bg-indigo-600 text-white').addClass('text-slate-500');
-                $(`.res-filter-btn[data-category="${cat}"]`).addClass('active bg-indigo-600 text-white').removeClass('text-slate-500');
+                // Radio UI handles visual state automatically
+                window.currentResourceFilter = cat;
                 renderResources(cat);
             };
 
-            $('#resource-search').on('input', () => renderResources($('.res-filter-btn.active').data('category') || 'all'));
+            $('#resource-search').on('input', () => renderResources(window.currentResourceFilter));
+
         </script>
 
         <!-- SECURITY MODAL (Nuclear Fix) -->
@@ -3570,6 +3703,7 @@
                 </div>
             </div>
         </div>
+
 </body>
 
 </html>
