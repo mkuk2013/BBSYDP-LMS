@@ -2100,7 +2100,7 @@
                     localStorage.setItem('login_streak', streak);
 
                     if (streak > 1) {
-                        showToast(`ðŸ”¥ on Fire! ${streak} Day Streak!`);
+                        showToast(`${streak} Day Streak! Keep it up!`);
                         confetti({ particleCount: 50, spread: 50, origin: { y: 0.1 } });
                     }
                 }
@@ -2113,7 +2113,7 @@
                             <i data-lucide="flame" class="w-3.5 h-3.5 text-orange-500 fill-orange-500 animate-pulse"></i>
                         </div>
                         <div class="flex flex-col leading-none">
-                            <span class="text-[8px] font-black uppercase text-orange-400 tracking-wider mb-0.5">Daily Streak</span>
+                            <span class="text-[8px] font-black uppercase text-orange-400 tracking-wider mb-0.5">Day Streak</span>
                             <span class="text-xs font-black text-orange-600 dark:text-orange-400">${streak} Day${streak !== 1 ? 's' : ''}</span>
                         </div>
                     </div>
@@ -2256,6 +2256,8 @@
                         showToast("CRITICAL: Database tables missing!");
                     }
                 }
+                // Live Chart Update
+                if (activeTab === 'dashboard' && performanceChart) updateChart();
             }
 
             // NEW: AJAX Version of fetchUsers
@@ -3239,7 +3241,13 @@
                 performanceChart = new Chart(ctx, {
                     type: 'doughnut',
                     data: { labels: ['Completed', 'Active'], datasets: [{ data: [0, 1], backgroundColor: ['#0ea5e9', '#e2e8f0'], borderWeight: 0, hoverOffset: 4 }] },
-                    options: { cutout: '80%', plugins: { legend: { display: false } } }
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        cutout: '80%',
+                        plugins: { legend: { display: false } },
+                        animation: { animateScale: true, animateRotate: true }
+                    }
                 });
             }
 
@@ -3248,7 +3256,7 @@
                 const active = window.allTasks.length - done;
                 if (performanceChart) {
                     performanceChart.data.datasets[0].data = [done, active > 0 ? active : 0];
-                    performanceChart.update();
+                    performanceChart.update('none'); // 'none' mode disables animation for smooth, lag-free updates
                 }
             }
 
