@@ -648,6 +648,236 @@
                 transform: rotateY(0deg);
             }
         }
+
+        /* --- MOBILE RESPONSIVENESS SUITE --- */
+
+        /* Smooth Sidebar with Backdrop Blur */
+        .sidebar {
+            overflow-y: auto;
+            scrollbar-width: none;
+            /* Firefox */
+        }
+
+        .sidebar::-webkit-scrollbar {
+            display: none;
+            /* Chrome/Safari */
+        }
+
+        @media (max-width: 1024px) {
+            .sidebar {
+                width: 280px;
+                /* Slightly wider for better mobile usability */
+                z-index: 2000;
+            }
+
+            #sidebar-overlay {
+                z-index: 1999;
+            }
+
+            .content-main {
+                padding-top: 80px;
+                /* Space for sticky header */
+            }
+
+            header {
+                position: fixed;
+                top: 0;
+                left: 0;
+                right: 0;
+                z-index: 100;
+                background: rgba(248, 250, 252, 0.8);
+                backdrop-filter: blur(12px);
+                border-bottom: 1px solid var(--plus-border);
+                padding: 12px 16px;
+                margin-bottom: 0 !important;
+            }
+
+            .dark header {
+                background: rgba(11, 17, 32, 0.8);
+            }
+        }
+
+        /* Task Tabs Horizontal Scroll */
+        @media (max-width: 640px) {
+            .task-tabs-container {
+                width: 100%;
+                overflow-x: auto;
+                justify-content: flex-start;
+                padding: 0.5rem;
+                display: flex;
+                white-space: nowrap;
+                -webkit-overflow-scrolling: touch;
+                scrollbar-width: none;
+                border-radius: 12px;
+            }
+
+            .task-tabs-container::-webkit-scrollbar {
+                display: none;
+            }
+
+            .task-tabs-container .tab {
+                flex-shrink: 0;
+                min-width: unset;
+                padding: 4px 12px;
+            }
+
+            /* Stack greeting banner */
+            #view-dashboard .flex-col.md\:flex-row {
+                text-align: center;
+                align-items: center;
+            }
+
+            #view-dashboard .text-right {
+                text-align: center;
+            }
+
+            /* Table Optimization */
+            .overflow-x-auto table {
+                min-width: 600px;
+                /* Force scroll instead of squish */
+            }
+
+            /* Stats Grid optimization */
+            .grid-cols-1.sm\:grid-cols-2 {
+                grid-template-columns: 1fr;
+            }
+
+            /* Improved Modal for Mobile */
+            .modal-dialog {
+                margin: 1rem;
+                display: flex;
+                align-items: flex-end;
+                /* Bottom sheet style on mobile */
+                min-height: calc(100% - 2rem);
+            }
+
+            @media (min-width: 576px) {
+                .modal-dialog {
+                    align-items: center;
+                    margin: 1.75rem auto;
+                }
+            }
+
+            .modal-content {
+                border-radius: 2rem 2rem 0 0;
+                /* Rounded top corners for bottom sheet */
+            }
+
+            @media (min-width: 576px) {
+                .modal-content {
+                    border-radius: 2rem;
+                }
+            }
+
+            .modal-body {
+                padding: 1.5rem !important;
+            }
+
+            .modal-header {
+                padding: 1.5rem 1.5rem 0.5rem !important;
+            }
+        }
+
+        /* Mobile Bottom Nav Bar */
+        .mobile-bottom-nav {
+            display: none;
+        }
+
+        @media (max-width: 1024px) {
+            .mobile-bottom-nav {
+                position: fixed;
+                bottom: 0;
+                left: 0;
+                right: 0;
+                height: 70px;
+                background: rgba(255, 255, 255, 0.95);
+                backdrop-filter: blur(20px);
+                border-top: 1px solid var(--plus-border);
+                display: flex;
+                justify-content: space-around;
+                align-items: center;
+                z-index: 40;
+                padding-bottom: env(safe-area-inset-bottom);
+                box-shadow: 0 -10px 25px -5px rgba(0, 0, 0, 0.05);
+            }
+
+            .dark .mobile-bottom-nav {
+                background: rgba(11, 17, 32, 0.95);
+                border-top-color: rgba(255, 255, 255, 0.05);
+            }
+
+            .mobile-nav-btn {
+                flex: 1;
+                display: flex;
+                flex-direction: column;
+                align-items: center;
+                justify-content: center;
+                gap: 4px;
+                color: var(--plus-text-muted);
+                transition: all 0.2s ease;
+            }
+
+            .mobile-nav-btn i {
+                width: 20px;
+                height: 20px;
+                transition: transform 0.2s ease;
+            }
+
+            .mobile-nav-btn span {
+                font-size: 8px;
+                font-weight: 800;
+                text-transform: uppercase;
+                letter-spacing: 0.05em;
+            }
+
+            .mobile-nav-btn.active {
+                color: var(--plus-indigo);
+            }
+
+            .mobile-nav-btn.active i {
+                transform: translateY(-2px);
+                fill: currentColor;
+            }
+
+            .content-main {
+                padding-bottom: 90px;
+                /* Space for bottom nav */
+            }
+        }
+
+        /* Adjustments for ultra-small screens */
+        @media (max-width: 380px) {
+            #page-title {
+                font-size: 1.25rem !important;
+            }
+
+            #header-user-name {
+                display: none;
+            }
+
+            .header-info-text {
+                display: none;
+            }
+        }
+
+        /* Card Pulse Animation for highlight */
+        @keyframes pulse-border {
+            0% {
+                border-color: var(--plus-border);
+            }
+
+            50% {
+                border-color: var(--plus-indigo);
+            }
+
+            100% {
+                border-color: var(--plus-border);
+            }
+        }
+
+        .highlight-card {
+            animation: pulse-border 2s infinite;
+        }
     </style>
 </head>
 
@@ -855,16 +1085,21 @@
                 <header class="flex justify-between items-center mb-6 gap-4">
                     <div class="flex items-center gap-4">
                         <button onclick="toggleSidebar()"
-                            class="lg:hidden p-2.5 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-100 dark:border-slate-800 hover:bg-slate-50 transition-colors">
-                            <i data-lucide="menu" class="w-5 h-5 text-indigo-500"></i>
+                            class="lg:hidden p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl hover:bg-indigo-100 transition-colors">
+                            <i data-lucide="menu" class="w-6 h-6 text-indigo-500"></i>
                         </button>
-                        <div>
-                            <h2 class="text-2xl font-black tracking-tighter uppercase leading-none" id="page-title">
-                                Dashboard</h2>
-                            <div class="flex items-center gap-2 mt-1.5 font-bold">
-                                <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                                <span class="text-[9px] text-slate-400 uppercase tracking-widest leading-none">System
-                                    Online</span>
+                        <div class="flex items-center gap-2">
+                            <img src="assets/bbsydp_logo.png" alt="Logo" class="w-8 h-8 lg:hidden object-contain">
+                            <div>
+                                <h2 class="text-xl md:text-2xl font-black tracking-tighter uppercase leading-none"
+                                    id="page-title">
+                                    Dashboard</h2>
+                                <div class="flex items-center gap-2 mt-1 font-bold hidden sm:flex">
+                                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                                    <span
+                                        class="text-[8px] text-slate-400 uppercase tracking-widest leading-none">System
+                                        Online</span>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -969,19 +1204,20 @@
                         </div>
 
                         <div
-                            class="relative z-10 p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
+                            class="relative z-10 p-6 md:p-8 flex flex-col md:flex-row justify-between items-start md:items-center gap-6">
                             <div>
                                 <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-200 mb-2">
                                     Workspace Dashboard</p>
-                                <h2 class="text-3xl md:text-4xl font-black text-white tracking-tighter leading-none"
+                                <h2 class="text-2xl md:text-4xl font-black text-white tracking-tighter leading-none"
                                     id="dynamic-greeting-text">
                                     Welcome Back
                                 </h2>
                                 <p class="text-xs text-indigo-100 font-medium mt-2 max-w-md">Ready to build something
-                                    amazing today? Check your pending tasks regarding Python & Web Development.</p>
+                                    amazing today? Check your pending tasksregarding Python & Web Development.</p>
                             </div>
-                            <div class="text-right">
-                                <h3 class="text-3xl font-black text-white tracking-tight" id="live-clock">00:00</h3>
+                            <div class="text-left md:text-right w-full md:w-auto">
+                                <h3 class="text-2xl md:text-3xl font-black text-white tracking-tight" id="live-clock">
+                                    00:00</h3>
                                 <p class="text-[10px] font-bold uppercase tracking-widest text-indigo-200"
                                     id="live-date">...</p>
                             </div>
@@ -1157,7 +1393,7 @@
                                 placeholder="Search tasks..."
                                 class="w-full pl-10 pr-4 py-3 bg-white dark:bg-[#1e293b] border border-slate-100 dark:border-slate-800 rounded-xl text-sm font-bold shadow-sm outline-none focus:ring-2 focus:ring-indigo-500 transition-all text-slate-900 dark:text-white">
                         </div>
-                        <div class="task-tabs-container">
+                        <div class="task-tabs-container mx-auto">
                             <input type="radio" id="radio-1" name="tabs" checked onchange="filterTasks('all')">
                             <label class="tab" for="radio-1">All Tasks</label>
 
@@ -1246,7 +1482,7 @@
                                     <tr>
                                         <th class="px-5 py-3">Rank</th>
                                         <th class="px-5 py-3">Student</th>
-                                        <th class="px-5 py-3 text-center">Tasks</th>
+                                        <th class="px-5 py-3 text-center hidden sm:table-cell">Tasks</th>
                                         <th class="px-5 py-3 text-center">Grade</th>
                                         <th class="px-5 py-3 text-right">Progress</th>
                                     </tr>
@@ -1371,7 +1607,7 @@
                             <i data-lucide="arrow-left" class="w-4 h-4"></i> Back to Menu
                         </button>
 
-                        <div class="v-card p-8 min-h-[400px] flex flex-col items-center justify-center text-center relative overflow-hidden"
+                        <div class="v-card p-4 sm:p-8 min-h-[400px] flex flex-col items-center justify-center text-center relative overflow-hidden"
                             id="game-container">
                             <!-- Game content loaded here -->
                         </div>
@@ -1434,7 +1670,7 @@
                                     class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
                                     <tr>
                                         <th class="px-5 py-3">Student Name</th>
-                                        <th class="px-5 py-3 text-center">Tasks</th>
+                                        <th class="px-5 py-3 text-center hidden sm:table-cell">Tasks</th>
                                         <th class="px-5 py-3 text-center">Grade</th>
                                         <th class="px-6 py-3 text-center">Status</th>
                                         <th class="px-5 py-3 text-right">Actions</th>
@@ -1738,6 +1974,25 @@
                     </div>
                 </footer>
         </main>
+        <!-- Mobile Bottom Navigation -->
+        <nav class="mobile-bottom-nav">
+            <button onclick="switchTab('dashboard')" class="mobile-nav-btn active" id="mob-nav-dashboard">
+                <i data-lucide="layout-grid"></i>
+                <span>Home</span>
+            </button>
+            <button onclick="switchTab('tasks')" class="mobile-nav-btn" id="mob-nav-tasks">
+                <i data-lucide="clipboard-list"></i>
+                <span>Tasks</span>
+            </button>
+            <button onclick="switchTab('arcade')" class="mobile-nav-btn" id="mob-nav-arcade">
+                <i data-lucide="gamepad-2"></i>
+                <span>Arcade</span>
+            </button>
+            <button onclick="switchTab('profile')" class="mobile-nav-btn" id="mob-nav-profile">
+                <i data-lucide="user"></i>
+                <span>Profile</span>
+            </button>
+        </nav>
     </div>
 
     <!-- MODALS -->
@@ -3453,7 +3708,7 @@
                                 ${r.name}
                             </div>
                         </td>
-                        <td class="px-6 py-4 font-black text-slate-400 text-[9px] uppercase tracking-widest text-center">${r.count} / ${totalTasks} Tasks</td>
+                        <td class="px-6 py-4 font-black text-slate-400 text-[9px] uppercase tracking-widest text-center hidden sm:table-cell">${r.count} / ${totalTasks} Tasks</td>
                         <td class="px-6 py-4 text-center"><span class="px-3 py-1 bg-indigo-50 dark:bg-indigo-900/40 text-indigo-600 dark:text-indigo-300 rounded-lg font-black text-xs shadow-sm">${r.avg}%</span></td>
                         <td class="px-6 py-4">
                             <div class="w-24 ml-auto flex flex-col items-end gap-1">
@@ -3772,8 +4027,8 @@
                                 </div>
                             </div>
                         </td>
-                        <td class="px-6 py-4 text-center">
-                            <div class="font-black text-indigo-500 text-xs tracking-tight">${uSubs.length}</div>
+                        <td class="px-6 py-4 text-center hidden sm:table-cell">
+                             <div class="font-black text-indigo-500 text-xs tracking-tight">${uSubs.length}</div>
                         </td>
                         <td class="px-6 py-4 text-center">
                             <div class="font-black text-slate-900 dark:text-white text-xs">${avg}%</div>
@@ -4861,6 +5116,53 @@
             }
         };
 
+        window.showGameFeedback = (text, success, subtext = '') => {
+            const theme = success ?
+                { bg: 'bg-emerald-500', icon: 'check-circle', text: 'text-emerald-500', bgLight: 'bg-emerald-50 dark:bg-emerald-500/10' } :
+                { bg: 'bg-rose-500', icon: 'x-circle', text: 'text-rose-500', bgLight: 'bg-rose-50 dark:bg-rose-500/10' };
+
+            let container = $('#game-feedback-side');
+            if (container.length === 0) {
+                $('#game-container').append('<div id="game-feedback-side" class="absolute top-4 right-4 z-[100] pointer-events-none flex flex-col gap-3"></div>');
+                container = $('#game-feedback-side');
+            }
+
+            // Clear previous feedback to keep it clean and professional
+            container.empty();
+
+            const id = 'feedback-' + Date.now();
+            const $feedback = $(`
+                <div id="${id}" class="v-card overflow-hidden w-72 animate-in slide-in-from-right duration-500 shadow-2xl bg-white dark:bg-[#1e293b] border-l-4 ${theme.bg}">
+                    <div class="p-4 flex items-center gap-4">
+                        <div class="w-10 h-10 rounded-full border-2 ${success ? 'border-emerald-500' : 'border-rose-500'} ${theme.bgLight} ${theme.text} flex items-center justify-center shrink-0 shadow-sm transform transition-transform duration-300">
+                            <i data-lucide="${theme.icon}" class="w-6 h-6"></i>
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <div class="font-black uppercase tracking-tighter text-sm ${success ? 'text-emerald-600' : 'text-rose-600'}">${text}</div>
+                            ${subtext ? `
+                                <div class="mt-1.5 pt-1.5 border-t border-slate-100 dark:border-slate-800">
+                                    <div class="text-[8px] font-black text-slate-400 uppercase tracking-[0.1em] mb-0.5">Correct Answer:</div>
+                                    <div class="text-[11px] font-mono font-bold text-indigo-500 break-all">${subtext.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</div>
+                                </div>
+                            ` : ''}
+                        </div>
+                    </div>
+                </div>
+            `);
+
+            container.append($feedback);
+            lucide.createIcons();
+
+            setTimeout(() => {
+                $feedback.addClass('animate-out fade-out slide-out-to-right duration-500');
+                setTimeout(() => $feedback.remove(), 500);
+            }, 2000);
+        };
+
+        window.clearGameFeedback = () => {
+            // No longer needed as they self-destruct, but kept for compatibility
+        };
+
         window.exitArcadeGame = () => {
             $('#game-stage').addClass('hidden');
             $('#arcade-menu').removeClass('hidden');
@@ -4973,8 +5275,8 @@
                 { q: "Which element describes the structure of a document?", a: ["<meta>", "<head>", "<body>", "<html>"], r: ["<html>"] },
                 { q: "Which element is used to draw graphics?", a: ["<svg>", "<canvas>", "<paint>", "<graphic>"], r: ["<canvas>"] },
                 { q: "Pattern attribute is used for?", a: ["Validation", "Styling", "Images", "Links"], r: ["Validation"] },
-                { q: "Which tag defines an embedded object?", a: ["<embed>", "<object>", "<iframe>", "<all>"], r: ["<embed>", "<object>"] },
-                { q: "Tag for result of calculation?", a: ["<output>", "<result>", "<calc>", "<sum>"], r: ["<output>"] }
+                { q: "Which tag defines an embedded object?", a: ["&lt;embed&gt;", "&lt;object&gt;", "&lt;iframe&gt;", "&lt;all&gt;"], r: ["&lt;embed&gt;", "&lt;object&gt;"] },
+                { q: "Tag for result of calculation?", a: ["&lt;output&gt;", "&lt;result&gt;", "&lt;calc&gt;", "&lt;sum&gt;"], r: ["&lt;output&gt;"] }
             ]
         };
 
@@ -5087,11 +5389,14 @@
                         <!-- Drop Zones -->
                         <div class="space-y-4">
                             <h3 class="text-xs font-black text-slate-400 uppercase tracking-widest mb-4">Definitions</h3>
-                            ${dropzones.map((item, i) => `
-                                <div id="drop-${i}" class="p-4 border-2 border-dashed border-slate-300 dark:border-slate-700 rounded-xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center text-slate-400 text-sm font-bold min-h-[64px] transition-all" ondrop="drop(event)" ondragover="allowDrop(event)" data-match="${item.code}">
-                                    ${item.desc}
+                            ${dropzones.map((item, i) => {
+                const colors = ['border-blue-500/30 bg-blue-50/10', 'border-purple-500/30 bg-purple-50/10', 'border-rose-500/30 bg-rose-50/10', 'border-amber-500/30 bg-amber-50/10'];
+                return `
+                                <div id="drop-${i}" class="p-4 border-2 border-dashed ${colors[i % colors.length]} rounded-xl flex items-center justify-center text-slate-500 dark:text-slate-400 text-sm font-bold min-h-[72px] transition-all relative group" ondrop="drop(event)" ondragover="allowDrop(event)" data-match="${item.code}">
+                                    <div class="absolute top-2 left-2 text-[8px] opacity-30 font-black uppercase">Slot 0${i + 1}</div>
+                                    <span class="relative z-10 px-4 text-center">${item.desc}</span>
                                 </div>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     </div>
                 </div>
@@ -5133,32 +5438,45 @@
                     $(dropZone).removeClass('border-dashed border-slate-300 text-slate-400').addClass('border-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 shadow-inner');
                     $(draggedEl).removeClass('bg-white border-slate-200 cursor-grab').addClass('bg-transparent border-0 cursor-default text-emerald-700 w-full text-lg shadow-none').attr('draggable', 'false');
 
-                    showDragFeedback("Correct!", true);
+                    showGameFeedback("Correct!", true);
                     confetti({ particleCount: 20, spread: 50, origin: { y: 0.6 } });
 
                     if (score === selected.length) {
+                        // Background Save
                         saveLevel('drag', score, selected.length).then(leveledUp => {
-                            // Award Badge on Win
                             if (window.awardBadge) window.awardBadge('arcade_win');
 
+                            // Delay slightly for feedback to be seen, then show Finalize screen
                             setTimeout(() => {
                                 container.html(`
                                     <div class="text-center animate-in zoom-in max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl">
                                         ${leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">🎉 LEVEL UP TO ${getLevel('drag').toUpperCase()}!</div>` : ''}
                                         <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="check" class="w-10 h-10"></i></div>
                                         <h2 class="text-3xl font-black text-slate-900 dark:text-white uppercase">All Matched!</h2>
-                                        <button onclick="exitArcadeGame()" class="mt-8 px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest">Back to Menu</button>
+                                        <div class="flex gap-3 justify-center mt-8">
+                                            <button onclick="startArcadeGame('drag_master')" class="px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors flex items-center gap-2">
+                                                <i data-lucide="play" class="w-4 h-4"></i> Play Next
+                                            </button>
+                                            <button onclick="exitArcadeGame()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30">
+                                                Back to Menu
+                                            </button>
+                                        </div>
                                     </div>
                                 `);
                                 lucide.createIcons();
-                                // Mock Save
                                 saveGameScore('drag_master', score, selected.length);
+                            }, 1200);
+                        }).catch(e => {
+                            console.warn("Save failed but continuing...", e);
+                            // Fallback if saveLevel throws for some reason
+                            setTimeout(() => {
+                                container.html(`<div class="text-center">Error in mission completion. Please retry.</div>`);
                             }, 1000);
                         });
                     }
                 } else {
                     // WRONG
-                    showDragFeedback("Wrong!", false);
+                    showGameFeedback("Incorrect!", false, targetMatch);
                     $(dropZone).addClass('bg-rose-50 border-rose-500').delay(500).queue(function (next) {
                         $(this).removeClass('bg-rose-50 border-rose-500');
                         next();
@@ -5166,14 +5484,7 @@
                 }
             };
 
-            function showDragFeedback(text, success) {
-                const color = success ? 'text-emerald-500' : 'text-rose-500';
-                const el = $('#drag-msg');
-                el.html(`<h1 class="text-6xl font-black ${color} drop-shadow-xl bg-white dark:bg-slate-900 px-12 py-6 rounded-3xl border-4 border-current animate-in zoom-in fade-in duration-300 shadow-2xl">${text}</h1>`)
-                    .removeClass('hidden')
-                    .delay(800)
-                    .fadeOut(200, function () { $(this).addClass('hidden').css('display', '').html(''); });
-            }
+            // No more showDragFeedback locally
         }
 
         function runHtmlMaster(container) {
@@ -5225,8 +5536,10 @@
                                 <div id="save-status" class="mb-6 text-xs font-bold text-slate-400 italic">Saving Result...</div>
                                 
                                 <div class="flex gap-3 justify-center">
-                                    <button onclick="startArcadeGame('html_master')" class="px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors">Replay</button>
-                                    <button onclick="exitArcadeGame()" class="px-6 py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl font-bold shadow-lg shadow-indigo-500/30 transition-all">Exit Code Arcade</button>
+                                    <button onclick="startArcadeGame('html_master')" class="px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors flex items-center gap-2">
+                                        <i data-lucide="play" class="w-4 h-4"></i> Next Level
+                                    </button>
+                                    <button onclick="exitArcadeGame()" class="px-6 py-3 bg-indigo-600 text-white hover:bg-indigo-700 rounded-xl font-bold shadow-lg shadow-indigo-500/30 transition-all">Back to Menu</button>
                                 </div>
                             </div>
                         `);
@@ -5267,15 +5580,25 @@
 
                         <!-- Options Grid -->
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 w-full">
-                            ${curr.a.map((opt, i) => `
-                                <button id="opt-${i}" class="group relative p-6 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl hover:border-indigo-500 hover:shadow-lg dark:hover:shadow-indigo-500/10 transition-all duration-200 text-left" onclick="checkProAns(this, '${opt}')">
-                                    <span class="inline-block w-8 h-8 rounded-lg bg-slate-50 dark:bg-slate-700 text-slate-500 font-black text-sm flex-center items-center justify-center mr-3 group-hover:bg-indigo-50 group-hover:text-indigo-500 transition-colors">${String.fromCharCode(65 + i)}</span>
-                                    <span class="font-mono text-lg font-bold text-slate-700 dark:text-slate-200">${opt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
-                                    
-                                    <!-- Selection Indicator -->
-                                    <div class="absolute inset-0 border-2 border-transparent rounded-2xl group-hover:border-indigo-500/50 pointer-events-none"></div>
+                            ${curr.a.map((opt, i) => {
+                    const themes = [
+                        { color: 'text-indigo-500', bg: 'bg-indigo-50', border: 'hover:border-indigo-500', icon: 'zap' },
+                        { color: 'text-cyan-500', bg: 'bg-cyan-50', border: 'hover:border-cyan-500', icon: 'code' },
+                        { color: 'text-purple-500', bg: 'bg-purple-50', border: 'hover:border-purple-500', icon: 'terminal' },
+                        { color: 'text-blue-500', bg: 'bg-blue-50', border: 'hover:border-blue-500', icon: 'layers' }
+                    ];
+                    const t = themes[i % themes.length];
+                    return `
+                                <button id="opt-${i}" class="group relative p-6 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl ${t.border} hover:shadow-xl transition-all duration-300 text-left flex items-start gap-4" onclick="checkProAns(this, '${opt}')">
+                                    <div class="w-10 h-10 rounded-xl ${t.bg} dark:${t.bg}/10 ${t.color} flex items-center justify-center shrink-0 font-black text-sm group-hover:scale-110 transition-transform">
+                                        <i data-lucide="${t.icon}" class="w-5 h-5"></i>
+                                    </div>
+                                    <div class="flex-1 min-w-0">
+                                        <span class="block text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Option ${String.fromCharCode(65 + i)}</span>
+                                        <span class="font-mono text-lg font-bold text-slate-700 dark:text-slate-200 block truncate">${opt.replace(/</g, '&lt;').replace(/>/g, '&gt;')}</span>
+                                    </div>
                                 </button>
-                            `).join('')}
+                            `}).join('')}
                         </div>
                     </div>
                 `);
@@ -5309,12 +5632,12 @@
                         $btn.find('span:first-child').addClass('bg-emerald-100 text-emerald-600');
                         // Confetti for correct answer
                         confetti({ particleCount: 30, spread: 40, origin: { y: 0.6 } });
-                        showFeedbackOverlay("CORRECT!", true);
+                        showGameFeedback("CORRECT!", true);
                     } else {
                         // Mark Wrong
                         $btn.removeClass('border-slate-100 dark:border-slate-700 hover:border-indigo-500').addClass('bg-rose-50 dark:bg-rose-900/20 border-rose-500 ring-4 ring-rose-500/20');
                         $btn.find('span:first-child').addClass('bg-rose-100 text-rose-600');
-                        showFeedbackOverlay("WRONG!", false);
+                        showGameFeedback("WRONG!", false, curr.r.join(', '));
 
                         // Highlight Correct One
                         curr.a.forEach((opt, i) => {
@@ -5332,7 +5655,7 @@
 
                 function handleTimeout() {
                     $('button[id^="opt-"]').prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
-                    showFeedbackOverlay("TIME'S UP!", false);
+                    showGameFeedback("TIME'S UP!", false, curr.r.join(', '));
 
                     // Highlight Correct One
                     curr.a.forEach((opt, i) => {
@@ -5347,26 +5670,9 @@
                     }, 2000);
                 }
 
-                function showFeedbackOverlay(text, success) {
-                    const color = success ? 'text-emerald-500' : 'text-rose-500';
-                    const container = $('#html-feedback-overlay');
-
-                    // Force container inject if missing (safety)
-                    if (container.length === 0) {
-                        $('#game-container').append('<div id="html-feedback-overlay" class="absolute inset-0 pointer-events-none z-50 flex items-center justify-center"></div>');
-                    }
-
-                    $('#html-feedback-overlay').html(`
-                        <div class="animate-in zoom-in duration-300 drop-shadow-2xl">
-                            <div class="bg-white dark:bg-slate-900 border-8 border-current ${color} text-center px-12 py-8 rounded-[2rem] transform -rotate-2">
-                                <h1 class="text-6xl font-black italic tracking-tighter uppercase">${text}</h1>
-                            </div>
-                        </div>
-                     `).removeClass('hidden');
-                }
             }
             // Clear overlay on new render just in case
-            $('#html-feedback-overlay').addClass('hidden').empty();
+            clearGameFeedback();
             renderQ();
         }
 
@@ -5389,7 +5695,12 @@
                                 <div class="w-20 h-20 bg-cyan-100 text-cyan-600 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="award" class="w-10 h-10"></i></div>
                                 <h2 class="text-3xl font-black text-slate-900 dark:text-white uppercase mb-4">CSS Stage Complete</h2>
                                 <p class="text-slate-500 mb-8 font-bold">Score: ${score}/${questions.length}</p>
-                                <button onclick="exitArcadeGame()" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30">Back to Menu</button>
+                                <div class="flex gap-3 justify-center">
+                                    <button onclick="startArcadeGame('css_speed')" class="px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors flex items-center gap-2">
+                                        <i data-lucide="play" class="w-4 h-4"></i> Next Level
+                                    </button>
+                                    <button onclick="exitArcadeGame()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30">Back to Menu</button>
+                                </div>
                             </div>
                          `);
                         lucide.createIcons();
@@ -5402,35 +5713,58 @@
                 const options = [curr.correct, ...curr.wrong].sort(() => 0.5 - Math.random());
 
                 container.html(`
-                    <div class="max-w-xl mx-auto text-center mt-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                        <span class="text-xs font-black text-cyan-500 uppercase tracking-widest mb-2 block">Task ${qIdx + 1} / ${questions.length}</span>
-                        <h2 class="text-3xl font-black text-slate-900 dark:text-white mb-2">${curr.task}</h2>
-                        <p class="text-slate-400 text-sm font-bold mb-8">${curr.desc}</p>
+                    <div class="max-w-4xl mx-auto text-center mt-4 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <span class="text-xs font-black text-cyan-500 uppercase tracking-widest mb-1 block">Task ${qIdx + 1} / ${questions.length}</span>
+                        <h2 class="text-2xl font-black text-slate-900 dark:text-white mb-1 font-mono">${curr.task}</h2>
+                        <p class="text-slate-400 text-[10px] font-bold mb-6">${curr.desc}</p>
                         
-                        <div class="grid gap-4">
-                            ${options.map(opt => `<button onclick="checkCss('${opt}')" class="p-5 rounded-xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold hover:border-cyan-500 hover:text-cyan-500 hover:shadow-lg transition-all text-left flex items-center justify-between group">
-                                <span>${opt}</span>
-                                <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"></i>
-                            </button>`).join('')}
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            ${options.map((opt, i) => {
+                    const themes = [
+                        { color: 'text-rose-500', bg: 'bg-rose-50', icon: 'palette' },
+                        { color: 'text-amber-500', bg: 'bg-amber-50', icon: 'layout' },
+                        { color: 'text-emerald-500', bg: 'bg-emerald-50', icon: 'maximize' },
+                        { color: 'text-indigo-500', bg: 'bg-indigo-50', icon: 'type' }
+                    ];
+                    const t = themes[i % themes.length];
+                    return `<button id="css-opt-${i}" onclick="checkCss('${opt}', this)" class="p-4 rounded-xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold hover:border-cyan-500 hover:shadow-xl transition-all text-left flex items-center justify-between group text-xs gap-3">
+                                    <div class="w-8 h-8 rounded-lg ${t.bg} dark:${t.bg}/10 ${t.color} flex items-center justify-center shrink-0">
+                                        <i data-lucide="${t.icon}" class="w-4 h-4"></i>
+                                    </div>
+                                    <span class="flex-1 truncate">${opt}</span>
+                                    <i data-lucide="chevron-right" class="w-4 h-4 opacity-0 group-hover:opacity-100 transition-opacity"></i>
+                                </button>`
+                }).join('')}
                         </div>
                     </div>
                 `);
                 lucide.createIcons();
 
-                window.checkCss = (ans) => {
+                window.checkCss = (ans, btn) => {
+                    const $btn = $(btn);
                     // Disable all buttons to prevent double clicks
-                    $('button').prop('disabled', true);
+                    $('button[id^="css-opt-"]').prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+                    $btn.removeClass('opacity-50 cursor-not-allowed');
 
                     if (ans === curr.correct) {
                         score++;
-                        showToast("Correct! +1");
+                        $btn.removeClass('border-slate-100 dark:border-slate-700 hover:border-cyan-500').addClass('bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 ring-4 ring-emerald-500/20');
+                        showGameFeedback("CORRECT!", true);
                     } else {
-                        showToast("Wrong!");
+                        $btn.removeClass('border-slate-100 dark:border-slate-700 hover:border-cyan-500').addClass('bg-rose-50 dark:bg-rose-900/20 border-rose-500 ring-4 ring-rose-500/20');
+                        showGameFeedback("WRONG!", false, curr.correct);
+
+                        // Highlight Correct One with high-impact visual
+                        options.forEach((opt, i) => {
+                            if (opt === curr.correct) {
+                                $(`#css-opt-${i}`).removeClass('opacity-50 border-slate-100').addClass('border-emerald-500 border-dashed bg-emerald-50/10');
+                            }
+                        });
                     }
                     setTimeout(() => {
                         qIdx++;
                         render();
-                    }, 600);
+                    }, 1500); // 1.5s is the sweet spot for feedback
                 }
             }
             render();
@@ -5444,6 +5778,10 @@
             $(`.nav-item[onclick*="${tabId}"]`).addClass('active');
             $(`#nav-${tabId}`).addClass('active');
 
+            // Mobile Nav Active State
+            $('.mobile-nav-btn').removeClass('active');
+            $(`#mob-nav-${tabId}`).addClass('active');
+
             // 2. Hide all content views
             $('.content-view').addClass('hidden');
 
@@ -5455,6 +5793,9 @@
             target.removeClass('animate-in fade-in slide-in-from-bottom-5');
             void target[0].offsetWidth; // trigger reflow
             target.addClass('animate-in fade-in slide-in-from-bottom-5');
+
+            // Scroll to top
+            window.scrollTo({ top: 0, behavior: 'smooth' });
 
             // 4. Update Header Title
             const titleMap = {
