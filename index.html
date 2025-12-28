@@ -2514,40 +2514,14 @@
                 if (error) throw error;
 
                 if (!profile) {
-                    console.warn("[Session] Profile missing during login. Attempting auto-recovery...");
+                    console.warn("[Session] Profile not found (User Deleted).");
+                    await client.auth.signOut();
 
-                    // Resurrection Logic for "Deleted" users who still have Auth
-                    const newProfile = {
-                        uid: user.id,
-                        email: user.email,
-                        name: user.user_metadata?.name || user.email.split('@')[0],
-                        role: 'student',
-                        status: 'pending'
-                    };
+                    isInitializing = false;
+                    localStorage.removeItem('supabase_profile_cache');
+                    $('#auth-btn').prop('disabled', false).find('span').text('Sign In');
 
-                    const { error: insertErr } = await client.from('profiles').insert([newProfile]);
-
-                    if (insertErr) {
-                        console.error("[Session] Auto-recovery failed:", insertErr);
-                        await client.auth.signOut();
-                        isInitializing = false;
-                        $('#auth-btn').prop('disabled', false).find('span').text('Sign In');
-                        throw new Error("Account Deactivated. Please contact support.");
-                    }
-
-                    // Use the newly created profile
-                    // We need to re-assign 'profile' variable, but it's const. 
-                    // So we handle the success flow here directly or reload.
-                    // Easiest is to just reload page to trigger fresh session check, 
-                    // OR manually set userProfile and continue.
-
-                    showToast("Profile restored. Welcome back!");
-                    userProfile = newProfile;
-                    currentUser = user;
-
-                    localStorage.setItem('supabase_profile_cache', JSON.stringify(newProfile));
-                    initDashboard();
-                    return; // Exit function, we are done
+                    throw new Error("Access Revoked: Your account has been deleted by an administrator.");
                 } else {
                     // STRICT LOGIN ROLE CHECK
                     // ONLY enforce this if we are NOT loading from cache (i.e., user just clicked login)
