@@ -2492,12 +2492,9 @@
             if (role === 'admin') {
                 $('#tab-admin').addClass(activeClass).removeClass(inactiveClass);
                 $('#tab-student').removeClass(activeClass).addClass(inactiveClass);
-                // Pre-fill admin email for convenience
-                if (!$('#auth-email').val()) $('#auth-email').val('admin@bbsydp.com');
             } else {
                 $('#tab-student').addClass(activeClass).removeClass(inactiveClass);
                 $('#tab-admin').removeClass(activeClass).addClass(inactiveClass);
-                if ($('#auth-email').val() === 'admin@bbsydp.com') $('#auth-email').val('');
             }
         };
 
