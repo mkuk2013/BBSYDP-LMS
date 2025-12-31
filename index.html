@@ -1112,7 +1112,7 @@
                             <div class="h-8 w-px bg-slate-200 dark:bg-slate-800 hidden sm:block"></div>
 
                             <div class="relative">
-                                <button id="admin-notif-btn" onclick="toggleNotifications()"
+                                <button id="admin-notif-btn" onclick="toggleNotifications(event)"
                                     class="hidden relative p-2.5 rounded-xl text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 transition-all group">
                                     <i data-lucide="bell"
                                         class="w-5 h-5 group-hover:text-indigo-500 transition-colors"></i>
@@ -2353,8 +2353,8 @@
                             "<span id="result-feedback"></span>"
                         </div>
                         <button onclick="downloadReport()"
-                            class="btn-command px-10 py-5 rounded-2xl flex items-center justify-center gap-3 mx-auto shadow-2xl mb-8">
-                            <i data-lucide="file-text" class="w-5 h-5"></i> Download Result PDF
+                            class="px-4 py-2 bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 rounded-xl border border-indigo-100 dark:border-indigo-800 text-[10px] font-black uppercase tracking-widest flex items-center justify-center gap-2 mx-auto hover:bg-indigo-100 transition-colors shadow-sm">
+                            <i data-lucide="file-text" class="w-3.5 h-3.5"></i> PDF Report
                         </button>
                     </div>
 
@@ -2482,50 +2482,71 @@
             }
 
             if (!user) { finishInitialization(false); return; }
-            // Avoid double initialization for same user
-            if (isInitializing && currentUser?.id === user.id) return;
-            isInitializing = true;
 
-            // --- CACHE-FIRST STRATEGY ---
-            // Try to load profile from local storage immediately to avoid waiting for DB
-            // --- BACKGROUND SYNC ---
-            let loadedFromCache = false;
+            // PROMISE-BASED LOCK: Request Coalescing
+            if (window.sessionInitPromise) {
+                console.log("[Session] Joining existing initialization process...");
+                return window.sessionInitPromise;
+            }
 
-            try {
-                // Check cache availability for this user ID
-                const cachedParams = localStorage.getItem('supabase_profile_cache');
+            window.sessionInitPromise = (async () => {
+                isInitializing = true;
+                let loadedFromCache = false;
 
-                if (cachedParams) {
-                    try {
-                        const parsed = JSON.parse(cachedParams);
-                        if (parsed.uid === user.id) {
-                            console.log("[Session] Instant load from cache.");
-                            currentUser = user;
-                            userProfile = parsed;
-                            initDashboard();
-                            loadedFromCache = true;
-                        }
-                    } catch (e) { localStorage.removeItem('supabase_profile_cache'); }
-                }
+                try {
+                    // Check cache availability for this user ID
+                    const cachedParams = localStorage.getItem('supabase_profile_cache');
 
-                // Attempt fresh fetch from server
-                const { data: profile, error } = await client.from('profiles').select('*').eq('uid', user.id).maybeSingle();
+                    if (cachedParams) {
+                        try {
+                            const parsed = JSON.parse(cachedParams);
+                            if (parsed.uid === user.id) {
+                                console.log("[Session] Instant load from cache.");
+                                currentUser = user;
+                                userProfile = parsed;
+                                initDashboard(); // UI is now visible!
+                                loadedFromCache = true;
+                            }
+                        } catch (e) { localStorage.removeItem('supabase_profile_cache'); }
+                    }
 
-                if (error) throw error;
+                    // DEFINE the fresh fetch promise
+                    const fetchProfilePromise = client.from('profiles').select('*').eq('uid', user.id).maybeSingle();
 
-                if (!profile) {
-                    console.warn("[Session] Profile not found (User Deleted).");
-                    await client.auth.signOut();
+                    // CRITICAL OPTIMIZATION:
+                    // If we loaded from cache, DO NOT WAIT for the network. Let it run in background.
+                    if (loadedFromCache) {
+                        console.log("[Session] Cache hit. Detaching fresh fetch to background.");
+                        fetchProfilePromise.then(async ({ data: profile, error }) => {
+                            if (!profile || error) return; // Silent fail if DB issue, cache is good enough for now
 
-                    isInitializing = false;
-                    localStorage.removeItem('supabase_profile_cache');
-                    $('#auth-btn').prop('disabled', false).find('span').text('Sign In');
+                            // Check for critical changes preventing access
+                            if (profile.role !== userProfile.role || profile.status === 'pending') {
+                                // If critical status changed, force reload
+                                localStorage.setItem('supabase_profile_cache', JSON.stringify(profile));
+                                location.reload();
+                                return;
+                            }
 
-                    throw new Error("Access Revoked: Your account has been deleted by an administrator.");
-                } else {
-                    // STRICT LOGIN ROLE CHECK
-                    // ONLY enforce this if we are NOT loading from cache (i.e., user just clicked login)
-                    if (!loadedFromCache) {
+                            // Update cache silently
+                            localStorage.setItem('supabase_profile_cache', JSON.stringify(profile));
+                            console.log("[Session] Background profile sync complete.");
+                        });
+                        return; // EXIT FUNCTION IMMEDIATELY -> Promises resolves -> Loader unlocks
+                    }
+
+                    // If NOT cached, we MUST wait for the fetch
+                    const { data: profile, error } = await fetchProfilePromise;
+
+                    if (error) throw error;
+
+                    if (!profile) {
+                        console.warn("[Session] Profile not found (User Deleted).");
+                        await client.auth.signOut();
+                        localStorage.removeItem('supabase_profile_cache');
+                        throw new Error("Access Revoked: Your account has been deleted by an administrator.");
+                    } else {
+                        // ROLE CHECK with Auto-Switch
                         const intendedRole = $('#tab-student').hasClass('bg-white') ? 'student' : 'admin';
 
                         if (profile.role !== intendedRole) {
@@ -2535,49 +2556,49 @@
                             throw new Error(`Access Denied: You cannot log in as ${intendedRole}. Please switch to the ${profile.role} tab.`);
                         }
 
-                        // CHECK APPROVAL STATUS
                         if (profile.status === 'pending') {
                             console.warn("[Security] Account Pending Approval");
                             await client.auth.signOut();
                             localStorage.removeItem('supabase_profile_cache');
                             throw new Error("Account is pending Admin Approval. Please contact your administrator.");
                         }
-                    }
 
-                    // Success: Update Cache
-                    localStorage.setItem('supabase_profile_cache', JSON.stringify(profile));
+                        // Success: Update Cache
+                        localStorage.setItem('supabase_profile_cache', JSON.stringify(profile));
 
-                    // Refresh UI if we didn't use cache OR if critical role data changed
-                    if (!loadedFromCache || (userProfile && userProfile.role !== profile.role)) {
                         currentUser = user;
                         userProfile = profile;
                         initDashboard();
                     }
-                }
-            } catch (err) {
-                console.error("Session Sync Error:", err);
 
-                // Only fail hard if we don't have cached data to fall back on
-                if (!loadedFromCache) {
-                    isInitializing = false;
-                    currentUser = null;
-                    userProfile = null;
-                    finishInitialization(false);
+                } catch (err) {
+                    console.error("Session Sync Error:", err);
 
-                    const btn = $('#auth-btn');
-                    btn.prop('disabled', false);
-                    const originalText = $('#name-field').hasClass('hidden') ? 'Sign In' : 'Create Account';
-                    btn.find('span').text(originalText);
+                    if (!loadedFromCache) {
+                        currentUser = null;
+                        userProfile = null;
+                        finishInitialization(false);
 
-                    if ($('#auth-wrapper').is(':visible')) {
-                        $('#auth-error').text(err.message).removeClass('hidden');
-                    } else {
-                        showToast(err.message);
+                        const btn = $('#auth-btn');
+                        btn.prop('disabled', false);
+                        // Restore button text based on current mode
+                        const originalText = $('#name-field').hasClass('hidden') ? 'Sign In' : 'Create Account';
+                        btn.find('span').text(originalText);
+
+                        if ($('#auth-wrapper').is(':visible')) {
+                            $('#auth-error').text(err.message).removeClass('hidden');
+                        } else {
+                            showToast(err.message);
+                        }
                     }
-                } else {
-                    console.log("Network failed, but keeping session active via cache.");
+                } finally {
+                    // CRITICAL: Always clear the lock so subsequent attempts can proceed
+                    isInitializing = false;
+                    window.sessionInitPromise = null;
                 }
-            }
+            })();
+
+            return window.sessionInitPromise;
         }
 
         function finishInitialization(isLoggedIn) {
@@ -2626,10 +2647,13 @@
             // Safety timeout
             setTimeout(() => {
                 if ($('#global-loader').is(':visible')) {
-                    console.warn("Initialization taking longer than expected...");
+                    console.warn("Initialization taking longer than expected... Resetting locks.");
+                    // CRITICAL: Clear the lock so user can try again manually
+                    window.sessionInitPromise = null;
+                    isInitializing = false;
                     finishInitialization(!!currentUser);
                 }
-            }, 8000);
+            }, 12000);
         });
 
         window.handleAuthSubmit = async (e) => {
@@ -2663,12 +2687,11 @@
                     const { data, error } = await client.auth.signInWithPassword({ email, password: pass });
                     if (error) throw error;
 
-                    // User session will be handled by onAuthStateChange
-                    setTimeout(() => {
-                        if ($('#auth-wrapper').is(':visible') && btn.prop('disabled')) {
-                            btn.prop('disabled', false).find('span').text('Sign In');
-                        }
-                    }, 8000);
+                    // EXPLICIT MODE: Immediately handle the user session
+                    // This prevents sticking on "Verifying..." if onAuthStateChange is slow/missed.
+                    if (data?.user) {
+                        await handleUserSession(data.user);
+                    }
                 }
             } catch (err) {
                 errorElement.text(err.message).removeClass('hidden');
@@ -2676,16 +2699,64 @@
             }
         };
 
-        window.handleLogout = async () => {
-            try {
-                await client.auth.signOut();
-                localStorage.removeItem('supabase_profile_cache');
-                location.reload();
-            } catch (err) {
-                console.error("Logout failed:", err);
-                location.reload();
+        // --- AUTOMATED PROGRESS ANALYSIS SYSTEM ---
+        window.runAutoProgressAnalysis = async () => {
+            console.log("Running Auto-Progress Analysis...");
+            if (!window.allSubmissions || !window.allUsersCache) return;
+
+            // 1. Calculate Averages
+            const stats = {};
+            window.allSubmissions.filter(s => s.status === 'graded').forEach(s => {
+                if (!stats[s.student_id]) stats[s.student_id] = { total: 0, count: 0, name: s.student_name };
+                stats[s.student_id].total += s.grade;
+                stats[s.student_id].count++;
+            });
+
+            // 2. Identify Top Performers (> 85% Average)
+            const topPerformers = [];
+            Object.keys(stats).forEach(uid => {
+                const avg = stats[uid].total / stats[uid].count;
+                if (avg >= 85 && stats[uid].count >= 2) { // Minimum 2 tasks
+                    topPerformers.push({ id: uid, name: stats[uid].name, avg: Math.round(avg) });
+                }
+            });
+
+            // 3. Check & Notify (Simulated Backend Job)
+            // We use the Notice system with a private tag mechanism.
+            // Check if we already notified them recently (Client-side check for now)
+            const today = new Date().toDateString();
+            const lastRun = localStorage.getItem('last_progress_analysis');
+
+            if (lastRun === today) {
+                console.log("Analysis already ran today.");
+                return;
             }
+
+            // In a real backend, this would happen on server. Here Admin client does it.
+            for (const student of topPerformers) {
+                // Check if notice exists
+                const { data: existing } = await client.from('notices')
+                    .select('id')
+                    .ilike('title', `@${student.name}%`)
+                    .gt('created_at', new Date(Date.now() - 86400000 * 7).toISOString()); // Last 7 days
+
+                if (!existing || existing.length === 0) {
+                    // Insert Commendation
+                    await client.from('notices').insert({
+                        title: `@${student.name} - Outstanding Progress!`,
+                        content: `Congratulations! Your performance is exceptional with an average score of ${student.avg}%. Keep up the fantastic work!`,
+                        priority: 'normal',
+                        created_by: currentUser.id,
+                        is_active: true
+                    });
+                    showToast(`Auto-Commendation sent to ${student.name}`);
+                }
+            }
+            localStorage.setItem('last_progress_analysis', today);
         };
+
+
+
 
         // --- NOTICE BOARD LOGIC ---
         window.openNoticeModal = () => {
@@ -2751,15 +2822,33 @@
             list.empty();
             let hasUrgent = false;
 
-            if (!notices || notices.length === 0) {
+            // Personalized Filtering
+            const relevantNotices = notices.filter(n => {
+                const title = n.title || '';
+
+                // Admin sees EVERYTHING to monitor the system
+                if (userProfile.role === 'admin') return true;
+
+                // If it starts with @, it's a private message.
+                // Only show if it matches @[MyName]
+                if (title.startsWith('@')) {
+                    if (title.toLowerCase().startsWith(`@${userProfile.name.toLowerCase()}`)) return true;
+                    return false; // Hide other people's private messages
+                }
+                return true; // Show global notices
+            });
+
+            if (!relevantNotices || relevantNotices.length === 0) {
                 list.html('<div class="text-center py-8 text-slate-400 text-xs font-bold uppercase tracking-wide">No new announcements.</div>');
                 $('#urgent-ticker').addClass('hidden');
                 return;
             }
 
-            notices.forEach(n => {
+            relevantNotices.forEach(n => {
                 const isUrgent = n.priority === 'urgent';
-                if (isUrgent && !hasUrgent) {
+                const isPersonal = n.title.startsWith('@');
+
+                if (isUrgent && !hasUrgent && !isPersonal) {
                     $('#ticker-text').text(n.title + ": " + (n.content || ""));
                     $('#urgent-ticker').removeClass('hidden');
                     hasUrgent = true;
@@ -2994,18 +3083,44 @@
         };
 
         function initDashboard() {
-            finishInitialization(true);
-            isInitializing = false;
-            $('#user-name').text(userProfile.name); // Legacy status text (if kept)
+            // OPTIMIZATION: Render "shell" and cached content IMMEDIATELY before hiding loader
+
+            // 1. Basic Text & Profile Info
+            $('#user-name').text(userProfile.name);
             $('#header-user-name').text(userProfile.name);
             $('#user-role').text(userProfile.role.toUpperCase());
 
-            // FETCH ARCADE CONFIG FROM DB
-            // FETCH ARCADE CONFIG FROM DB
-            if (typeof fetchArcadeConfig === 'function') fetchArcadeConfig();
-            if (typeof syncArcadeProgress === 'function') syncArcadeProgress();
+            // 2. Avatar Rendering
+            const initial = userProfile.name.charAt(0).toUpperCase();
+            $('#header-initial').text(initial);
+            $('#profile-initial-lg').text(initial);
 
-            // --- DAILY STREAK LOGIC ---
+            if (userProfile.avatar_url) {
+                $('#header-avatar-container').html(`<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">`);
+                $('#profile-avatar-display').html(`<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">`);
+            } else {
+                $('#header-avatar-container').html(`<span id="header-initial">${initial}</span>`);
+                $('#profile-avatar-display').html(`<span id="profile-initial-lg">${initial}</span>`);
+            }
+
+            // 3. Navigation & Mode Setup
+            if (userProfile.role === 'admin') {
+                $('#nav-dashboard, #nav-grading, #nav-users, #nav-leaderboard').removeClass('hidden');
+                $('#admin-nav').removeClass('hidden');
+                $('#nav-tasks').removeClass('hidden').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> Manage Tasks');
+                $('#nav-arcade, #nav-playground').addClass('hidden');
+            } else {
+                $('#nav-dashboard, #nav-tasks, #nav-leaderboard, #nav-resources, #profile-tab, #nav-arcade, #nav-playground').removeClass('hidden');
+                $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> My Tasks');
+                $('#admin-nav').addClass('hidden');
+            }
+
+            // 4. Load Cached Data & Render Charts (CRITICAL FOR INSTANT FEEL)
+            switchTab('dashboard');
+            startSync(); // This calls loadCachedData() internally
+            initChart();
+
+            // 5. Daily Streak Logic (Local Storage - Fast)
             const today = new Date().toDateString();
             const lastLogin = localStorage.getItem('last_login_date');
             let streak = parseInt(localStorage.getItem('login_streak') || 0);
@@ -3013,12 +3128,9 @@
             if (lastLogin !== today) {
                 const yesterday = new Date();
                 yesterday.setDate(yesterday.getDate() - 1);
+                if (lastLogin === yesterday.toDateString()) streak++;
+                else streak = 1;
 
-                if (lastLogin === yesterday.toDateString()) {
-                    streak++;
-                } else {
-                    streak = 1; // Reset if broken (or first time)
-                }
                 localStorage.setItem('last_login_date', today);
                 localStorage.setItem('login_streak', streak);
 
@@ -3028,123 +3140,7 @@
                 }
             }
 
-            // --- INITIALIZATION CALLS (ALWAYS RUN) ---
-            fetchNotices(); // Fetch announcements
-            fetchAchievements(); // Fetch badges
-
-            // LIVE CODE EDITOR LOGIC
-            window.runCode = () => {
-                if (window.awardBadge) window.awardBadge('code_runner');
-
-                const html = $('#code-html').val();
-                const css = `<style>${$('#code-css').val()}</style>`;
-                const js = `<script>${$('#code-js').val()}<\/script>`; // Escape closing script tag
-
-                const previewFrame = document.getElementById('code-preview');
-                const preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
-
-                preview.open();
-                preview.write(html + css + js);
-                preview.close();
-            };
-
-            window.clearCode = () => {
-                if (confirm('Are you sure you want to clear all code?')) {
-                    $('#code-html').val('');
-                    $('#code-css').val('');
-                    $('#code-js').val('');
-                    const previewFrame = document.getElementById('code-preview');
-                    const preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
-                    preview.open();
-                    preview.write('');
-                    preview.close();
-                }
-            };
-
-            // GAMIFICATION / BADGES SYSTEM
-            const BADGES = {
-                'first_login': { title: 'First Steps', icon: 'footprints', desc: 'Logged in for the first time.' },
-                'profile_pic': { title: 'Identity', icon: 'camera', desc: 'Updated profile picture.' },
-                'arcade_win': { title: 'Arcade Champion', icon: 'trophy', desc: 'Won an arcade game level.' },
-                'streak_3': { title: 'On Fire', icon: 'flame', desc: 'Reached a 3-day login streak.' },
-                'code_runner': { title: 'Scripter', icon: 'code-2', desc: 'Ran code in the Live Editor.' }
-            };
-
-            async function fetchAchievements() {
-                try {
-                    const { data: userBadges, error } = await client.from('user_achievements').select('badge_key');
-                    if (error) throw error;
-
-                    const earnedKeys = new Set(userBadges.map(b => b.badge_key));
-                    renderBadges(earnedKeys);
-
-                    // Check logic for 'first_login' if not present (simple hack for now)
-                    if (!earnedKeys.has('first_login')) {
-                        awardBadge('first_login');
-                    }
-                    if (streak >= 3 && !earnedKeys.has('streak_3')) {
-                        awardBadge('streak_3');
-                    }
-
-                } catch (e) {
-                    console.warn("Achievements fetch failed:", e);
-                    // Render empty/locked state if fetch fails
-                    renderBadges(new Set());
-                }
-            }
-
-            window.awardBadge = async (badgeKey) => {
-                if (userProfile.role !== 'student') return; // Admin should not earn badges
-                // Optimistic check: prevent spamming DB if we know locally (though DB has unique constraint usually)
-                // We'll trust the insert to fail silently or we handle it.
-                if (!BADGES[badgeKey]) return;
-
-                try {
-                    const { error } = await client.from('user_achievements').insert({
-                        user_id: currentUser.id,
-                        badge_key: badgeKey
-                    });
-
-                    if (!error) {
-                        // Success!
-                        showToast(`Badge Unlocked: ${BADGES[badgeKey].title}!`, 'success');
-                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                        fetchAchievements(); // Refresh UI
-                    }
-                } catch (e) {
-                    // Ignore duplicate key errors
-                }
-            };
-
-            function renderBadges(earnedKeys) {
-                const grid = $('#achievements-grid');
-                grid.empty();
-
-                Object.entries(BADGES).forEach(([key, badge]) => {
-                    const isUnlocked = earnedKeys.has(key);
-                    const opacity = isUnlocked ? 'opacity-100' : 'opacity-40 grayscale';
-                    const bg = isUnlocked ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800';
-                    const iconColor = isUnlocked ? 'text-indigo-500' : 'text-slate-400';
-
-                    grid.append(`
-                        <div class="p-4 ${bg} rounded-xl border flex flex-col items-center justify-center ${opacity} transition-all duration-500 group relative hover:scale-[1.02]">
-                            <i data-lucide="${badge.icon}" class="w-8 h-8 ${iconColor} mb-2"></i>
-                            <span class="text-[9px] font-black uppercase ${isUnlocked ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-400'} text-center">${badge.title}</span>
-                            ${!isUnlocked ? '<i data-lucide="lock" class="absolute top-2 right-2 w-3 h-3 text-slate-300"></i>' : ''}
-                             <div class="absolute inset-0 bg-black/80 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity rounded-xl p-2 text-center">
-                                <span class="text-[10px] text-white font-medium">${badge.desc}</span>
-                            </div>
-                        </div>
-                    `);
-                });
-                lucide.createIcons();
-            }
-
-
-
-
-
-            // Inject Streak Badge
+            // Render Streak Badge immediately
             if ($('#streak-badge').length === 0) {
                 const streakHtml = `
                     <div id="streak-badge" class="hidden sm:flex items-center gap-2 px-3 py-1.5 bg-orange-50 dark:bg-orange-900/10 border border-orange-100 dark:border-orange-500/20 rounded-xl mr-2 animate-in fade-in zoom-in duration-500">
@@ -3162,48 +3158,11 @@
                 $('#streak-badge').find('span:last').text(`${streak} Day${streak !== 1 ? 's' : ''}`);
             }
 
-            // Avatar Rendering
-            const initial = userProfile.name.charAt(0).toUpperCase();
-            $('#header-initial').text(initial);
-            $('#profile-initial-lg').text(initial);
-
-            if (userProfile.avatar_url) {
-                $('#header-avatar-container').html(`<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">`);
-                $('#profile-avatar-display').html(`<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">`);
-            } else {
-                $('#header-avatar-container').html(`<span id="header-initial">${initial}</span>`);
-                $('#profile-avatar-display').html(`<span id="profile-initial-lg">${initial}</span>`);
-            }
-
-            // Handle Admin-Only vs Student-Only nav
-            if (userProfile.role === 'admin') {
-                $('#nav-dashboard, #nav-grading, #nav-users, #nav-leaderboard').removeClass('hidden');
-                $('#admin-nav').removeClass('hidden');
-
-                // Show Tasks but rename it
-                $('#nav-tasks').removeClass('hidden').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> Manage Tasks');
-
-                $('#nav-arcade, #nav-playground').addClass('hidden'); // Hide student-only tabs
-            } else {
-                $('#nav-dashboard, #nav-tasks, #nav-leaderboard, #nav-resources, #profile-tab, #nav-arcade, #nav-playground').removeClass('hidden');
-                // Ensure correct name for students
-                $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> My Tasks');
-                $('#admin-nav').addClass('hidden');
-            }
-
-
-            // setTimeout(() => { if (window.fetchResources) window.fetchResources(); }, 500); // Disabled to prevent 404 until table created
-
-
-
-            // setTimeout(() => { if (window.fetchResources) window.fetchResources(); }, 500); // Disabled to prevent 404 until table created
-
-            // --- Live Clock & Greeting ---
+            // 6. Live Clock (Instant)
             const updateClock = () => {
                 const now = new Date();
                 const hours = now.getHours();
                 const greeting = hours < 12 ? "Good Morning" : hours < 18 ? "Good Afternoon" : "Good Evening";
-
                 $('#live-clock').text(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }));
                 $('#live-date').text(now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' }));
                 $('#dynamic-greeting-text').text(`${greeting}, ${userProfile.name.split(' ')[0]}`);
@@ -3211,13 +3170,94 @@
             updateClock();
             setInterval(updateClock, 1000);
 
-            switchTab('dashboard'); startSync();
-            initChart();
+            // 7. Initialize Icons ONCE globally for the initial view
+            lucide.createIcons();
+
+            // 8. FINAL STEP: Hide Loader NOW.
+            // result: User sees fully rendered dashboard instantly.
+            finishInitialization(true);
+            isInitializing = false;
+
+            // --- DEFERRED / BACKGROUND TASKS ---
+            // These fetch fresh data but assume UI is already usable
+            if (typeof fetchArcadeConfig === 'function') fetchArcadeConfig();
+            if (typeof syncArcadeProgress === 'function') syncArcadeProgress();
+            fetchNotices();
+            fetchAchievements();
             if (window.setupRealtime) window.setupRealtime();
 
+            // Define Global Functions (keep definitions)
+            window.runCode = () => {
+                if (window.awardBadge) window.awardBadge('code_runner');
+                const html = $('#code-html').val();
+                const css = `<style>${$('#code-css').val()}</style>`;
+                const js = `<script>${$('#code-js').val()}<\/script>`;
+                const previewFrame = document.getElementById('code-preview');
+                const preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
+                preview.open(); preview.write(html + css + js); preview.close();
+            };
 
+            window.clearCode = () => {
+                if (confirm('Are you sure you want to clear all code?')) {
+                    $('#code-html').val(''); $('#code-css').val(''); $('#code-js').val('');
+                    const previewFrame = document.getElementById('code-preview');
+                    const preview = previewFrame.contentDocument || previewFrame.contentWindow.document;
+                    preview.open(); preview.write(''); preview.close();
+                }
+            };
 
-            lucide.createIcons();
+            // Re-define Award Badge (abbreviated)
+            window.awardBadge = async (badgeKey) => {
+                if (userProfile.role !== 'student') return;
+                if (!BADGES[badgeKey]) return;
+                try {
+                    const { error } = await client.from('user_achievements').insert({ user_id: currentUser.id, badge_key: badgeKey });
+                    if (!error) {
+                        showToast(`Badge Unlocked: ${BADGES[badgeKey].title}!`, 'success');
+                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                        fetchAchievements();
+                    }
+                } catch (e) { }
+            };
+
+            // Define Badges Const
+            const BADGES = {
+                'first_login': { title: 'First Steps', icon: 'footprints', desc: 'Logged in for the first time.' },
+                'profile_pic': { title: 'Identity', icon: 'camera', desc: 'Updated profile picture.' },
+                'arcade_win': { title: 'Arcade Champion', icon: 'trophy', desc: 'Won an arcade game level.' },
+                'streak_3': { title: 'On Fire', icon: 'flame', desc: 'Reached a 3-day login streak.' },
+                'code_runner': { title: 'Scripter', icon: 'code-2', desc: 'Ran code in the Live Editor.' }
+            };
+
+            async function fetchAchievements() {
+                try {
+                    const { data: userBadges, error } = await client.from('user_achievements').select('badge_key');
+                    if (error) throw error;
+                    const earnedKeys = new Set(userBadges.map(b => b.badge_key));
+                    renderBadges(earnedKeys);
+                    if (!earnedKeys.has('first_login')) awardBadge('first_login');
+                    if (streak >= 3 && !earnedKeys.has('streak_3')) awardBadge('streak_3');
+                } catch (e) { renderBadges(new Set()); }
+            }
+
+            function renderBadges(earnedKeys) {
+                const grid = $('#achievements-grid');
+                grid.empty();
+                Object.entries(BADGES).forEach(([key, badge]) => {
+                    const isUnlocked = earnedKeys.has(key);
+                    const opacity = isUnlocked ? 'opacity-100' : 'opacity-40 grayscale';
+                    const bg = isUnlocked ? 'bg-indigo-50 dark:bg-indigo-900/20 border-indigo-200 dark:border-indigo-800' : 'bg-slate-50 dark:bg-slate-900/50 border-slate-100 dark:border-slate-800';
+                    const iconColor = isUnlocked ? 'text-indigo-500' : 'text-slate-400';
+                    grid.append(`
+                        <div class="p-4 ${bg} rounded-xl border flex flex-col items-center justify-center ${opacity} transition-all duration-500 group relative hover:scale-[1.02]">
+                            <i data-lucide="${badge.icon}" class="w-8 h-8 ${iconColor} mb-2"></i>
+                            <span class="text-[9px] font-black uppercase ${isUnlocked ? 'text-indigo-600 dark:text-indigo-300' : 'text-slate-400'} text-center">${badge.title}</span>
+                            ${!isUnlocked ? '<i data-lucide="lock" class="absolute top-2 right-2 w-3 h-3 text-slate-300"></i>' : ''}
+                        </div>
+                    `);
+                });
+                lucide.createIcons();
+            }
         }
 
 
@@ -3292,11 +3332,13 @@
                 const [tasks, subs] = await Promise.all([
                     $.ajax({
                         url: `${SUPABASE_URL}/rest/v1/tasks?select=*&order=deadline.asc`,
-                        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}` }
+                        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}` },
+                        timeout: 30000 // 30s timeout
                     }),
                     $.ajax({
                         url: `${SUPABASE_URL}/rest/v1/submissions?select=*`,
-                        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}` }
+                        headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}` },
+                        timeout: 30000 // 30s timeout
                     })
                 ]);
 
@@ -3724,7 +3766,7 @@
                             <h6 class="font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest text-[9px] mb-1">Teacher Feedback</h6>
                             <p class="text-xs text-emerald-900 dark:text-emerald-100 italic">"${sub.feedback}"</p>
                             <div class="mt-2 font-black text-2xl text-emerald-600">${sub.grade}/100</div>
-                            <button onclick="downloadReport()" class="mt-2 text-[9px] font-black uppercase tracking-widest text-indigo-500 hover:underline flex items-center gap-1"><i data-lucide="download" class="w-3 h-3"></i> Download Report</button>
+                            <button onclick="downloadReport()" class="mt-1 px-2 py-0.5 bg-white dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded text-[7px] font-black uppercase tracking-widest text-indigo-500 hover:bg-emerald-50 transition-colors flex items-center gap-1 shadow-sm w-fit"><i data-lucide="download" class="w-2.5 h-2.5"></i> PDF Report</button>
                         </div>`;
                 }
 
@@ -3914,7 +3956,8 @@
         async function fetchUsers() {
             // Select all fields to ensure status, avatar_url, and email are available
             const { data: users } = await client.from('profiles').select('*').order('created_at', { ascending: false });
-            renderUsers(users || []);
+            window.allUsersCache = users || [];
+            renderUsers(window.allUsersCache);
         }
 
         function renderUsers(users) {
@@ -4247,7 +4290,31 @@
             currentTask = task; currentSub = sub;
 
             $('#detail-title').text(task.title);
-            $('#detail-desc').text(task.description);
+            // Intelligent Rendering: Escape user text to show tags like <hr> literally, but render the appended Reference Link as HTML.
+            const rawDesc = task.description || 'No description provided.';
+            const refMarker = '<br><strong>Reference Asset:</strong>';
+            const splitIdx = rawDesc.lastIndexOf(refMarker);
+
+            let safeContent = '';
+            if (splitIdx !== -1) {
+                const userText = rawDesc.substring(0, splitIdx);
+                const refLinkHtml = rawDesc.substring(splitIdx);
+                // 1. Escape HTML special chars in user text
+                // 2. Convert newlines to <br>
+                const safeUserText = userText
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\n/g, '<br>');
+                safeContent = safeUserText + refLinkHtml;
+            } else {
+                safeContent = rawDesc
+                    .replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/\n/g, '<br>');
+            }
+            $('#detail-desc').html(safeContent);
             $('#submit-id').val(taskId);
 
             // Operational Guidance & Assets
@@ -4301,12 +4368,12 @@
                 else {
                     $('#submission-section').html(`
             <div class="p-10 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-3xl text-center font-black uppercase tracking-[0.2em] text-[10px] border border-indigo-100 dark:border-indigo-900/50 flex flex-col items-center gap-4">
-                            <i data-lucide="shield-check" class="w-6 h-6"></i> 
+                            <i data-lucide="check-circle-2" class="w-8 h-8 animate-in zoom-in duration-300"></i> 
                             <div>
-                                <p class="text-[8px] opacity-70 mb-1">RECORD FOUND IN DATABASE</p>
-                                <p class="text-xs">COMMITTED: ${sub.task_title}</p>
+                                <p class="text-[8px] opacity-70 mb-1">SUBMISSION STATUS</p>
+                                <p class="text-xs">RECEIVED: ${sub.task_title}</p>
                             </div>
-                            <p class="text-[8px] bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 rounded-full mt-2">UNDER REVIEW BY TEACHER</p>
+                            <p class="text-[8px] bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 rounded-full mt-2">Result Pending</p>
                             <div class="flex gap-2 justify-center mt-3">
                                 ${(() => {
                             const data = parseSubmission(sub.content);
@@ -4593,11 +4660,17 @@
             btn.prop('disabled', true).text('PROCESSING...');
 
             const dateVal = $('#new-task-date').val();
+            let safeDeadline = null;
+            if (dateVal) {
+                const d = new Date(dateVal);
+                if (!isNaN(d.getTime())) safeDeadline = d.toISOString();
+            }
+
             const taskData = {
                 title: $('#new-task-title').val(),
                 description: $('#new-task-desc').val(),
                 hints: $('#new-task-hints').val(),
-                deadline: dateVal ? new Date(dateVal).toISOString() : null
+                deadline: safeDeadline
             };
 
             const refFile = document.getElementById('new-task-ref').files[0];
@@ -4639,7 +4712,10 @@
                     const uploadData = await response.json();
                     if (uploadData.error) throw new Error(uploadData.error.message);
 
-                    taskData.reference_asset = uploadData.secure_url;
+                    // WORKAROUND: 'reference_asset' column missing in DB. Appending to description as a clickable link.
+                    const refHtml = `\n\n<br><strong>Reference Asset:</strong> <a href="${uploadData.secure_url}" target="_blank" class="text-indigo-500 hover:underline">View Attachment</a>`;
+                    taskData.description = (taskData.description || '') + refHtml;
+
                     await executeSave(taskData);
                 } catch (err) {
                     alert("Reference File Error: " + err.message);
@@ -4973,14 +5049,18 @@
         $('#resource-search').on('input', () => renderResources(window.currentResourceFilter));
 
         // --- NOTIFICATION SYSTEM ---
-        window.toggleNotifications = () => {
+        // --- NOTIFICATION SYSTEM (FIXED) ---
+        window.toggleNotifications = (e) => {
+            if (e) e.stopPropagation(); // Prevent immediate close
             const dropdown = $('#notification-dropdown');
+
             if (dropdown.hasClass('hidden')) {
                 dropdown.removeClass('hidden');
                 renderNotifications();
-                // Close on outside click
-                $(document).on('click.notif', function (e) {
-                    if (!$(e.target).closest('#admin-notif-btn, #notification-dropdown').length) {
+
+                // One-time click handler to close when clicking outside
+                $(document).off('click.notif').on('click.notif', function (ev) {
+                    if (!$(ev.target).closest('#admin-notif-btn, #notification-dropdown').length) {
                         dropdown.addClass('hidden');
                         $(document).off('click.notif');
                     }
@@ -5977,18 +6057,8 @@
     </div>
 
     <script>
-        // FAILSAFE: Force remove loader if stuck
-        setTimeout(() => {
-            const loader = document.getElementById('global-loader');
-            if (loader && window.getComputedStyle(loader).display !== 'none') {
-                console.warn("Failsafe triggered: Forced loader removal.");
-                loader.style.display = 'none';
-                // Show Auth by default if nothing else happened
-                if (document.getElementById('dashboard-layout').classList.contains('hidden')) {
-                    document.getElementById('auth-wrapper').classList.remove('hidden');
-                }
-            }
-        }, 5000);
+        // FAILSAFE: Removed aggressive loader removal.
+        // We rely on the main initialization logic (8s timeout) to handle this.
     </script>
 </body>
 
