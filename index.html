@@ -1528,7 +1528,8 @@
                     </div>
 
                     <!-- Game Selection Grid -->
-                    <div id="arcade-menu" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden">
+                    <div id="arcade-menu"
+                        class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6 hidden">
                         <!-- Game 1: HTML Tag Master -->
                         <div class="v-card group relative overflow-hidden cursor-pointer hover:border-orange-500 transition-all hover:shadow-xl hover:shadow-orange-500/10"
                             onclick="startArcadeGame('html_master')">
@@ -1598,6 +1599,51 @@
                                     Game</span>
                             </div>
                         </div>
+
+                        <!-- Game 4: JS Logic Lab (New) -->
+                        <div class="v-card group relative overflow-hidden cursor-pointer hover:border-yellow-500 transition-all hover:shadow-xl hover:shadow-yellow-500/10"
+                            onclick="startArcadeGame('js_logic')">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-yellow-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                            </div>
+                            <div class="p-6 relative z-10">
+                                <div
+                                    class="w-12 h-12 bg-yellow-100 text-yellow-600 rounded-xl flex items-center justify-center mb-4 text-2xl font-black shadow-sm">
+                                    <i data-lucide="braces" class="w-6 h-6"></i>
+                                </div>
+                                <h4
+                                    class="font-black text-lg text-slate-900 dark:text-white mb-2 uppercase tracking-tighter">
+                                    JS Logic Lab</h4>
+                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Predict
+                                    the output of JavaScript snippets.</p>
+                                <span
+                                    class="px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-600 text-[9px] font-black uppercase tracking-widest">Start
+                                    Game</span>
+                            </div>
+                        </div>
+
+                        <!-- Game 5: Syntax Balloons (New Adventure) -->
+                        <div class="v-card group relative overflow-hidden cursor-pointer hover:border-sky-500 transition-all hover:shadow-xl hover:shadow-sky-500/10"
+                            onclick="startArcadeGame('syntax_balloons')">
+                            <div
+                                class="absolute inset-0 bg-gradient-to-br from-sky-500/10 to-transparent opacity-0 group-hover:opacity-100 transition-opacity">
+                            </div>
+                            <div class="p-6 relative z-10">
+                                <div
+                                    class="w-12 h-12 bg-sky-100 text-sky-600 rounded-xl flex items-center justify-center mb-4 text-2xl font-black shadow-sm">
+                                    <i data-lucide="aperture" class="w-6 h-6"></i>
+                                </div>
+                                <h4
+                                    class="font-black text-lg text-slate-900 dark:text-white mb-2 uppercase tracking-tighter">
+                                    Syntax Balloons</h4>
+                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Pop the
+                                    correct code bubbles! HTML, CSS, & JS.</p>
+                                <span
+                                    class="px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 text-[9px] font-black uppercase tracking-widest">Start
+                                    Learning</span>
+                            </div>
+                        </div>
+
                     </div>
 
                     <!-- Game Interface (Hidden by default) -->
@@ -1612,326 +1658,328 @@
                             <!-- Game content loaded here -->
                         </div>
                     </div>
-                </div>
 
-                <!-- 5. Admin Review Center -->
-                <div id="view-grading" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
-                    <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
-                        <div>
-                            <h3 class="text-xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">
-                                Grading
-                                Center</h3>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Review and
-                                grade
-                                student tasks</p>
-                        </div>
-                        <div class="flex items-center gap-3">
-                            <div
-                                class="px-4 py-2 bg-white dark:bg-[#1e293b] rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-2">
-                                <i data-lucide="filter" class="w-3 h-3 text-slate-400"></i>
-                                <select onchange="renderGrading(window.allSubmissions)" id="grading-filter"
-                                    class="bg-transparent text-[9px] font-black uppercase tracking-widest outline-none text-slate-600 dark:text-slate-300 cursor-pointer">
-                                    <option value="all">Check All Student's</option>
-                                </select>
+                    <!-- 5. Admin Review Center -->
+                    <div id="view-grading" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                        <div class="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-6">
+                            <div>
+                                <h3
+                                    class="text-xl font-black uppercase tracking-tighter text-slate-900 dark:text-white">
+                                    Grading
+                                    Center</h3>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Review and
+                                    grade
+                                    student tasks</p>
                             </div>
+                            <div class="flex items-center gap-3">
+                                <div
+                                    class="px-4 py-2 bg-white dark:bg-[#1e293b] rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm flex items-center gap-2">
+                                    <i data-lucide="filter" class="w-3 h-3 text-slate-400"></i>
+                                    <select onchange="renderGrading(window.allSubmissions)" id="grading-filter"
+                                        class="bg-transparent text-[9px] font-black uppercase tracking-widest outline-none text-slate-600 dark:text-slate-300 cursor-pointer">
+                                        <option value="all">Check All Student's</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="grading-list" class="space-y-4 pb-10">
+                            <!-- Submissions Injected -->
                         </div>
                     </div>
 
-                    <div id="grading-list" class="space-y-4 pb-10">
-                        <!-- Submissions Injected -->
-                    </div>
-                </div>
-
-                <!-- 6. Admin Student Directory -->
-                <div id="view-users" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
-                    <div class="v-card overflow-hidden">
-                        <div
-                            class="p-4 border-b border-slate-100 dark:border-slate-800/50 flex flex-col md:flex-row gap-3 items-center justify-between">
-                            <div class="relative w-full md:max-w-xs">
-                                <i data-lucide="search"
-                                    class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5"></i>
-                                <input type="text" id="user-search" placeholder="Search..."
-                                    class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="window.approveAllUsers()"
-                                    class="px-4 py-2.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
-                                    <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approve All
-                                </button>
-                                <button onclick="downloadAllReports()"
-                                    class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
-                                    <i data-lucide="download" class="w-3 h-3"></i> Export All
-                                </button>
-                            </div>
-                        </div>
-                        <div class="overflow-x-auto">
-                            <table class="w-full text-left font-bold">
-                                <thead
-                                    class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
-                                    <tr>
-                                        <th class="px-5 py-3">Student Name</th>
-                                        <th class="px-5 py-3 text-center hidden sm:table-cell">Tasks</th>
-                                        <th class="px-5 py-3 text-center">Grade</th>
-                                        <th class="px-6 py-3 text-center">Status</th>
-                                        <th class="px-5 py-3 text-right">Actions</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="user-table-body"
-                                    class="divide-y divide-slate-100 dark:divide-slate-800/50 text-[11px]">
-                                    <!-- Row Injected -->
-                                </tbody>
-                            </table>
-                        </div>
-                    </div>
-                </div>
-
-
-                <!-- Selected Private Chat (Hidden by default, will reuse global chat container if needed) -->
-                <!-- Removing the dedicated inbox view as requested -->
-
-                <!-- 8. Profile View -->
-                <div id="view-profile" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
-                    <div class="max-w-2xl mx-auto">
+                    <!-- 6. Admin Student Directory -->
+                    <div id="view-users" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
                         <div class="v-card overflow-hidden">
                             <div
-                                class="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-6">
-                                <input type="file" id="profile-upload" class="hidden" accept="image/*">
-                                <div class="relative group cursor-pointer" onclick="$('#profile-upload').click()">
-                                    <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-indigo-500/30 overflow-hidden ring-4 ring-white dark:ring-slate-800"
-                                        id="profile-avatar-display">
-                                        <span id="profile-initial-lg">?</span>
-                                    </div>
-                                    <div
-                                        class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                                        <i data-lucide="camera" class="w-6 h-6 text-white"></i>
-                                    </div>
-                                    <div
-                                        class="absolute bottom-1 right-1 bg-indigo-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-800">
-                                        <i data-lucide="edit-2" class="w-3 h-3"></i>
-                                    </div>
+                                class="p-4 border-b border-slate-100 dark:border-slate-800/50 flex flex-col md:flex-row gap-3 items-center justify-between">
+                                <div class="relative w-full md:max-w-xs">
+                                    <i data-lucide="search"
+                                        class="absolute left-3.5 top-1/2 -translate-y-1/2 text-slate-400 w-3.5 h-3.5"></i>
+                                    <input type="text" id="user-search" placeholder="Search..."
+                                        class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
                                 </div>
-
-                                <div class="text-center sm:text-left">
-                                    <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1"
-                                        id="profile-page-name">
-                                        My Account</h3>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Update
-                                        your personal profile & avatar</p>
-                                    <p class="text-[8px] text-indigo-500 font-bold uppercase tracking-widest mt-2 hidden"
-                                        id="upload-status">Uploading...</p>
+                                <div class="flex gap-2">
+                                    <button onclick="window.approveAllUsers()"
+                                        class="px-4 py-2.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
+                                        <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approve All
+                                    </button>
+                                    <button onclick="downloadAllReports()"
+                                        class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
+                                        <i data-lucide="download" class="w-3 h-3"></i> Export All
+                                    </button>
                                 </div>
                             </div>
-                            <div class="p-8">
-                                <form id="profile-form" class="space-y-6">
-                                    <div class="space-y-2">
-                                        <label
-                                            class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Full
-                                            Name</label>
-                                        <div class="relative">
-                                            <i data-lucide="user"
-                                                class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                            <input type="text" id="profile-name" required
-                                                class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-left font-bold">
+                                    <thead
+                                        class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                        <tr>
+                                            <th class="px-5 py-3">Student Name</th>
+                                            <th class="px-5 py-3 text-center hidden sm:table-cell">Tasks</th>
+                                            <th class="px-5 py-3 text-center">Grade</th>
+                                            <th class="px-6 py-3 text-center">Status</th>
+                                            <th class="px-5 py-3 text-right">Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="user-table-body"
+                                        class="divide-y divide-slate-100 dark:divide-slate-800/50 text-[11px]">
+                                        <!-- Row Injected -->
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+
+
+                    <!-- Selected Private Chat (Hidden by default, will reuse global chat container if needed) -->
+                    <!-- Removing the dedicated inbox view as requested -->
+
+                    <!-- 8. Profile View -->
+                    <div id="view-profile" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                        <div class="max-w-2xl mx-auto">
+                            <div class="v-card overflow-hidden">
+                                <div
+                                    class="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-col sm:flex-row items-center gap-6">
+                                    <input type="file" id="profile-upload" class="hidden" accept="image/*">
+                                    <div class="relative group cursor-pointer" onclick="$('#profile-upload').click()">
+                                        <div class="w-24 h-24 bg-indigo-600 rounded-full flex items-center justify-center text-3xl font-black text-white shadow-xl shadow-indigo-500/30 overflow-hidden ring-4 ring-white dark:ring-slate-800"
+                                            id="profile-avatar-display">
+                                            <span id="profile-initial-lg">?</span>
+                                        </div>
+                                        <div
+                                            class="absolute inset-0 bg-black/40 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                            <i data-lucide="camera" class="w-6 h-6 text-white"></i>
+                                        </div>
+                                        <div
+                                            class="absolute bottom-1 right-1 bg-indigo-500 text-white p-1 rounded-full border-2 border-white dark:border-slate-800">
+                                            <i data-lucide="edit-2" class="w-3 h-3"></i>
                                         </div>
                                     </div>
-                                    <div class="space-y-2">
-                                        <label
-                                            class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Email
-                                            Address</label>
-                                        <div class="relative opacity-70">
-                                            <i data-lucide="mail"
-                                                class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                            <input type="email" id="profile-email" disabled
-                                                class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-900/50 border border-transparent dark:border-slate-800/50 rounded-xl text-sm font-bold text-slate-500 cursor-not-allowed">
-                                        </div>
-                                        <p class="text-[9px] text-slate-400 italic px-1">Email cannot be changed
-                                            directly.</p>
+
+                                    <div class="text-center sm:text-left">
+                                        <h3 class="text-2xl font-black text-slate-900 dark:text-white uppercase tracking-tighter mb-1"
+                                            id="profile-page-name">
+                                            My Account</h3>
+                                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Update
+                                            your personal profile & avatar</p>
+                                        <p class="text-[8px] text-indigo-500 font-bold uppercase tracking-widest mt-2 hidden"
+                                            id="upload-status">Uploading...</p>
                                     </div>
-                                    <div class="pt-6 border-t border-slate-100 dark:border-slate-800">
-                                        <h4
-                                            class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">
-                                            Security</h4>
-                                        <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                                            <div class="space-y-2">
-                                                <label
-                                                    class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">New
-                                                    Password</label>
-                                                <div class="relative">
-                                                    <i data-lucide="lock"
-                                                        class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                                    <input type="password" id="profile-new-pass"
-                                                        class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
-                                                        placeholder="Minimum 6 chars">
+                                </div>
+                                <div class="p-8">
+                                    <form id="profile-form" class="space-y-6">
+                                        <div class="space-y-2">
+                                            <label
+                                                class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Full
+                                                Name</label>
+                                            <div class="relative">
+                                                <i data-lucide="user"
+                                                    class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                                <input type="text" id="profile-name" required
+                                                    class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-slate-950 border border-transparent dark:border-slate-800 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all">
+                                            </div>
+                                        </div>
+                                        <div class="space-y-2">
+                                            <label
+                                                class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Email
+                                                Address</label>
+                                            <div class="relative opacity-70">
+                                                <i data-lucide="mail"
+                                                    class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                                <input type="email" id="profile-email" disabled
+                                                    class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-900/50 border border-transparent dark:border-slate-800/50 rounded-xl text-sm font-bold text-slate-500 cursor-not-allowed">
+                                            </div>
+                                            <p class="text-[9px] text-slate-400 italic px-1">Email cannot be changed
+                                                directly.</p>
+                                        </div>
+                                        <div class="pt-6 border-t border-slate-100 dark:border-slate-800">
+                                            <h4
+                                                class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">
+                                                Security</h4>
+                                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                                <div class="space-y-2">
+                                                    <label
+                                                        class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">New
+                                                        Password</label>
+                                                    <div class="relative">
+                                                        <i data-lucide="lock"
+                                                            class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                                        <input type="password" id="profile-new-pass"
+                                                            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                                                            placeholder="Minimum 6 chars">
+                                                    </div>
+                                                </div>
+                                                <div class="space-y-2">
+                                                    <label
+                                                        class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Confirm
+                                                        Password</label>
+                                                    <div class="relative">
+                                                        <i data-lucide="check-circle-2"
+                                                            class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
+                                                        <input type="password" id="profile-confirm-pass"
+                                                            class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
+                                                            placeholder="Re-enter password">
+                                                    </div>
                                                 </div>
                                             </div>
-                                            <div class="space-y-2">
-                                                <label
-                                                    class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Confirm
-                                                    Password</label>
-                                                <div class="relative">
-                                                    <i data-lucide="check-circle-2"
-                                                        class="absolute left-4 top-3.5 w-4 h-4 text-slate-400"></i>
-                                                    <input type="password" id="profile-confirm-pass"
-                                                        class="w-full pl-10 pr-4 py-3 bg-slate-50 dark:bg-[#0b1120] border-0 rounded-xl text-sm font-bold text-slate-900 dark:text-slate-100 focus:ring-2 focus:ring-indigo-500 outline-none transition-all placeholder:font-normal placeholder:text-slate-400"
-                                                        placeholder="Re-enter password">
-                                                </div>
-                                            </div>
+                                        </div>
+                                        <div class="pt-4 flex justify-end">
+                                            <button type="submit"
+                                                class="btn-command px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/20 text-xs flex items-center gap-2">
+                                                <i data-lucide="save" class="w-4 h-4"></i> Save Changes
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+
+                            <!-- Achievements Section -->
+                            <div id="achievements-section" class="v-card overflow-hidden mt-6">
+                                <div class="p-6 border-b border-slate-100 dark:border-slate-800">
+                                    <h5 class="text-sm font-black uppercase tracking-widest text-indigo-500">Badges &
+                                        Achievements</h5>
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
+                                        Unlock
+                                        badges
+                                        by
+                                        completing tasks and winning games.</p>
+                                </div>
+                                <div class="p-6">
+                                    <div id="achievements-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
+                                        <!-- Badges will be injected here via JS -->
+                                        <div
+                                            class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center opacity-50 grayscale">
+                                            <i data-lucide="lock" class="w-8 h-8 text-slate-300 mb-2"></i>
+                                            <span class="text-[9px] font-black uppercase text-slate-400">Locked</span>
                                         </div>
                                     </div>
-                                    <div class="pt-4 flex justify-end">
-                                        <button type="submit"
-                                            class="btn-command px-8 py-3 rounded-xl shadow-lg shadow-indigo-500/20 text-xs flex items-center gap-2">
-                                            <i data-lucide="save" class="w-4 h-4"></i> Save Changes
-                                        </button>
-                                    </div>
-                                </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- 9. LIVE CODE PLAYGROUND -->
+                    <div id="view-playground"
+                        class="content-view hidden animate-in slide-in-from-bottom-5 duration-500 h-full flex flex-col bg-[#1e1e1e]">
+
+                        <!-- CodePen-like Header -->
+                        <div
+                            class="h-14 bg-black border-b border-[#333] flex items-center justify-between px-4 shrink-0">
+                            <div class="flex items-center gap-3">
+                                <i data-lucide="cloud" class="w-6 h-6 text-white"></i>
+                            </div>
+                            <div class="flex gap-3">
+                                <button onclick="runCode()"
+                                    class="flex items-center gap-2 px-6 py-2 bg-[#47cf73] hover:bg-[#3dbb65] text-white rounded-md font-bold text-xs transition-all">
+                                    <i data-lucide="play" class="w-3 h-3 fill-current"></i> Run
+                                </button>
+                                <button onclick="clearCode()"
+                                    class="px-4 py-2 bg-[#444] hover:bg-[#555] text-white rounded-md font-bold text-xs transition-all">
+                                    Clear
+                                </button>
+                                <button onclick="switchTab('dashboard')"
+                                    class="px-4 py-2 bg-[#333] hover:bg-[#444] text-white rounded-md font-bold text-xs transition-all">
+                                    Close
+                                </button>
                             </div>
                         </div>
 
-                        <!-- Achievements Section -->
-                        <div id="achievements-section" class="v-card overflow-hidden mt-6">
-                            <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-                                <h5 class="text-sm font-black uppercase tracking-widest text-indigo-500">Badges &
-                                    Achievements</h5>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                    Unlock
-                                    badges
-                                    by
-                                    completing tasks and winning games.</p>
-                            </div>
-                            <div class="p-6">
-                                <div id="achievements-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    <!-- Badges will be injected here via JS -->
+                        <div class="flex-1 flex flex-col h-[calc(100vh-56px)]">
+                            <!-- Editors Area (Top Half) -->
+                            <div class="h-1/2 flex border-b border-[#333] bg-[#1e1e1e]">
+                                <!-- HTML Editor -->
+                                <div class="flex-1 flex flex-col border-r border-[#333] min-w-0">
                                     <div
-                                        class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center opacity-50 grayscale">
-                                        <i data-lucide="lock" class="w-8 h-8 text-slate-300 mb-2"></i>
-                                        <span class="text-[9px] font-black uppercase text-slate-400">Locked</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- 9. LIVE CODE PLAYGROUND -->
-                <div id="view-playground"
-                    class="content-view hidden animate-in slide-in-from-bottom-5 duration-500 h-full flex flex-col bg-[#1e1e1e]">
-
-                    <!-- CodePen-like Header -->
-                    <div class="h-14 bg-black border-b border-[#333] flex items-center justify-between px-4 shrink-0">
-                        <div class="flex items-center gap-3">
-                            <i data-lucide="cloud" class="w-6 h-6 text-white"></i>
-                        </div>
-                        <div class="flex gap-3">
-                            <button onclick="runCode()"
-                                class="flex items-center gap-2 px-6 py-2 bg-[#47cf73] hover:bg-[#3dbb65] text-white rounded-md font-bold text-xs transition-all">
-                                <i data-lucide="play" class="w-3 h-3 fill-current"></i> Run
-                            </button>
-                            <button onclick="clearCode()"
-                                class="px-4 py-2 bg-[#444] hover:bg-[#555] text-white rounded-md font-bold text-xs transition-all">
-                                Clear
-                            </button>
-                            <button onclick="switchTab('dashboard')"
-                                class="px-4 py-2 bg-[#333] hover:bg-[#444] text-white rounded-md font-bold text-xs transition-all">
-                                Close
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="flex-1 flex flex-col h-[calc(100vh-56px)]">
-                        <!-- Editors Area (Top Half) -->
-                        <div class="h-1/2 flex border-b border-[#333] bg-[#1e1e1e]">
-                            <!-- HTML Editor -->
-                            <div class="flex-1 flex flex-col border-r border-[#333] min-w-0">
-                                <div
-                                    class="bg-[#1e1e1e] border-b border-[#333] px-3 py-2 flex items-center justify-between">
-                                    <span
-                                        class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                        <i data-lucide="file-code" class="w-3 h-3 text-orange-500"></i> HTML
-                                    </span>
-                                </div>
-                                <textarea id="code-html"
-                                    class="flex-1 w-full bg-[#1e1e1e] text-gray-300 p-4 font-mono text-sm resize-none outline-none focus:bg-[#252525] transition-colors leading-relaxed"
-                                    spellcheck="false"
-                                    placeholder="<!-- Write HTML here -->"><h1>Hello World</h1></textarea>
-                            </div>
-
-                            <!-- CSS Editor -->
-                            <div class="flex-1 flex flex-col border-r border-[#333] min-w-0">
-                                <div
-                                    class="bg-[#1e1e1e] border-b border-[#333] px-3 py-2 flex items-center justify-between">
-                                    <span
-                                        class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                        <i data-lucide="file-code" class="w-3 h-3 text-blue-500"></i> CSS
-                                    </span>
-                                </div>
-                                <textarea id="code-css"
-                                    class="flex-1 w-full bg-[#1e1e1e] text-gray-300 p-4 font-mono text-sm resize-none outline-none focus:bg-[#252525] transition-colors leading-relaxed"
-                                    spellcheck="false"
-                                    placeholder="/* Write CSS here */">body { font-family: sans-serif; color: #333; padding: 20px; }</textarea>
-                            </div>
-
-                            <!-- JS Editor -->
-                            <div class="flex-1 flex flex-col min-w-0">
-                                <div
-                                    class="bg-[#1e1e1e] border-b border-[#333] px-3 py-2 flex items-center justify-between">
-                                    <span
-                                        class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
-                                        <i data-lucide="file-code" class="w-3 h-3 text-yellow-500"></i> JS
-                                    </span>
-                                </div>
-                                <textarea id="code-js"
-                                    class="flex-1 w-full bg-[#1e1e1e] text-gray-300 p-4 font-mono text-sm resize-none outline-none focus:bg-[#252525] transition-colors leading-relaxed"
-                                    spellcheck="false" placeholder="// Write JS here"></textarea>
-                            </div>
-                        </div>
-
-                        <!-- Preview Area (Bottom Half) -->
-                        <div class="h-1/2 flex flex-col bg-white">
-                            <iframe id="code-preview" class="w-full h-full border-none bg-white"></iframe>
-                        </div>
-                    </div>
-                </div>
-
-
-
-                <!-- CORE SCRIPTS -->
-                <footer class="w-full mt-auto pt-12 pb-6 px-6">
-                    <div class="max-w-7xl mx-auto border-t border-slate-200 dark:border-slate-800 pt-8">
-                        <div class="flex flex-col md:flex-row justify-between items-center gap-6">
-
-                            <!-- Brand / Copyright -->
-                            <div class="text-center md:text-left">
-                                <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                    <img src="assets/bbsydp_logo.png" alt="BBSYDP Logo"
-                                        class="w-8 h-8 rounded-lg shadow-lg shadow-indigo-500/30 object-contain bg-white">
-                                    <span
-                                        class="font-black text-sm tracking-tight text-slate-900 dark:text-white">BBSYDP
-                                        LMS</span>
-                                </div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                    &copy; 2025 Enterprise Learning System. All Rights Reserved.
-                                </p>
-                            </div>
-
-                            <!-- Social / Status -->
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30">
-                                    <span class="relative flex h-2 w-2">
+                                        class="bg-[#1e1e1e] border-b border-[#333] px-3 py-2 flex items-center justify-between">
                                         <span
-                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
-                                    <span
-                                        class="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">System
-                                        Online</span>
+                                            class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                            <i data-lucide="file-code" class="w-3 h-3 text-orange-500"></i> HTML
+                                        </span>
+                                    </div>
+                                    <textarea id="code-html"
+                                        class="flex-1 w-full bg-[#1e1e1e] text-gray-300 p-4 font-mono text-sm resize-none outline-none focus:bg-[#252525] transition-colors leading-relaxed"
+                                        spellcheck="false"
+                                        placeholder="<!-- Write HTML here -->"><h1>Hello World</h1></textarea>
+                                </div>
+
+                                <!-- CSS Editor -->
+                                <div class="flex-1 flex flex-col border-r border-[#333] min-w-0">
+                                    <div
+                                        class="bg-[#1e1e1e] border-b border-[#333] px-3 py-2 flex items-center justify-between">
+                                        <span
+                                            class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                            <i data-lucide="file-code" class="w-3 h-3 text-blue-500"></i> CSS
+                                        </span>
+                                    </div>
+                                    <textarea id="code-css"
+                                        class="flex-1 w-full bg-[#1e1e1e] text-gray-300 p-4 font-mono text-sm resize-none outline-none focus:bg-[#252525] transition-colors leading-relaxed"
+                                        spellcheck="false"
+                                        placeholder="/* Write CSS here */">body { font-family: sans-serif; color: #333; padding: 20px; }</textarea>
+                                </div>
+
+                                <!-- JS Editor -->
+                                <div class="flex-1 flex flex-col min-w-0">
+                                    <div
+                                        class="bg-[#1e1e1e] border-b border-[#333] px-3 py-2 flex items-center justify-between">
+                                        <span
+                                            class="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-2">
+                                            <i data-lucide="file-code" class="w-3 h-3 text-yellow-500"></i> JS
+                                        </span>
+                                    </div>
+                                    <textarea id="code-js"
+                                        class="flex-1 w-full bg-[#1e1e1e] text-gray-300 p-4 font-mono text-sm resize-none outline-none focus:bg-[#252525] transition-colors leading-relaxed"
+                                        spellcheck="false" placeholder="// Write JS here"></textarea>
                                 </div>
                             </div>
 
+                            <!-- Preview Area (Bottom Half) -->
+                            <div class="h-1/2 flex flex-col bg-white">
+                                <iframe id="code-preview" class="w-full h-full border-none bg-white"></iframe>
+                            </div>
                         </div>
                     </div>
-                </footer>
+
+
+
+                    <!-- CORE SCRIPTS -->
+                    <footer class="w-full mt-auto pt-12 pb-6 px-6">
+                        <div class="max-w-7xl mx-auto border-t border-slate-200 dark:border-slate-800 pt-8">
+                            <div class="flex flex-col md:flex-row justify-between items-center gap-6">
+
+                                <!-- Brand / Copyright -->
+                                <div class="text-center md:text-left">
+                                    <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
+                                        <img src="assets/bbsydp_logo.png" alt="BBSYDP Logo"
+                                            class="w-8 h-8 rounded-lg shadow-lg shadow-indigo-500/30 object-contain bg-white">
+                                        <span
+                                            class="font-black text-sm tracking-tight text-slate-900 dark:text-white">BBSYDP
+                                            LMS</span>
+                                    </div>
+                                    <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                                        &copy; 2025 Enterprise Learning System. All Rights Reserved.
+                                    </p>
+                                </div>
+
+                                <!-- Social / Status -->
+                                <div class="flex items-center gap-4">
+                                    <div
+                                        class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30">
+                                        <span class="relative flex h-2 w-2">
+                                            <span
+                                                class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                            <span
+                                                class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                        </span>
+                                        <span
+                                            class="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">System
+                                            Online</span>
+                                    </div>
+                                </div>
+
+                            </div>
+                        </div>
+                    </footer>
         </main>
         <!-- Mobile Bottom Navigation -->
         <nav class="mobile-bottom-nav">
@@ -2358,7 +2406,7 @@
                         </button>
                     </div>
 
-                    <!-- ðŸ—£ï¸ DISCUSSION HUB (NEW) -->
+                    <!-- 🗣️ DISCUSSION HUB (NEW) -->
                     <div class="mt-12 pt-12 border-t border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-3 mb-6">
                             <div
@@ -3307,7 +3355,7 @@
                 window.allTasks = tasks;
                 window.allSubmissions = subs;
 
-                console.log("⚡ Instant Load from Cache triggered");
+                console.log("? Instant Load from Cache triggered");
                 renderStats(tasks, subs);
                 if (activeTab === 'tasks') renderTasks(tasks, subs);
                 if (activeTab === 'leaderboard') renderLeaderboard(subs);
@@ -5128,7 +5176,11 @@
         };
 
         // --- ARCADE GAME ENGINE ---
+        window.activeGameTimer = null;
+
         window.startArcadeGame = (gameId) => {
+            if (window.activeGameTimer) clearInterval(window.activeGameTimer);
+
             $('#arcade-menu').addClass('hidden');
             $('#game-stage').removeClass('hidden');
             const container = $('#game-container').empty();
@@ -5139,6 +5191,10 @@
                 runCssSpeed(container);
             } else if (gameId === 'drag_master') {
                 runDragMaster(container);
+            } else if (gameId === 'js_logic') {
+                runJsLogic(container);
+            } else if (gameId === 'syntax_balloons') {
+                runSyntaxBalloons(container);
             }
         };
 
@@ -5190,6 +5246,7 @@
         };
 
         window.exitArcadeGame = () => {
+            if (window.activeGameTimer) clearInterval(window.activeGameTimer);
             $('#game-stage').addClass('hidden');
             $('#arcade-menu').removeClass('hidden');
         };
@@ -5223,7 +5280,7 @@
 
         // ADAPTIVE LEVEL MANAGER (Global)
         function getLevel(gameType) {
-            const map = { 'html': 'html_master_level', 'css': 'css_master_level', 'drag': 'drag_master_level' };
+            const map = { 'html': 'html_master_level', 'css': 'css_master_level', 'drag': 'drag_master_level', 'js': 'js_logic_level' };
             return localStorage.getItem(map[gameType]) || 'easy';
         }
 
@@ -5246,6 +5303,7 @@
                         if (gameType === 'html') payload.html_level = newLevel;
                         if (gameType === 'css') payload.css_level = newLevel;
                         if (gameType === 'drag') payload.drag_level = newLevel;
+                        if (gameType === 'js') payload.js_level = newLevel;
 
                         await client.from('user_arcade_progress').upsert(payload, { onConflict: 'user_id' });
                     } catch (e) { console.error(e); }
@@ -5262,6 +5320,7 @@
                     if (data.html_level) localStorage.setItem('html_master_level', data.html_level);
                     if (data.css_level) localStorage.setItem('css_master_level', data.css_level);
                     if (data.drag_level) localStorage.setItem('drag_master_level', data.drag_level);
+                    if (data.js_level) localStorage.setItem('js_logic_level', data.js_level);
                     console.log("[Arcade] Synced Progress: ", data);
                 }
             } catch (e) {
@@ -5272,7 +5331,7 @@
         // ADAPTIVE DIFFICULTY CONTENT BANKS
         const htmlQB = {
             easy: [
-                { q: "Which tag makes text <b>bold</b>?", a: ["<b>", "<bold>", "<heavy>", "<strong>"], r: ["<b>", "<strong>"] },
+                { q: "Which tag makes text <b>bold</b>?", a: ["<b>", "<bold>", "<heavy>", "<em>"], r: ["<b>"] },
                 { q: "What is the correct tag for a hyperlink?", a: ["<link>", "<a>", "<href>", "<url>"], r: ["<a>"] },
                 { q: "Which is the largest heading tag?", a: ["<h6>", "<head>", "<h1>", "<header>"], r: ["<h1>"] },
                 { q: "How do you insert an image?", a: ["<img>", "<pic>", "<src>", "<image>"], r: ["<img>"] },
@@ -5280,7 +5339,7 @@
                 { q: "Line break tag?", a: ["<br>", "<break>", "<lb>", "<newline>"], r: ["<br>"] },
                 { q: "Paragraph tag?", a: ["<p>", "<para>", "<text>", "<pg>"], r: ["<p>"] },
                 { q: "Smallest heading tag?", a: ["<h1>", "<h6>", "<small>", "<head>"], r: ["<h6>"] },
-                { q: "Horizontal rule tag?", a: ["<hr>", "<line>", "<br>", "<tr >"], r: ["<hr>"] }
+                { q: "Horizontal rule tag?", a: ["<hr>", "<line>", "<br>", "<tr>"], r: ["<hr>"] }
             ],
             moderate: [
                 { q: "Choose the correct HTML5 element for the main content?", a: ["<article>", "<main>", "<content>", "<body>"], r: ["<main>"] },
@@ -5290,7 +5349,7 @@
                 { q: "Which tag is used to define a table row?", a: ["<th>", "<td>", "<tr>", "<table>"], r: ["<tr>"] },
                 { q: "Tag for navigation links?", a: ["<nav>", "<links>", "<menu>", "<ul>"], r: ["<nav>"] },
                 { q: "Tag for a dropdown list?", a: ["<select>", "<list>", "<dropdown>", "<option>"], r: ["<select>"] },
-                { q: "Correct attribute to link CSS?", a: ["href", "src", "link", "rel"], r: ["href"] },
+                { q: "Attribute for external CSS URL?", a: ["href", "src", "link", "rel"], r: ["href"] },
                 { q: "Alternative text for image?", a: ["title", "alt", "desc", "src"], r: ["alt"] }
             ],
             hard: [
@@ -5301,8 +5360,8 @@
                 { q: "Which element describes the structure of a document?", a: ["<meta>", "<head>", "<body>", "<html>"], r: ["<html>"] },
                 { q: "Which element is used to draw graphics?", a: ["<svg>", "<canvas>", "<paint>", "<graphic>"], r: ["<canvas>"] },
                 { q: "Pattern attribute is used for?", a: ["Validation", "Styling", "Images", "Links"], r: ["Validation"] },
-                { q: "Which tag defines an embedded object?", a: ["&lt;embed&gt;", "&lt;object&gt;", "&lt;iframe&gt;", "&lt;all&gt;"], r: ["&lt;embed&gt;", "&lt;object&gt;"] },
-                { q: "Tag for result of calculation?", a: ["&lt;output&gt;", "&lt;result&gt;", "&lt;calc&gt;", "&lt;sum&gt;"], r: ["&lt;output&gt;"] }
+                { q: "Which tag defines an embedded object?", a: ["<embed>", "<object>", "<iframe>", "<all>"], r: ["<embed>", "<object>"] },
+                { q: "Tag for result of calculation?", a: ["<output>", "<result>", "<calc>", "<sum>"], r: ["<output>"] }
             ]
         };
 
@@ -5375,6 +5434,33 @@
                 { code: "justify-content:center;", desc: "Flex Center" },
                 { code: "align-items:center;", desc: "Flex Align" },
                 { code: "flex-direction:column;", desc: "Vertical Layout" }
+            ]
+        };
+
+        const jsQB = {
+            easy: [
+                { q: "typeof 'Hello'", a: ["string", "text", "str", "object"], r: "string" },
+                { q: "2 + '2' = ?", a: ["'22'", "4", "NaN", "Error"], r: "'22'" },
+                { q: "Boolean(0)", a: ["false", "true", "null", "undefined"], r: "false" },
+                { q: "Which symbol is for comments?", a: ["//", "#", "<!--", "**"], r: "//" },
+                { q: "Which declares a constant?", a: ["const", "let", "var", "fixed"], r: "const" },
+                { q: "Output of: console.log(5 == '5')", a: ["true", "false", "error", "undefined"], r: "true" }
+            ],
+            moderate: [
+                { q: "[1, 2, 3].length", a: ["3", "2", "4", "undefined"], r: "3" },
+                { q: "Which method adds to array end?", a: ["push()", "pop()", "shift()", "add()"], r: "push()" },
+                { q: "Output: !true", a: ["false", "true", "undefined", "null"], r: "false" },
+                { q: "Correct way to write a function?", a: ["function myFunc() {}", "func myFunc() {}", "def myFunc() {}", "function:myFunc()"], r: "function myFunc() {}" },
+                { q: "5 === '5'", a: ["false", "true", "error", "null"], r: "false" },
+                { q: "Logical AND operator", a: ["&&", "||", "&", "and"], r: "&&" }
+            ],
+            hard: [
+                { q: "typeof null", a: ["object", "null", "undefined", "number"], r: "object" },
+                { q: "Output: 0.1 + 0.2 === 0.3", a: ["false", "true", "undefined", "NaN"], r: "false" },
+                { q: "Which is NOT a loop?", a: ["foreach", "for", "while", "do...while"], r: "foreach" },
+                { q: "[...'Hello']", a: ["['H','e','l','l','o']", "'Hello'", "Error", "undefined"], r: "['H','e','l','l','o']" },
+                { q: "JSON.parse('{\"a\":1}')", a: ["{a: 1}", "Error", "'{\"a\":1}'", "undefined"], r: "{a: 1}" },
+                { q: "What is a Promise?", a: ["Async Operation", "Sync Operation", "Loop", "Array"], r: "Async Operation" }
             ]
         };
 
@@ -5476,7 +5562,7 @@
                             setTimeout(() => {
                                 container.html(`
                                     <div class="text-center animate-in zoom-in max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl">
-                                        ${leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">🎉 LEVEL UP TO ${getLevel('drag').toUpperCase()}!</div>` : ''}
+                                        ${leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">?? LEVEL UP TO ${getLevel('drag').toUpperCase()}!</div>` : ''}
                                         <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="check" class="w-10 h-10"></i></div>
                                         <h2 class="text-3xl font-black text-slate-900 dark:text-white uppercase">All Matched!</h2>
                                         <div class="flex gap-3 justify-center mt-8">
@@ -5515,7 +5601,7 @@
 
         function runHtmlMaster(container) {
             let score = 0;
-            let timerInterval;
+            // Global timer used
             const timeLeftInit = 15;
 
             // 1. Determine Difficulty
@@ -5531,7 +5617,7 @@
             let qIdx = 0;
 
             function renderQ() {
-                clearInterval(timerInterval);
+                clearInterval(window.activeGameTimer);
 
                 if (qIdx >= questions.length) {
                     // --- GAME OVER SCREEN ---
@@ -5539,7 +5625,7 @@
 
                     // SAVE PROGRESSION
                     saveLevel('html', score, questions.length).then(leveledUp => {
-                        const nextLevelMsg = leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">🎉 LEVEL UP TO ${getLevel('html').toUpperCase()}!</div>` : '';
+                        const nextLevelMsg = leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">?? LEVEL UP TO ${getLevel('html').toUpperCase()}!</div>` : '';
 
                         container.html(`
                             <div class="max-w-md mx-auto bg-white dark:bg-slate-800 rounded-3xl p-8 shadow-2xl border border-slate-100 dark:border-slate-700 text-center animate-in zoom-in duration-300">
@@ -5615,7 +5701,7 @@
                     ];
                     const t = themes[i % themes.length];
                     return `
-                                <button id="opt-${i}" class="group relative p-6 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl ${t.border} hover:shadow-xl transition-all duration-300 text-left flex items-start gap-4" onclick="checkProAns(this, '${opt}')">
+                                <button id="opt-${i}" class="group relative p-6 bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 rounded-2xl ${t.border} hover:shadow-xl transition-all duration-300 text-left flex items-start gap-4" onclick="checkProAns(this, '${opt.replace(/'/g, "\\'")}')">
                                     <div class="w-10 h-10 rounded-xl ${t.bg} dark:${t.bg}/10 ${t.color} flex items-center justify-center shrink-0 font-black text-sm group-hover:scale-110 transition-transform">
                                         <i data-lucide="${t.icon}" class="w-5 h-5"></i>
                                     </div>
@@ -5632,19 +5718,19 @@
                 lucide.createIcons();
 
                 // Start Timer
-                timerInterval = setInterval(() => {
+                window.activeGameTimer = setInterval(() => {
                     timeLeft--;
                     $('#game-timer').text(timeLeft + 's');
                     $('#timer-bar').css('width', `${(timeLeft / timeLeftInit) * 100}%`);
 
                     if (timeLeft <= 0) {
-                        clearInterval(timerInterval);
+                        clearInterval(window.activeGameTimer);
                         handleTimeout();
                     }
                 }, 1000);
 
                 window.checkProAns = (btn, ans) => {
-                    clearInterval(timerInterval);
+                    clearInterval(window.activeGameTimer);
                     const isCorrect = curr.r.includes(ans);
                     const $btn = $(btn);
 
@@ -5717,7 +5803,7 @@
                     saveLevel('css', score, questions.length).then(leveledUp => {
                         container.html(`
                             <div class="text-center animate-in zoom-in max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700">
-                                ${leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">🎉 LEVEL UP TO ${getLevel('css').toUpperCase()}!</div>` : ''}
+                                ${leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">?? LEVEL UP TO ${getLevel('css').toUpperCase()}!</div>` : ''}
                                 <div class="w-20 h-20 bg-cyan-100 text-cyan-600 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="award" class="w-10 h-10"></i></div>
                                 <h2 class="text-3xl font-black text-slate-900 dark:text-white uppercase mb-4">CSS Stage Complete</h2>
                                 <p class="text-slate-500 mb-8 font-bold">Score: ${score}/${questions.length}</p>
@@ -5795,9 +5881,451 @@
             }
             render();
         }
+
+        function runJsLogic(container) {
+            const level = getLevel('js');
+            const pool = jsQB[level] || jsQB['easy'];
+            const questions = pool.sort(() => 0.5 - Math.random()).slice(0, 5);
+            let score = 0;
+            let qIdx = 0;
+
+            showToast(`Adaptivity Active: Difficulty set to ${level.toUpperCase()}`);
+
+            function render() {
+                if (qIdx >= questions.length) {
+                    saveLevel('js', score, questions.length).then(leveledUp => {
+                        container.html(`
+                            <div class="text-center animate-in zoom-in max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700">
+                                ${leveledUp ? `<div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">?? LEVEL UP TO ${getLevel('js').toUpperCase()}!</div>` : ''}
+                                <div class="w-20 h-20 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="braces" class="w-10 h-10"></i></div>
+                                <h2 class="text-3xl font-black text-slate-900 dark:text-white uppercase mb-4">JS Lab Complete</h2>
+                                <p class="text-slate-500 mb-8 font-bold">Score: ${score}/${questions.length}</p>
+                                <div class="flex gap-3 justify-center">
+                                    <button onclick="startArcadeGame('js_logic')" class="px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors flex items-center gap-2">
+                                        <i data-lucide="play" class="w-4 h-4"></i> Next Round
+                                    </button>
+                                    <button onclick="exitArcadeGame()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30">Back to Menu</button>
+                                </div>
+                            </div>
+                         `);
+                        lucide.createIcons();
+                        saveGameScore('js_logic', score, questions.length);
+                    });
+                    return;
+                }
+                const curr = questions[qIdx];
+                const options = curr.a.sort(() => 0.5 - Math.random());
+
+                container.html(`
+                    <div class="max-w-2xl mx-auto text-center mt-10 animate-in fade-in slide-in-from-bottom-4 duration-500">
+                        <span class="text-xs font-black text-yellow-500 uppercase tracking-widest mb-4 block">Snippet ${qIdx + 1} / ${questions.length}</span>
+                        <div class="bg-slate-900 text-slate-200 p-6 rounded-xl font-mono text-lg font-bold mb-8 shadow-inner text-left border-l-4 border-yellow-500">
+                            ${curr.q}
+                        </div>
+                        
+                        <div class="grid grid-cols-2 gap-4">
+                            ${options.map((opt, i) => `
+                                <button id="js-opt-${i}" onclick="checkJs(this, '${opt.replace(/'/g, "\\'")}')" class="p-5 rounded-xl border-2 border-slate-100 dark:border-slate-700 bg-white dark:bg-slate-800 font-mono font-bold hover:border-yellow-500 hover:shadow-xl transition-all text-sm group">
+                                    <span class="block text-slate-500 dark:text-slate-400 group-hover:text-slate-900 dark:group-hover:text-white transition-colors break-words">${opt}</span>
+                                </button>
+                            `).join('')}
+                        </div>
+                    </div>
+                `);
+
+                window.checkJs = (btn, ans) => {
+                    const $btn = $(btn);
+                    $('button[id^="js-opt-"]').prop('disabled', true).addClass('opacity-50 cursor-not-allowed');
+                    $btn.removeClass('opacity-50 cursor-not-allowed');
+
+                    if (ans === curr.r) {
+                        score++;
+                        $btn.removeClass('border-slate-100 dark:border-slate-700 hover:border-yellow-500').addClass('bg-emerald-50 dark:bg-emerald-900/20 border-emerald-500 text-emerald-600');
+                        showGameFeedback("LOGIC VALID!", true);
+                    } else {
+                        $btn.removeClass('border-slate-100 dark:border-slate-700 hover:border-yellow-500').addClass('bg-rose-50 dark:bg-rose-900/20 border-rose-500 text-rose-600');
+                        showGameFeedback("SYNTAX ERROR!", false, curr.r);
+                    }
+
+                    setTimeout(() => {
+                        qIdx++;
+                        render();
+                    }, 1500);
+                };
+            }
+            render();
+        }
+        // --- NAVIGATION & LAYOUT LOGIC ---
+        function runSyntaxBalloons(container) {
+            let score = 0;
+            let lives = 3;
+            window.gameActive = true;
+            let spawnRate = 2500;
+            let speed = 6000;
+            let level = 1;
+
+            // Audio Context for Pop Sound
+            const AudioContext = window.AudioContext || window.webkitAudioContext;
+            const audioCtx = new AudioContext();
+
+            function playPopSound() {
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                const oscillator = audioCtx.createOscillator();
+                const gainNode = audioCtx.createGain();
+
+                oscillator.type = 'triangle';
+                oscillator.frequency.setValueAtTime(300, audioCtx.currentTime);
+                oscillator.frequency.exponentialRampToValueAtTime(50, audioCtx.currentTime + 0.1);
+
+                gainNode.gain.setValueAtTime(0.3, audioCtx.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.01, audioCtx.currentTime + 0.1);
+
+                oscillator.connect(gainNode);
+                gainNode.connect(audioCtx.destination);
+
+                oscillator.start();
+                oscillator.stop(audioCtx.currentTime + 0.1);
+            }
+
+            // Phase Data
+            const phases = [
+                { id: 'html', name: 'Pop HTML Tags!', color: 'orange', valid: ['<div>', '<nav>', '<img>', '<p>', '<ul>', '<form>', '<input>', '<br>', '<hr>', '<span>', '<h1>', '<a>', '<body>', '<head>'] },
+                { id: 'css', name: 'Pop CSS Properties!', color: 'cyan', valid: ['color', 'flex', 'grid', 'margin', 'padding', 'width', 'top', 'border', 'z-index', 'display', 'height', 'left', 'font', 'gap'] },
+                { id: 'js', name: 'Pop JS Keywords!', color: 'yellow', valid: ['const', 'let', 'var', 'async', 'await', 'if', 'else', 'return', 'map', 'filter', 'class', 'new', 'this', 'try'] }
+            ];
+
+            let currentPhaseIdx = 0;
+            let currentPhase = phases[0];
+
+            // Inject Keyframes and Balloon Styles
+            if ($('#balloon-style').length === 0) {
+                $('head').append(`
+                <style id="balloon-style">
+                    @keyframes floatUp {
+                        from { transform: translateY(100%); opacity: 0.8; }
+                        to { transform: translateY(-120vh); opacity: 1; }
+                    }
+                    @keyframes sway {
+                        0%, 100% { transform: rotate(-5deg) translateX(-5px); }
+                        50% { transform: rotate(5deg) translateX(5px); }
+                    }
+                    @keyframes burst {
+                        0% { transform: scale(1); opacity: 1; }
+                        50% { transform: scale(1.5); opacity: 0.8; }
+                        100% { transform: scale(2); opacity: 0; }
+                    }
+                    .balloon-wrapper {
+                        position: absolute;
+                        cursor: crosshair;
+                        user-select: none;
+                        will-change: transform;
+                        display: flex;
+                        flex-direction: column; 
+                        align-items: center;
+                        justify-content: center;
+                        z-index: 20; 
+                    }
+                    .balloon-body {
+                        width: 70px;
+                        height: 85px;
+                        border-radius: 50% 50% 50% 50% / 40% 40% 60% 60%;
+                        box-shadow: inset -5px -5px 15px rgba(0,0,0,0.1);
+                        position: relative;
+                        display: flex;
+                        align-items: center;
+                        justify-content: center;
+                        transition: transform 0.1s;
+                        /* Sway animation will be added inline */
+                    }
+                    .balloon-body:active { transform: scale(0.95) !important; animation: none !important; }
+                    
+                    /* Reflection aka Shine */
+                    .balloon-body::after {
+                        content: '';
+                        position: absolute;
+                        top: 15%;
+                        left: 15%;
+                        width: 15px;
+                        height: 25px;
+                        border-radius: 50%;
+                        background: linear-gradient(to bottom, rgba(255,255,255,0.8), rgba(255,255,255,0.1));
+                        transform: rotate(45deg);
+                    }
+
+                    /* The Knot */
+                    .balloon-knot {
+                        width: 0; 
+                        height: 0; 
+                        border-left: 6px solid transparent;
+                        border-right: 6px solid transparent;
+                        border-bottom: 8px solid; 
+                        transform: translateY(-2px);
+                    }
+
+                    /* The String */
+                    .balloon-string {
+                        width: 1px;
+                        height: 60px;
+                        background: rgba(255,255,255,0.6);
+                        transform-origin: top;
+                    }
+                </style>`);
+            }
+
+            container.html(`
+                 <div class="relative w-full h-[550px] bg-slate-900 rounded-3xl overflow-hidden shadow-2xl border-4 border-slate-800 cursor-crosshair">
+                    <!-- HUD -->
+                    <div class="absolute top-0 left-0 w-full p-4 flex justify-between items-start z-20 pointer-events-none bg-gradient-to-b from-slate-900/90 to-transparent h-24">
+                        <div>
+                             <div class="text-[10px] font-black uppercase tracking-widest text-slate-400">Score</div>
+                             <div class="text-3xl font-black text-white" id="sb-score">0</div>
+                        </div>
+                        
+                        <!-- Current Objective Display -->
+                        <div class="absolute top-4 left-1/2 transform -translate-x-1/2 text-center transition-all duration-300" id="sb-objective-box">
+                             <div class="px-6 py-2 rounded-full border-2 border-${currentPhase.color}-500 bg-${currentPhase.color}-500/10 backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+                                <span class="text-${currentPhase.color}-400 font-black uppercase tracking-widest text-xs block mb-0.5">Mission</span>
+                                <span class="text-white font-black text-lg uppercase tracking-tight whitespace-nowrap" id="sb-objective-text">${currentPhase.name}</span>
+                             </div>
+                             <div class="h-1 bg-slate-800 rounded-full mt-2 w-full overflow-hidden">
+                                <div id="sb-phase-bar" class="h-full bg-${currentPhase.color}-500 w-0 transition-all duration-[200ms]"></div>
+                             </div>
+                        </div>
+
+                        <div class="flex gap-2" id="sb-lives">
+                             <div class="w-8 h-8 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50"></div>
+                             <div class="w-8 h-8 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50"></div>
+                             <div class="w-8 h-8 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50"></div>
+                        </div>
+                    </div>
+
+                    <!-- Game Area -->
+                    <div id="sb-field" class="absolute inset-0 z-10"></div>
+                    
+                    <!-- Start Overlay -->
+                    <div id="sb-start" class="absolute inset-0 z-30 flex flex-col items-center justify-center bg-slate-900/95 text-white text-center">
+                        <div class="w-24 h-24 bg-sky-500 rounded-full flex items-center justify-center mb-6 shadow-2xl shadow-sky-500/20"><i data-lucide="aperture" class="w-12 h-12 text-white"></i></div>
+                        <h2 class="text-5xl font-black uppercase tracking-tighter mb-2">Syntax Balloons</h2>
+                        <p class="text-slate-400 font-bold mb-8 max-w-sm text-sm leading-relaxed">Pop the balloons that match the <span class="text-sky-400">Current Mission</span>.<br>Avoid wrong code blocks!</p>
+                        <button onclick="window.startBalloonHunt()" class="px-10 py-4 bg-white text-slate-900 rounded-2xl font-black uppercase tracking-[0.2em] hover:scale-105 transition-transform hover:shadow-2xl hover:shadow-white/20">Start Hunting</button>
+                    </div>
+                </div>
+            `);
+            lucide.createIcons();
+
+            // Phase Management
+            let phaseProgress = 0; // 0 to 100
+
+            window.startBalloonHunt = () => {
+                $('#sb-start').addClass('hidden');
+                if (audioCtx.state === 'suspended') audioCtx.resume();
+                window.gameActive = true;
+                gameLoop();
+            };
+
+            const togglePhase = () => {
+                currentPhaseIdx = (currentPhaseIdx + 1) % phases.length;
+                currentPhase = phases[currentPhaseIdx];
+
+                // Visual Update
+                const box = $('#sb-objective-box');
+                box.addClass('scale-90 opacity-50'); // pop out
+
+                setTimeout(() => {
+                    $('#sb-objective-text').text(currentPhase.name);
+                    const html = `
+                             <div class="px-6 py-2 rounded-full border-2 border-${currentPhase.color}-500 bg-${currentPhase.color}-500/10 backdrop-blur-md shadow-[0_0_20px_rgba(0,0,0,0.3)]">
+                                <span class="text-${currentPhase.color}-400 font-black uppercase tracking-widest text-xs block mb-0.5">Mission</span>
+                                <span class="text-white font-black text-lg uppercase tracking-tight whitespace-nowrap" id="sb-objective-text">${currentPhase.name}</span>
+                             </div>
+                             <div class="h-1 bg-slate-800 rounded-full mt-2 w-full overflow-hidden">
+                                <div id="sb-phase-bar" class="h-full bg-${currentPhase.color}-500 w-0 transition-all duration-[200ms]"></div>
+                             </div>`;
+                    box.html(html).removeClass('scale-90 opacity-50'); // pop in
+                    showToast(`Mission Update: ${currentPhase.name}`);
+                }, 300);
+
+                phaseProgress = 0;
+            };
+
+            const endGame = (reason) => {
+                window.gameActive = false;
+                $('#sb-field').empty();
+
+                container.html(`
+                    <div class="text-center animate-in zoom-in max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700">
+                        <div class="w-20 h-20 bg-rose-100 text-rose-600 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="skull" class="w-10 h-10"></i></div>
+                        <h2 class="text-3xl font-black text-slate-900 dark:text-white uppercase mb-4">Study Session Over</h2>
+                        <p class="text-slate-500 mb-2 font-bold uppercase tracking-widest text-xs">${reason}</p>
+                        <p class="text-4xl font-black text-indigo-500 mb-8">${score}</p>
+                        <div class="flex gap-3 justify-center">
+                            <button onclick="startArcadeGame('syntax_balloons')" class="px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors flex items-center gap-2">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Retry
+                            </button>
+                            <button onclick="exitArcadeGame()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30">Back to Menu</button>
+                        </div>
+                    </div>
+                 `);
+                lucide.createIcons();
+                saveGameScore('syntax_balloons', score, 0);
+            };
+
+            const updateLives = () => {
+                const liveContainer = $('#sb-lives').empty();
+                for (let i = 0; i < 3; i++) {
+                    if (i < lives) liveContainer.append(`<div class="w-8 h-8 rounded-full bg-rose-500 shadow-lg shadow-rose-500/50"></div>`);
+                    else liveContainer.append(`<div class="w-8 h-8 rounded-full bg-slate-800 border-2 border-slate-700"></div>`);
+                }
+                if (lives <= 0) endGame("Too many syntax errors!");
+            };
+
+            const spawnEntity = () => {
+                if (!window.gameActive) return;
+
+                // Random phase to pick word from
+                const randomPhase = phases[Math.floor(Math.random() * phases.length)];
+                const word = randomPhase.valid[Math.floor(Math.random() * randomPhase.valid.length)];
+
+                // ESCAPE HTML FOR DISPLAY! (Critical fix for "empty" balloons)
+                const displayWord = word.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+
+                // Determine if this is a Target (Correct) or Trap (Wrong)
+                const isTarget = (randomPhase.id === currentPhase.id);
+
+                // Styling
+                let bgClass = '';
+                let knotColor = '';
+                if (randomPhase.id === 'html') { bgClass = 'from-orange-400 to-orange-500 text-white'; knotColor = 'border-bottom-color: #f97316'; }
+                if (randomPhase.id === 'css') { bgClass = 'from-cyan-400 to-cyan-500 text-white'; knotColor = 'border-bottom-color: #06b6d4'; }
+                if (randomPhase.id === 'js') { bgClass = 'from-yellow-400 to-yellow-500 text-slate-900'; knotColor = 'border-bottom-color: #eab308'; }
+
+                // Random Sway Animation Duration
+                const swayDur = 2 + Math.random() * 2; // 2s to 4s
+
+                // Wrapper
+                const wrapper = $(`<div class="balloon-wrapper"></div>`);
+
+                // Balloon Item (Apply Sway Here)
+                const balloon = $(`<div class="balloon-body bg-gradient-to-tr ${bgClass} z-10" style="animation: sway ${swayDur}s ease-in-out infinite alternate"><span class="font-mono font-black text-[11px] drop-shadow-md text-center leading-tight px-1">${displayWord}</span></div>`);
+
+                // Parts
+                const knot = $(`<div class="balloon-knot" style="${knotColor}"></div>`);
+                const string = $(`<div class="balloon-string"></div>`);
+
+                wrapper.append(balloon);
+                wrapper.append(knot);
+                wrapper.append(string);
+
+                // Movement (Apply Float Here)
+                const leftPos = Math.random() * 80 + 5;
+                const dur = (Math.random() * 3000) + speed;
+
+                wrapper.css({
+                    left: leftPos + '%',
+                    bottom: '-150px',
+                    animation: `floatUp ${dur}ms linear forwards`
+                });
+
+                // Interaction on the WRAPPER (easier to click)
+                wrapper.on('mousedown', function (e) {
+                    e.stopPropagation();
+                    if (!window.gameActive) return;
+
+                    if (isTarget) {
+                        // Correct!
+                        playPopSound();
+                        score += 10;
+                        phaseProgress += 10;
+                        $('#sb-score').text(score);
+                        $('#sb-phase-bar').css('width', phaseProgress + '%');
+
+                        // Feedback
+                        showGameFeedback("Correct Syntax!", true);
+
+                        // Vfx - Pop Effect
+                        const pos = $(this).position();
+                        const burst = $(this).clone();
+                        burst.css({
+                            position: 'absolute',
+                            left: pos.left,
+                            top: pos.top,
+                            margin: 0,
+                            'pointer-events': 'none',
+                            animation: 'burst 0.2s ease-out forwards'
+                        });
+                        burst.find('.balloon-body').css('animation', 'none');
+
+                        $('#sb-field').append(burst);
+                        setTimeout(() => burst.remove(), 200);
+
+                        $(this).remove();
+
+                        // Check Phase Progress
+                        if (phaseProgress >= 100) {
+                            togglePhase();
+                            // Speed up slightly
+                            speed = Math.max(3000, speed - 200);
+                            showToast(`Speed Up! Round ${++level}`);
+                        }
+                    } else {
+                        // Wrong Type!
+                        playPopSound();
+
+                        // Vfx - Pop Effect
+                        const pos = $(this).position();
+                        const burst = $(this).clone();
+                        burst.css({
+                            position: 'absolute',
+                            left: pos.left,
+                            top: pos.top,
+                            margin: 0,
+                            'pointer-events': 'none',
+                            animation: 'burst 0.2s ease-out forwards'
+                        });
+                        burst.find('.balloon-body').css('animation', 'none');
+                        $('#sb-field').append(burst);
+                        setTimeout(() => burst.remove(), 200);
+
+                        lives--;
+                        updateLives();
+                        showGameFeedback(`Wrong! That's ${randomPhase.id.toUpperCase()}`, false);
+                        $(this).remove();
+                    }
+                });
+
+                // Cleanup
+                wrapper.on('animationend', function (e) {
+                    // Only remove if it's the floatUp animation ending (meaning it went off screen)
+                    if (e.originalEvent.animationName === 'floatUp' && this.isConnected) {
+                        if (isTarget) {
+                            lives--;
+                            updateLives();
+                            showGameFeedback("Missed one!", false);
+                        }
+                        $(this).remove();
+                    }
+                });
+
+                $('#sb-field').append(wrapper);
+
+                if (window.gameActive) setTimeout(spawnEntity, spawnRate);
+            };
+
+            function gameLoop() {
+                spawnEntity();
+            }
+        }
+
         // --- NAVIGATION & LAYOUT LOGIC ---
         window.switchTab = (tabId) => {
             activeTab = tabId;
+
+            // FIX: Ensure Game Stage is hidden when switching tabs
+            $('#game-stage').addClass('hidden');
+            if (window.activeGameTimer) clearInterval(window.activeGameTimer);
+            // Stop balloon game loop if active
+            // Stop balloon game loop if active
+            if (typeof window.gameActive !== 'undefined') window.gameActive = false;
 
             // 1. Sidebar Active State
             $('.nav-item').removeClass('active');
