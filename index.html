@@ -1367,25 +1367,7 @@
 
 
                     <!-- DAILY QUESTS WIDGET (NEW) -->
-                    <div id="daily-quests-widget" class="v-card p-6 mb-8 hidden">
-                        <div class="flex justify-between items-center mb-4">
-                            <div>
-                                <h3
-                                    class="font-black text-xs uppercase tracking-tighter text-slate-900 dark:text-white flex items-center gap-2">
-                                    <i data-lucide="zap" class="w-4 h-4 text-yellow-500"></i> Daily Quests
-                                </h3>
-                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Complete
-                                    tasks to earn bonus XP</p>
-                            </div>
-                            <div class="text-right">
-                                <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest"
-                                    id="quest-timer">Resets in: 12h 30m</p>
-                            </div>
-                        </div>
-                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="quest-list">
-                            <!-- Quests injected via JS -->
-                        </div>
-                    </div>
+
 
                     <!-- Bottom Grid (Activities & Analytics) -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
@@ -2785,7 +2767,6 @@
                 $('#dashboard-layout').removeClass('hidden').css('display', 'flex');
 
                 // Init Daily Quests
-                if (window.questSystem) setTimeout(() => window.questSystem.init(), 500);
             } else {
                 $('#dashboard-layout').addClass('hidden');
                 $('#auth-wrapper').removeClass('hidden');
@@ -6846,102 +6827,7 @@
             lucide.createIcons();
         };
 
-        // --- DAILY QUESTS SYSTEM ---
-        window.questSystem = {
-            quests: [
-                { id: 'q_arcade', title: 'Arcade Player', desc: 'Play any arcade game', xp: 50, type: 'arcade' },
-                { id: 'q_res', title: 'Knowledge Seeker', desc: 'Open the Resources tab', xp: 30, type: 'resource' },
-                { id: 'q_profile', title: 'Self Update', desc: 'Visit your profile', xp: 20, type: 'profile' },
-                { id: 'q_leaderboard', title: 'Competition Watch', desc: 'Check the leaderboard', xp: 20, type: 'leaderboard' },
-                { id: 'q_task', title: 'Task Master', desc: 'View or submit a task', xp: 100, type: 'task' }
-            ],
 
-            init() {
-                if (!userProfile || userProfile.role !== 'student') return;
-
-                $('#daily-quests-widget').removeClass('hidden');
-
-                const today = new Date().toDateString();
-                let saved = JSON.parse(localStorage.getItem('daily_quests_v1') || 'null');
-
-                // Generate new if missing or old date
-                if (!saved || saved.date !== today) {
-                    const shuffled = this.quests.sort(() => 0.5 - Math.random());
-                    saved = {
-                        date: today,
-                        active: shuffled.slice(0, 3).map(q => ({ ...q, completed: false }))
-                    };
-                    localStorage.setItem('daily_quests_v1', JSON.stringify(saved));
-                }
-
-                this.render(saved.active);
-                this.startTimer();
-            },
-
-            render(activeQuests) {
-                const list = $('#quest-list').empty();
-                activeQuests.forEach(q => {
-                    const status = q.completed
-                        ? `<span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-black uppercase">Completed</span>`
-                        : `<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded text-[9px] font-black uppercase">+${q.xp} XP</span>`;
-
-                    const border = q.completed ? 'border-emerald-500' : 'border-slate-200 dark:border-slate-700';
-                    const icon = q.completed ? 'check-circle-2' : 'circle';
-                    const iconColor = q.completed ? 'text-emerald-500' : 'text-slate-300';
-
-                    list.append(`
-                        <div class="p-3 rounded-xl border ${border} bg-slate-50 dark:bg-slate-800/50 flex items-center gap-3 transition-all relative overflow-hidden group">
-                             ${q.completed ? `<div class="absolute inset-0 bg-emerald-500/5"></div>` : ''}
-                             <i data-lucide="${icon}" class="w-5 h-5 ${iconColor} shrink-0"></i>
-                             <div class="flex-1 min-w-0 z-10">
-                                 <h4 class="text-[10px] font-black uppercase text-slate-900 dark:text-white truncate">${q.title}</h4>
-                                 <p class="text-[9px] text-slate-400 truncate">${q.desc}</p>
-                             </div>
-                             <div class="z-10">${status}</div>
-                        </div>
-                    `);
-                });
-                lucide.createIcons();
-            },
-
-            check(type) {
-                if (!userProfile || userProfile.role !== 'student') return;
-
-                const saved = JSON.parse(localStorage.getItem('daily_quests_v1'));
-                if (!saved) return;
-
-                let changed = false;
-                saved.active.forEach(q => {
-                    if (!q.completed && q.type === type) {
-                        q.completed = true;
-                        changed = true;
-                        showToast(`Quest Complete: ${q.title} (+${q.xp} XP)`);
-                        // Here you would optimally add XP to DB
-                    }
-                });
-
-                if (changed) {
-                    localStorage.setItem('daily_quests_v1', JSON.stringify(saved));
-                    this.render(saved.active);
-                    if (window.playPopSound) window.playPopSound();
-                }
-            },
-
-            startTimer() {
-                const update = () => {
-                    const now = new Date();
-                    const midnight = new Date();
-                    midnight.setHours(24, 0, 0, 0);
-                    const diff = midnight - now;
-
-                    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
-                    const m = Math.floor((diff / (1000 * 60)) % 60);
-                    $('#quest-timer').text(`Resets in: ${h}h ${m}m`);
-                };
-                update();
-                setInterval(update, 60000);
-            }
-        };
 
 
 
