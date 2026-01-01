@@ -2392,7 +2392,7 @@
     </div>
 
     <!-- Task Detail/Submit Modal -->
-    <div class="modal fade" id="taskDetailModal" tabindex="-1">
+    <div class="modal fade" id="taskDetailModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-dialog-centered modal-lg">
             <div class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
                 <div class="modal-header border-0 p-8 pb-0 flex flex-col items-start gap-4">
@@ -6726,6 +6726,14 @@
             if (tabId === 'dashboard' && typeof performanceChart !== 'undefined' && performanceChart) {
                 if (typeof updateChart === 'function') updateChart();
             }
+
+            // Fix for stuck modal backdrops
+            $('.modal').on('hidden.bs.modal', function () {
+                if ($('.modal.show').length === 0) {
+                    $('.modal-backdrop').remove();
+                    $('body').removeClass('modal-open').css('padding-right', '');
+                }
+            });
 
             lucide.createIcons();
         };
