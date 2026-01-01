@@ -3734,7 +3734,7 @@
                              <div class="flex justify-between items-start mb-4 gap-3 relative z-10">
                                 <span class="px-3 py-1 rounded-lg text-[7px] font-black uppercase tracking-[0.15em] bg-slate-100 dark:bg-slate-800 text-slate-500 shadow-sm">ID: ${t.id.substring(0, 6)}</span>
                                 <div class="text-[7px] font-black text-indigo-500 uppercase tracking-[0.15em] flex items-center gap-1 bg-indigo-50 dark:bg-indigo-900/30 px-2 py-1.5 rounded-lg">
-                                    <i data-lucide="calendar" class="w-2.5 h-2.5"></i> ${t.deadline ? new Date(t.deadline).toLocaleDateString() : 'No Date'}
+                                    <i data-lucide="calendar" class="w-2.5 h-2.5"></i> ${t.deadline ? new Date(t.deadline).toLocaleString([], { year: 'numeric', month: 'numeric', day: 'numeric', hour: '2-digit', minute: '2-digit' }) : 'No Date'}
                                 </div>
                             </div>
                             
@@ -4279,7 +4279,17 @@
             $('#new-task-title').val(task.title);
             $('#new-task-desc').val(task.description);
             $('#new-task-hints').val(task.hints || '');
-            $('#new-task-date').val(task.deadline ? task.deadline.substring(0, 16) : '');
+            $('#new-task-date').val('');
+            if (task.deadline) {
+                try {
+                    const d = new Date(task.deadline);
+                    const offset = d.getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(d - offset)).toISOString().slice(0, 16);
+                    $('#new-task-date').val(localISOTime);
+                } catch (e) {
+                    $('#new-task-date').val(task.deadline.substring(0, 16));
+                }
+            }
             $('#task-submit-btn').text('Update Task');
             bootstrap.Modal.getOrCreateInstance(document.getElementById('createTaskModal')).show();
         };
@@ -4626,6 +4636,44 @@
             new bootstrap.Modal('#taskDetailModal').show();
         };
 
+        window.openEditFromDetail = () => {
+            if (!currentTask) return;
+            editingTaskId = currentTask.id;
+
+            $('#new-task-title').val(currentTask.title);
+            // Attempt to strip auto-appended reference link for cleaner editing if possible, 
+            // but for now keeping raw description to ensure no data loss.
+            // A smarter way would be to regex replace the appended HTML if it matches known pattern, but unsafe.
+            $('#new-task-desc').val(currentTask.description);
+            $('#new-task-hints').val(currentTask.hints);
+
+            if (currentTask.deadline) {
+                try {
+                    const d = new Date(currentTask.deadline);
+                    // Adjust to local ISO string for input[type="datetime-local"]
+                    const offset = d.getTimezoneOffset() * 60000;
+                    const localISOTime = (new Date(d - offset)).toISOString().slice(0, 16);
+                    $('#new-task-date').val(localISOTime);
+                } catch (e) { console.warn("Date parse error", e); }
+            } else {
+                $('#new-task-date').val('');
+            }
+
+            $('#createTaskModal .modal-title').text('Edit Task');
+            $('#task-submit-btn').text('Update Task');
+
+            bootstrap.Modal.getInstance('#taskDetailModal').hide();
+            new bootstrap.Modal('#createTaskModal').show();
+        };
+
+        // Reset for Create Mode
+        $('#create-task-btn').on('click', () => {
+            editingTaskId = null;
+            $('#create-task-form')[0].reset();
+            $('#createTaskModal .modal-title').text('Create New Task');
+            $('#task-submit-btn').text('Create Task');
+        });
+
         window.fetchComments = async (taskId) => {
             const { data: comments } = await client.from('task_comments').select('*').eq('task_id', taskId).order('created_at', { ascending: true });
             renderComments(comments || []);
@@ -4860,6 +4908,9 @@
             const dateVal = $('#new-task-date').val();
             let safeDeadline = null;
             if (dateVal) {
+                // dateVal is "YYYY-MM-DDTHH:MM" (Local)
+                // new Date(dateVal) creates a Date object representing that local time
+                // toISOString() converts it to UTC, which is what we want for Supabase
                 const d = new Date(dateVal);
                 if (!isNaN(d.getTime())) safeDeadline = d.toISOString();
             }
@@ -4875,19 +4926,36 @@
 
             const executeSave = async (data) => {
                 try {
+                    console.log("Saving Task:", isEditing ? "UPDATE" : "CREATE", data);
                     if (isEditing) {
-                        const { error } = await client.from('tasks').update(data).eq('id', editingTaskId);
+                        const { data: updatedData, error } = await client.from('tasks')
+                            .update(data)
+                            .eq('id', editingTaskId)
+                            .select();
+
                         if (error) throw error;
-                        showToast("Task updated successfully.");
+
+                        // Strict Verification
+                        if (!updatedData || updatedData.length === 0) {
+                            throw new Error("Update failed! No rows modified. Check Admin permissions.");
+                        }
+
+                        const savedDate = new Date(data.deadline);
+                        showToast(`Saved! Local: ${savedDate.toLocaleTimeString()} (Server: ${savedDate.getUTCHours()}:${savedDate.getUTCMinutes() < 10 ? '0' : ''}${savedDate.getUTCMinutes()})`);
+
+                        if (currentTask && currentTask.id === editingTaskId) {
+                            currentTask = { ...currentTask, ...data };
+                        }
                     } else {
                         const { error } = await client.from('tasks').insert([data]);
                         if (error) throw error;
                         showToast("New task created.");
                     }
                     bootstrap.Modal.getOrCreateInstance(document.getElementById('createTaskModal')).hide();
-                    fetchData();
-                    editingTaskId = null;
+                    fetchData(); // Refresh list
+                    editingTaskId = null; // Clear edit mode
                 } catch (err) {
+                    console.error("Save Error:", err);
                     alert("System Error: " + err.message);
                 } finally {
                     btn.prop('disabled', false).text(isEditing ? 'Update Task' : 'Create Task');
@@ -4910,9 +4978,20 @@
                     const uploadData = await response.json();
                     if (uploadData.error) throw new Error(uploadData.error.message);
 
-                    // WORKAROUND: 'reference_asset' column missing in DB. Appending to description as a clickable link.
-                    const refHtml = `\n\n<br><strong>Reference Asset:</strong> <a href="${uploadData.secure_url}" target="_blank" class="text-indigo-500 hover:underline">View Attachment</a>`;
-                    taskData.description = (taskData.description || '') + refHtml;
+                    // WORKAROUND: If editing, try to replace existing reference link if it exists in description
+                    // otherwise append.
+                    const refHtml = `<br><strong>Reference Asset:</strong> <a href="${uploadData.secure_url}" target="_blank" class="text-indigo-500 hover:underline">View Attachment</a>`;
+
+                    if (taskData.description.includes('Reference Asset:</strong>')) {
+                        // Regex to replace the existing link block?
+                        // Simple approach: Split and keep top part, add new link
+                        // This assumes the link is at the end.
+                        const splitMarker = '<br><strong>Reference Asset:</strong>';
+                        const parts = taskData.description.split(splitMarker);
+                        taskData.description = parts[0] + refHtml;
+                    } else {
+                        taskData.description = (taskData.description || '') + "\n\n" + refHtml;
+                    }
 
                     await executeSave(taskData);
                 } catch (err) {
