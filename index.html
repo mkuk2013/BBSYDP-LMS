@@ -1366,6 +1366,29 @@
                         </div>
                     </div> <!-- End of Stats Grid -->
 
+
+
+                    <!-- DAILY QUESTS WIDGET (NEW) -->
+                    <div id="daily-quests-widget" class="v-card p-6 mb-8 hidden">
+                        <div class="flex justify-between items-center mb-4">
+                            <div>
+                                <h3
+                                    class="font-black text-xs uppercase tracking-tighter text-slate-900 dark:text-white flex items-center gap-2">
+                                    <i data-lucide="zap" class="w-4 h-4 text-yellow-500"></i> Daily Quests
+                                </h3>
+                                <p class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mt-1">Complete
+                                    tasks to earn bonus XP</p>
+                            </div>
+                            <div class="text-right">
+                                <p class="text-[10px] font-black text-indigo-500 uppercase tracking-widest"
+                                    id="quest-timer">Resets in: 12h 30m</p>
+                            </div>
+                        </div>
+                        <div class="grid grid-cols-1 md:grid-cols-3 gap-4" id="quest-list">
+                            <!-- Quests injected via JS -->
+                        </div>
+                    </div>
+
                     <!-- Bottom Grid (Activities & Analytics) -->
                     <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-8">
                         <!-- Recent Activity -->
@@ -1748,6 +1771,7 @@
                                         <th class="px-5 py-3">Student Name</th>
                                         <th class="px-5 py-3 text-center hidden sm:table-cell">Tasks</th>
                                         <th class="px-5 py-3 text-center">Grade</th>
+                                        <th class="px-5 py-3 text-center">Arcade</th>
                                         <th class="px-6 py-3 text-center">Status</th>
                                         <th class="px-5 py-3 text-right">Actions</th>
                                     </tr>
@@ -1823,6 +1847,27 @@
                                         <p class="text-[9px] text-slate-400 italic px-1">Email cannot be changed
                                             directly.</p>
                                     </div>
+
+
+                                    <div id="trophy-section"
+                                        class="pt-6 border-t border-slate-100 dark:border-slate-800">
+                                        <h4
+                                            class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+                                            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i> Trophy Case
+                                        </h4>
+                                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="badges-grid">
+                                            <!-- Badges will be injected here via JS -->
+                                            <div class="col-span-full text-center py-8">
+                                                <div
+                                                    class="w-8 h-8 rounded-full border-2 border-slate-100 dark:border-slate-800 border-t-indigo-500 animate-spin mx-auto mb-2">
+                                                </div>
+                                                <span
+                                                    class="text-[9px] font-bold uppercase tracking-widest text-slate-400">Loading
+                                                    Achievements...</span>
+                                            </div>
+                                        </div>
+                                    </div>
+
                                     <div class="pt-6 border-t border-slate-100 dark:border-slate-800">
                                         <h4
                                             class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-white mb-4">
@@ -1865,27 +1910,7 @@
                         </div>
 
                         <!-- Achievements Section -->
-                        <div id="achievements-section" class="v-card overflow-hidden mt-6">
-                            <div class="p-6 border-b border-slate-100 dark:border-slate-800">
-                                <h5 class="text-sm font-black uppercase tracking-widest text-indigo-500">Badges &
-                                    Achievements</h5>
-                                <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1">
-                                    Unlock
-                                    badges
-                                    by
-                                    completing tasks and winning games.</p>
-                            </div>
-                            <div class="p-6">
-                                <div id="achievements-grid" class="grid grid-cols-2 sm:grid-cols-4 gap-4">
-                                    <!-- Badges will be injected here via JS -->
-                                    <div
-                                        class="p-4 bg-slate-50 dark:bg-slate-900/50 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center justify-center opacity-50 grayscale">
-                                        <i data-lucide="lock" class="w-8 h-8 text-slate-300 mb-2"></i>
-                                        <span class="text-[9px] font-black uppercase text-slate-400">Locked</span>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
+
                     </div>
                 </div>
 
@@ -2760,6 +2785,9 @@
             if (isLoggedIn) {
                 $('#auth-wrapper').addClass('hidden');
                 $('#dashboard-layout').removeClass('hidden').css('display', 'flex');
+
+                // Init Daily Quests
+                if (window.questSystem) setTimeout(() => window.questSystem.init(), 500);
             } else {
                 $('#dashboard-layout').addClass('hidden');
                 $('#auth-wrapper').removeClass('hidden');
@@ -3581,7 +3609,6 @@
 
                 if (userProfile.role === 'student') {
                     $('#student-level-ui').removeClass('hidden').addClass('flex');
-                    $('#achievements-section').removeClass('hidden'); // Show for student
                     $('#rank-name').text(`${rankName} (Lvl ${level})`);
 
                     // Simple animation for the bar
@@ -3591,7 +3618,6 @@
                     }, 500);
                 } else {
                     $('#student-level-ui').addClass('hidden');
-                    $('#achievements-section').addClass('hidden'); // Hide for admin
                 }
 
                 $('#student-alert-msg').text(msg);
@@ -4126,7 +4152,10 @@
         async function fetchUsers() {
             // Select all fields to ensure status, avatar_url, and email are available
             const { data: users } = await client.from('profiles').select('*').order('created_at', { ascending: false });
+            const { data: progress } = await client.from('user_arcade_progress').select('*');
+
             window.allUsersCache = users || [];
+            window.allArcadeProgress = progress || [];
             renderUsers(window.allUsersCache);
         }
 
@@ -4139,10 +4168,23 @@
                 const gradedSubs = uSubs.filter(s => s.status === 'graded');
                 const avg = uSubs.length ? Math.round(gradedSubs.reduce((a, b) => a + b.grade, 0) / (gradedSubs.length || 1)) : 0;
 
+                // Get Arcade Progress (Try matching by both potential ID fields)
+                // Some profiles might index by 'id' internally if fetched differently
+                const prog = window.allArcadeProgress ? window.allArcadeProgress.find(p => p.user_id === u.uid || p.user_id === u.id) : null;
+                const htmlLvl = prog?.html_level || '-';
+                const cssLvl = prog?.css_level || '-';
+                const jsLvl = prog?.js_level || '-';
+
                 // Fallback for avatar
                 const avatar = u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`;
                 // Default status if null
                 const status = u.status || 'active';
+
+                const levelBadge = (lvl, color) => {
+                    const displayLvl = (lvl === '-') ? 'easy' : lvl;
+                    const short = displayLvl.charAt(0).toUpperCase();
+                    return `<span class="inline-flex items-center justify-center w-5 h-5 rounded text-[8px] font-black uppercase bg-${color}-100 dark:bg-${color}-900/30 text-${color}-600 dark:text-${color}-400 border border-${color}-200 dark:border-${color}-800/50" title="${displayLvl}">${short}</span>`;
+                };
 
                 container.append(`
                     <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-50 dark:border-slate-800/50 text-xs">
@@ -4164,6 +4206,13 @@
                         </td>
                         <td class="px-6 py-4 text-center">
                             <div class="font-black text-slate-900 dark:text-white text-xs">${avg}%</div>
+                        </td>
+                        <td class="px-4 py-4 text-center">
+                            <div class="flex gap-1 justify-center">
+                                ${levelBadge(htmlLvl, 'orange')}
+                                ${levelBadge(cssLvl, 'cyan')}
+                                ${levelBadge(jsLvl, 'yellow')}
+                            </div>
                         </td>
                         <td class="px-6 py-4 text-center">
                             <span class="px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] shadow-sm ${status === 'approved' || status === 'active' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}">${status}</span>
@@ -5416,27 +5465,47 @@
             const percentage = (score / total) * 100;
             const current = getLevel(gameType);
 
+
             if (percentage >= 80) {
                 let newLevel = current;
                 if (current === 'easy') newLevel = 'moderate';
                 else if (current === 'moderate') newLevel = 'hard';
 
                 if (newLevel !== current) {
-                    const map = { 'html': 'html_master_level', 'css': 'css_master_level', 'drag': 'drag_master_level' };
+                    const map = { 'html': 'html_master_level', 'css': 'css_master_level', 'drag': 'drag_master_level', 'js': 'js_logic_level' };
                     localStorage.setItem(map[gameType], newLevel);
-
-                    // DB Update
-                    try {
-                        const payload = { user_id: currentUser.id };
-                        if (gameType === 'html') payload.html_level = newLevel;
-                        if (gameType === 'css') payload.css_level = newLevel;
-                        if (gameType === 'drag') payload.drag_level = newLevel;
-                        if (gameType === 'js') payload.js_level = newLevel;
-
-                        await client.from('user_arcade_progress').upsert(payload, { onConflict: 'user_id' });
-                    } catch (e) { console.error(e); }
-                    return true;
                 }
+
+                // ALWAYS DB Update to ensure record exists
+                try {
+                    const payload = { user_id: currentUser.id };
+                    // We use newLevel (if upgraded) or current (if not)
+                    // But we must be careful not to overwrite other fields with null 
+                    // Upsert with only ONE field might wipe others if we don't select first?
+                    // Supabase upsert merges if we don't specify otherwise, but let's be safe.
+                    // Actually upsert on a specific ID updates columns provided.
+
+                    if (gameType === 'html') payload.html_level = newLevel;
+                    if (gameType === 'css') payload.css_level = newLevel;
+                    if (gameType === 'drag') payload.drag_level = newLevel;
+                    if (gameType === 'js') payload.js_level = newLevel;
+
+                    await client.from('user_arcade_progress').upsert(payload, { onConflict: 'user_id' });
+                } catch (e) { console.error(e); }
+
+                return newLevel !== current;
+            } else {
+                // Even if they failed, ensure the record exists as "Easy" (or current) 
+                // so Admin sees they are active.
+                try {
+                    const payload = { user_id: currentUser.id };
+                    if (gameType === 'html') payload.html_level = current;
+                    if (gameType === 'css') payload.css_level = current;
+                    if (gameType === 'drag') payload.drag_level = current;
+                    if (gameType === 'js') payload.js_level = current; // Fix missing JS map
+
+                    await client.from('user_arcade_progress').upsert(payload, { onConflict: 'user_id' });
+                } catch (e) { console.error(e); }
             }
             return false;
         }
@@ -6307,6 +6376,29 @@
                 if (lives <= 0) endGame("Too many syntax errors!");
             };
 
+            const winGame = () => {
+                window.gameActive = false;
+                $('#sb-field').empty();
+
+                container.html(`
+                    <div class="text-center animate-in zoom-in max-w-md mx-auto bg-white dark:bg-slate-800 p-8 rounded-3xl shadow-xl border border-slate-100 dark:border-slate-700">
+                        <div class="mb-6 p-4 bg-yellow-50 dark:bg-yellow-900/20 border-2 border-yellow-400 rounded-xl text-yellow-600 font-black uppercase animate-pulse">?? ALL LEVELS CLEARED!</div>
+                        <div class="w-20 h-20 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center mx-auto mb-6"><i data-lucide="trophy" class="w-10 h-10"></i></div>
+                        <h2 class="text-3xl font-black text-slate-900 dark:text-white uppercase mb-4">Mission Complete</h2>
+                        <p class="text-slate-500 mb-2 font-bold uppercase tracking-widest text-xs">You conquered the syntax skies!</p>
+                        <p class="text-4xl font-black text-indigo-500 mb-8">${score}</p>
+                        <div class="flex gap-3 justify-center">
+                            <button onclick="startArcadeGame('syntax_balloons')" class="px-6 py-3 bg-slate-100 dark:bg-slate-700 hover:bg-slate-200 rounded-xl font-bold transition-colors flex items-center gap-2">
+                                <i data-lucide="rotate-ccw" class="w-4 h-4"></i> Play Again
+                            </button>
+                            <button onclick="exitArcadeGame()" class="px-6 py-3 bg-indigo-600 text-white rounded-xl font-bold uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/30">Back to Menu</button>
+                        </div>
+                    </div>
+                `);
+                lucide.createIcons();
+                saveGameScore('syntax_balloons', score, 0);
+            };
+
             const spawnEntity = () => {
                 if (!window.gameActive) return;
 
@@ -6391,10 +6483,14 @@
 
                         // Check Phase Progress
                         if (phaseProgress >= 100) {
-                            togglePhase();
-                            // Speed up slightly
-                            speed = Math.max(3000, speed - 200);
-                            showToast(`Speed Up! Round ${++level}`);
+                            if (level >= 3) {
+                                winGame();
+                            } else {
+                                togglePhase();
+                                // Speed up slightly
+                                speed = Math.max(3000, speed - 200);
+                                showToast(`Speed Up! Round ${++level}`);
+                            }
                         }
                     } else {
                         // Wrong Type!
@@ -6587,12 +6683,21 @@
 
             // 8. Specific Initializations
 
-            if (tabId === 'resources' && window.renderResources) window.renderResources();
+            if (tabId === 'resources') {
+                if (window.renderResources) window.renderResources();
+                if (window.questSystem) window.questSystem.check('resource');
+            }
+            if (tabId === 'leaderboard' && window.questSystem) window.questSystem.check('leaderboard');
+            if (tabId === 'tasks' && window.questSystem) window.questSystem.check('task');
+            if (tabId === 'arcade' && window.questSystem) window.questSystem.check('arcade');
+
+
             if (tabId === 'playground') {
                 // Run code initially if preview is empty
                 if (window.runCode) setTimeout(window.runCode, 100);
             }
             if (tabId === 'profile' && userProfile) {
+                if (window.questSystem) window.questSystem.check('profile');
                 $('#profile-name').val(userProfile.name);
                 $('#profile-email').val(userProfile.email);
                 const initial = userProfile.name.charAt(0).toUpperCase();
@@ -6605,10 +6710,15 @@
 
                 // Toggle Achievements Visibility
                 if (userProfile.role === 'student') {
-                    $('#achievements-section').removeClass('hidden');
+                    $('#trophy-section').removeClass('hidden');
                 } else {
-                    $('#achievements-section').addClass('hidden');
+                    $('#trophy-section').addClass('hidden');
                 }
+            }
+
+            // New: Render Badges when opening profile
+            if (tabId === 'profile' && userProfile.role === 'student') {
+                if (window.renderBadges) window.renderBadges();
             }
 
             // 9. Data Sync
@@ -6620,11 +6730,217 @@
             lucide.createIcons();
         };
 
+        // --- BADGE SYSTEM LOGIC ---
+        window.renderBadges = async () => {
+            const container = $('#badges-grid');
+            container.empty();
+
+            if (!userProfile || userProfile.role !== 'student') {
+                container.html(`<div class="col-span-full text-center py-4 text-slate-400 text-xs italic">Badges are only for students.</div>`);
+                return;
+            }
+
+            // Fetch latest arcade progress if not cached
+            let arcade = window.allArcadeProgress ? window.allArcadeProgress.find(p => p.user_id === currentUser.id) : null;
+            if (!arcade && client) {
+                const { data } = await client.from('user_arcade_progress').select('*').eq('user_id', currentUser.id).maybeSingle();
+                arcade = data;
+            }
+
+            // Fetch submission stats
+            const mySubs = window.allSubmissions ? window.allSubmissions.filter(s => s.student_id === currentUser.id && s.status === 'graded') : [];
+            const avgGrade = mySubs.length ? (mySubs.reduce((a, b) => a + b.grade, 0) / mySubs.length) : 0;
+
+            const badges = [
+                {
+                    id: 'html_master',
+                    title: 'HTML Master',
+                    desc: 'Reach "Hard" level in HTML Arcade',
+                    icon: 'code-2',
+                    color: 'orange',
+                    unlocked: arcade?.html_level === 'hard'
+                },
+                {
+                    id: 'css_pro',
+                    title: 'CSS Pro',
+                    desc: 'Reach "Hard" level in CSS Arcade',
+                    icon: 'palette',
+                    color: 'cyan',
+                    unlocked: arcade?.css_level === 'hard'
+                },
+                {
+                    id: 'js_wizard',
+                    title: 'JS Wizard',
+                    desc: 'Reach "Hard" level in JS Arcade',
+                    icon: 'zap',
+                    color: 'yellow',
+                    unlocked: arcade?.js_level === 'hard'
+                },
+                {
+                    id: 'bug_hunter',
+                    title: 'Bug Hunter',
+                    desc: 'Score > 500 in Syntax Balloons',
+                    icon: 'bug',
+                    color: 'rose',
+                    // Mock check: If they played Balloons enough to have a level > 1
+                    unlocked: (arcade?.syntax_balloons_score > 500) || false
+                },
+                {
+                    id: 'speed_coder',
+                    title: 'Speed Coder',
+                    desc: 'Complete 5 Speed Challenges',
+                    icon: 'timer',
+                    color: 'purple',
+                    unlocked: (arcade?.css_level === 'moderate' || arcade?.css_level === 'hard') // Mock logic
+                },
+                {
+                    id: 'task_master',
+                    title: 'Task Master',
+                    desc: 'Complete 10+ Assignments',
+                    icon: 'clipboard-check',
+                    color: 'emerald',
+                    unlocked: mySubs.length >= 10
+                },
+                {
+                    id: 'top_performer',
+                    title: 'Top Performer',
+                    desc: 'Maintain 90%+ Average Grade',
+                    icon: 'star',
+                    color: 'indigo',
+                    unlocked: avgGrade >= 90 && mySubs.length >= 3
+                },
+                {
+                    id: 'streak_7',
+                    title: '7-Day Streak',
+                    desc: 'Login for 7 consecutive days',
+                    icon: 'flame',
+                    color: 'amber',
+                    unlocked: false // Placeholder for future logic
+                }
+            ];
+
+            badges.forEach(b => {
+                const opacity = b.unlocked ? 'opacity-100' : 'opacity-40 grayscale';
+                const bg = b.unlocked ? `bg-${b.color}-50 dark:bg-${b.color}-900/20` : 'bg-slate-100 dark:bg-slate-800';
+                const border = b.unlocked ? `border-${b.color}-200 dark:border-${b.color}-800/50` : 'border-slate-200 dark:border-slate-700';
+                const text = b.unlocked ? `text-${b.color}-600 dark:text-${b.color}-400` : 'text-slate-400';
+                const lockIcon = b.unlocked ? '' : `<div class="absolute top-2 right-2 text-slate-400"><i data-lucide="lock" class="w-3 h-3"></i></div>`;
+
+                container.append(`
+                    <div class="relative p-4 rounded-2xl border ${border} ${bg} ${opacity} transition-all flex flex-col items-center text-center group hover:scale-[1.02]">
+                        ${lockIcon}
+                        <div class="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center mb-3 shadow-sm ${text}">
+                            <i data-lucide="${b.icon}" class="w-5 h-5"></i>
+                        </div>
+                        <h5 class="font-black text-[10px] uppercase tracking-wider text-slate-900 dark:text-white mb-1">${b.title}</h5>
+                        <p class="text-[8px] font-bold text-slate-400 leading-tight">${b.desc}</p>
+                    </div>
+                `);
+            });
+            lucide.createIcons();
+        };
+
+        // --- DAILY QUESTS SYSTEM ---
+        window.questSystem = {
+            quests: [
+                { id: 'q_arcade', title: 'Arcade Player', desc: 'Play any arcade game', xp: 50, type: 'arcade' },
+                { id: 'q_res', title: 'Knowledge Seeker', desc: 'Open the Resources tab', xp: 30, type: 'resource' },
+                { id: 'q_profile', title: 'Self Update', desc: 'Visit your profile', xp: 20, type: 'profile' },
+                { id: 'q_leaderboard', title: 'Competition Watch', desc: 'Check the leaderboard', xp: 20, type: 'leaderboard' },
+                { id: 'q_task', title: 'Task Master', desc: 'View or submit a task', xp: 100, type: 'task' }
+            ],
+
+            init() {
+                if (!userProfile || userProfile.role !== 'student') return;
+
+                $('#daily-quests-widget').removeClass('hidden');
+
+                const today = new Date().toDateString();
+                let saved = JSON.parse(localStorage.getItem('daily_quests_v1') || 'null');
+
+                // Generate new if missing or old date
+                if (!saved || saved.date !== today) {
+                    const shuffled = this.quests.sort(() => 0.5 - Math.random());
+                    saved = {
+                        date: today,
+                        active: shuffled.slice(0, 3).map(q => ({ ...q, completed: false }))
+                    };
+                    localStorage.setItem('daily_quests_v1', JSON.stringify(saved));
+                }
+
+                this.render(saved.active);
+                this.startTimer();
+            },
+
+            render(activeQuests) {
+                const list = $('#quest-list').empty();
+                activeQuests.forEach(q => {
+                    const status = q.completed
+                        ? `<span class="px-2 py-1 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 dark:text-emerald-400 rounded text-[9px] font-black uppercase">Completed</span>`
+                        : `<span class="px-2 py-1 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded text-[9px] font-black uppercase">+${q.xp} XP</span>`;
+
+                    const border = q.completed ? 'border-emerald-500' : 'border-slate-200 dark:border-slate-700';
+                    const icon = q.completed ? 'check-circle-2' : 'circle';
+                    const iconColor = q.completed ? 'text-emerald-500' : 'text-slate-300';
+
+                    list.append(`
+                        <div class="p-3 rounded-xl border ${border} bg-slate-50 dark:bg-slate-800/50 flex items-center gap-3 transition-all relative overflow-hidden group">
+                             ${q.completed ? `<div class="absolute inset-0 bg-emerald-500/5"></div>` : ''}
+                             <i data-lucide="${icon}" class="w-5 h-5 ${iconColor} shrink-0"></i>
+                             <div class="flex-1 min-w-0 z-10">
+                                 <h4 class="text-[10px] font-black uppercase text-slate-900 dark:text-white truncate">${q.title}</h4>
+                                 <p class="text-[9px] text-slate-400 truncate">${q.desc}</p>
+                             </div>
+                             <div class="z-10">${status}</div>
+                        </div>
+                    `);
+                });
+                lucide.createIcons();
+            },
+
+            check(type) {
+                if (!userProfile || userProfile.role !== 'student') return;
+
+                const saved = JSON.parse(localStorage.getItem('daily_quests_v1'));
+                if (!saved) return;
+
+                let changed = false;
+                saved.active.forEach(q => {
+                    if (!q.completed && q.type === type) {
+                        q.completed = true;
+                        changed = true;
+                        showToast(`Quest Complete: ${q.title} (+${q.xp} XP)`);
+                        // Here you would optimally add XP to DB
+                    }
+                });
+
+                if (changed) {
+                    localStorage.setItem('daily_quests_v1', JSON.stringify(saved));
+                    this.render(saved.active);
+                    if (window.playPopSound) window.playPopSound();
+                }
+            },
+
+            startTimer() {
+                const update = () => {
+                    const now = new Date();
+                    const midnight = new Date();
+                    midnight.setHours(24, 0, 0, 0);
+                    const diff = midnight - now;
+
+                    const h = Math.floor((diff / (1000 * 60 * 60)) % 24);
+                    const m = Math.floor((diff / (1000 * 60)) % 60);
+                    $('#quest-timer').text(`Resets in: ${h}h ${m}m`);
+                };
+                update();
+                setInterval(update, 60000);
+            }
+        };
 
 
-        // --- GLOBAL INITIALIZATION ---
-        // Ensure switchTab('dashboard') is called on successful login/init
-        // This is handled in finishInitialization usually, but let's ensure default visibility
+
+
+
 
     </script>
 
