@@ -6664,19 +6664,13 @@
 
             if (tabId === 'resources') {
                 if (window.renderResources) window.renderResources();
-                if (window.questSystem) window.questSystem.check('resource');
             }
-            if (tabId === 'leaderboard' && window.questSystem) window.questSystem.check('leaderboard');
-            if (tabId === 'tasks' && window.questSystem) window.questSystem.check('task');
-            if (tabId === 'arcade' && window.questSystem) window.questSystem.check('arcade');
-
 
             if (tabId === 'playground') {
                 // Run code initially if preview is empty
                 if (window.runCode) setTimeout(window.runCode, 100);
             }
             if (tabId === 'profile' && userProfile) {
-                if (window.questSystem) window.questSystem.check('profile');
                 $('#profile-name').val(userProfile.name);
                 $('#profile-email').val(userProfile.email);
                 const initial = userProfile.name.charAt(0).toUpperCase();
