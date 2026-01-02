@@ -882,6 +882,7 @@
         /* ===== LIVE EDITOR WIDTH FIX ===== */
         .content-view {
             width: 100% !important;
+            height: 100% !important;
         }
     </style>
 
@@ -1915,11 +1916,6 @@
 
                         <!-- Actions -->
                         <div class="flex items-center gap-2">
-                            <button onclick="runCode()"
-                                class="px-4 py-2 bg-[#444857] hover:bg-[#5a5f73] text-white rounded-[4px] font-bold text-xs transition-colors flex items-center gap-2">
-                                <i data-lucide="play" class="w-3.5 h-3.5 fill-current"></i>
-                                Run
-                            </button>
                             <button onclick="clearCode()"
                                 class="px-4 py-2 bg-[#444857] hover:bg-[#5a5f73] text-white rounded-[4px] font-bold text-xs transition-colors flex items-center gap-2">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
@@ -2167,7 +2163,7 @@
                     </form>
                 </div>
                 <div class="modal-footer border-0 p-6 pt-0">
-                    <button onclick="handleResourceUpload()"
+                    <button type="submit" form="resource-upload-form" id="upload-res-btn"
                         class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-[1.02]">
                         Add Resource
                     </button>
@@ -5194,16 +5190,22 @@
 
         window.fetchResources = async () => {
             try {
+                // Ensure table exists or handle error gracefully
                 const { data, error } = await client.from('resources').select('*').order('created_at', { ascending: false });
+
                 if (error) {
-                    // Silent fail for missing table - feature just won't show data
+                    console.error("Resource fetch error:", error);
+                    showToast("Error loading resources: " + error.message); // Optional: for debugging
                     window.learningResources = [];
                 } else {
                     window.learningResources = data || [];
+                    // showToast(`Loaded ${window.learningResources.length} resources`); // Debug
                 }
+
                 if (window.renderResources) renderResources();
             } catch (err) {
-                console.error("Resource fetch error:", err);
+                console.error("Resource fetch fatal error:", err);
+                showToast("Fatal Error loading resources: " + err.message);
                 window.learningResources = [];
                 if (window.renderResources) renderResources();
             }
@@ -5245,13 +5247,22 @@
                 const iconMap = { 'video': 'video', 'doc': 'file-text', 'link': 'link' };
                 const colorMap = { 'video': 'rose', 'doc': 'indigo', 'link': 'emerald' };
 
+                let finalIcon = iconMap[category] || 'file';
+                let finalColor = colorMap[category] || 'slate';
+
+                // Auto-detect PDF
+                if ((file && file.name.toLowerCase().endsWith('.pdf')) || (resourceUrl && resourceUrl.toLowerCase().endsWith('.pdf'))) {
+                    finalIcon = 'file-text';
+                    finalColor = 'rose';
+                }
+
                 const { error } = await client.from('resources').insert([{
                     title,
                     subtitle,
                     category,
                     link: resourceUrl,
-                    icon: iconMap[category] || 'file',
-                    color: colorMap[category] || 'slate',
+                    icon: finalIcon,
+                    color: finalColor,
                     created_by: currentUser.id
                 }]);
 
@@ -5296,11 +5307,22 @@
             }
 
             filtered.forEach(r => {
+                let iconDisplay = `<i data-lucide="${r.icon}" class="w-5 h-5"></i>`;
+
+                // Dynamic PDF Fix for display
+                if (r.link && r.link.toLowerCase().endsWith('.pdf')) {
+                    r.color = 'rose';
+                    iconDisplay = `<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" class="bi bi-file-pdf" viewBox="0 0 16 16">
+  <path d="M4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2zm0 1h8a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1"/>
+  <path d="M4.603 12.087a.8.8 0 0 1-.438-.42c-.195-.388-.13-.776.08-1.102.198-.307.526-.568.897-.787a7.7 7.7 0 0 1 1.482-.645 20 20 0 0 0 1.062-2.227 7.3 7.3 0 0 1-.43-1.295c-.086-.4-.119-.796-.046-1.136.075-.354.274-.672.65-.823.192-.077.4-.12.602-.077a.7.7 0 0 1 .477.365c.088.164.12.356.127.538.007.187-.012.395-.047.614-.084.51-.27 1.134-.52 1.794a11 11 0 0 0 .98 1.686 5.8 5.8 0 0 1 1.334.05c.364.065.734.195.96.465.12.144.193.32.2.518.007.192-.047.382-.138.563a1.04 1.04 0 0 1-.354.416.86.86 0 0 1-.51.138c-.331-.014-.654-.196-.933-.417a5.7 5.7 0 0 1-.911-.95 11.6 11.6 0 0 0-1.997.406 11.3 11.3 0 0 1-1.021 1.51c-.29.35-.608.655-.926.787a.8.8 0 0 1-.58.029m1.379-1.901q-.25.115-.459.238c-.328.194-.541.383-.647.547-.094.145-.096.25-.04.361q.016.032.026.044l.035-.012c.137-.056.355-.235.635-.572a8 8 0 0 0 .45-.606m1.64-1.33a13 13 0 0 1 1.01-.193 12 12 0 0 1-.51-.858 21 21 0 0 1-.5 1.05zm2.446.45q.226.244.435.41c.24.19.407.253.498.256a.1.1 0 0 0 .07-.015.3.3 0 0 0 .094-.125.44.44 0 0 0 .059-.2.1.1 0 0 0-.026-.063c-.052-.062-.2-.152-.518-.209a4 4 0 0 0-.612-.053zM8.078 5.8a7 7 0 0 0 .2-.828q.046-.282.038-.465a.6.6 0 0 0-.032-.198.5.5 0 0 0-.145.04c-.087.035-.158.106-.196.283-.04.192-.03.469.046.822q.036.167.09.346z"/>
+</svg>`;
+                }
+
                 grid.append(`
                     <div class="v-card p-5 group hover:scale-[1.02] transition-transform cursor-pointer">
                         <div class="flex justify-between items-start mb-4">
                             <div class="w-10 h-10 bg-${r.color}-50 dark:bg-${r.color}-900/20 text-${r.color}-600 dark:text-${r.color}-400 rounded-xl flex items-center justify-center shadow-sm">
-                                <i data-lucide="${r.icon}" class="w-5 h-5"></i>
+                                ${iconDisplay}
                             </div>
                             <span class="text-[9px] font-black uppercase tracking-widest px-2 py-1 rounded bg-slate-100 dark:bg-slate-800 text-slate-500">${r.category}</span>
                         </div>
@@ -5594,7 +5616,12 @@
                 { q: "Line break tag?", a: ["<br>", "<break>", "<lb>", "<newline>"], r: ["<br>"] },
                 { q: "Paragraph tag?", a: ["<p>", "<para>", "<text>", "<pg>"], r: ["<p>"] },
                 { q: "Smallest heading tag?", a: ["<h1>", "<h6>", "<small>", "<head>"], r: ["<h6>"] },
-                { q: "Horizontal rule tag?", a: ["<hr>", "<line>", "<br>", "<tr>"], r: ["<hr>"] }
+                { q: "Horizontal rule tag?", a: ["<hr>", "<line>", "<br>", "<tr>"], r: ["<hr>"] },
+                { q: "Which tag defines the document title?", a: ["<title>", "<meta>", "<name>", "<head>"], r: ["<title>"] },
+                { q: "Correct tag for ordered list?", a: ["<ol>", "<ul>", "<list>", "<dl>"], r: ["<ol>"] },
+                { q: "Tag to define a container?", a: ["<div>", "<span>", "<container>", "<block>"], r: ["<div>"] },
+                { q: "Which tag is used for input fields?", a: ["<input>", "<text>", "<field>", "<enter>"], r: ["<input>"] },
+                { q: "Tag for main content area?", a: ["<main>", "<body>", "<content>", "<root>"], r: ["<main>"] }
             ],
             moderate: [
                 { q: "Choose the correct HTML5 element for the main content?", a: ["<article>", "<main>", "<content>", "<body>"], r: ["<main>"] },
@@ -5605,7 +5632,12 @@
                 { q: "Tag for navigation links?", a: ["<nav>", "<links>", "<menu>", "<ul>"], r: ["<nav>"] },
                 { q: "Tag for a dropdown list?", a: ["<select>", "<list>", "<dropdown>", "<option>"], r: ["<select>"] },
                 { q: "Attribute for external CSS URL?", a: ["href", "src", "link", "rel"], r: ["href"] },
-                { q: "Alternative text for image?", a: ["title", "alt", "desc", "src"], r: ["alt"] }
+                { q: "Alternative text for image?", a: ["title", "alt", "desc", "src"], r: ["alt"] },
+                { q: "Which tag defines a table header?", a: ["<thead>", "<th>", "<head>", "<header>"], r: ["<th>"] },
+                { q: "HTML5 tag for sidebar content?", a: ["<aside>", "<sidebar>", "<section>", "<nav>"], r: ["<aside>"] },
+                { q: "Attribute to open link in new tab?", a: ["target='_blank'", "new='tab'", "target='new'", "open='window'"], r: ["target='_blank'"] },
+                { q: "Which tag defines a form?", a: ["<form>", "<input>", "<submit>", "<field>"], r: ["<form>"] },
+                { q: "Valid attribute for <script> src?", a: ["src", "href", "link", "url"], r: ["src"] }
             ],
             hard: [
                 { q: "Which input type defines a slider control?", a: ["slider", "range", "controls", "search"], r: ["range"] },
@@ -5616,7 +5648,12 @@
                 { q: "Which element is used to draw graphics?", a: ["<svg>", "<canvas>", "<paint>", "<graphic>"], r: ["<canvas>"] },
                 { q: "Pattern attribute is used for?", a: ["Validation", "Styling", "Images", "Links"], r: ["Validation"] },
                 { q: "Which tag defines an embedded object?", a: ["<embed>", "<object>", "<iframe>", "<all>"], r: ["<embed>", "<object>"] },
-                { q: "Tag for result of calculation?", a: ["<output>", "<result>", "<calc>", "<sum>"], r: ["<output>"] }
+                { q: "Tag for result of calculation?", a: ["<output>", "<result>", "<calc>", "<sum>"], r: ["<output>"] },
+                { q: "Which meta tag is used for viewport?", a: ["viewport", "responsive", "scale", "dim"], r: ["viewport"] },
+                { q: "Tag for independent self-contained content?", a: ["<article>", "<section>", "<div class='post'>", "<aside>"], r: ["<article>"] },
+                { q: "Which input attribute specifies a regex?", a: ["pattern", "regex", "validate", "match"], r: ["pattern"] },
+                { q: "Tag for grouping options in a select?", a: ["<optgroup>", "<group>", "<category>", "<list>"], r: ["<optgroup>"] },
+                { q: "Which tag defines a caption for a <figure>?", a: ["<figcaption>", "<caption>", "<label>", "<title>"], r: ["<figcaption>"] }
             ]
         };
 
@@ -5629,7 +5666,11 @@
                 { task: "Underline text", correct: "text-decoration: underline;", wrong: ["font-style: underline;", "text-style: underline;", "decoration: underline;", "line: bottom;"], desc: "Line below text" },
                 { task: "Blue Background", correct: "background-color: blue;", wrong: ["color: blue;", "bg: blue;", "back: blue;", "area: blue;"], desc: "Change background" },
                 { task: "Set font size", correct: "font-size: 16px;", wrong: ["text-size: 16px;", "size: 16px;", "font: 16px;", "height: 16px;"], desc: "Text size" },
-                { task: "Add border", correct: "border: 1px solid;", wrong: ["outline: 1px;", "stroke: 1px;", "line: 1px;", "box: 1px;"], desc: "Box outline" }
+                { task: "Add border", correct: "border: 1px solid;", wrong: ["outline: 1px;", "stroke: 1px;", "line: 1px;", "box: 1px;"], desc: "Box outline" },
+                { task: "Upper case", correct: "text-transform: uppercase;", wrong: ["text-style: uppercase;", "transform: upper;", "font: uppercase;", "caps: true;"], desc: "All caps" },
+                { task: "Remove bullet points", correct: "list-style: none;", wrong: ["list: none;", "ul: none;", "bullet: none;", "marker: none;"], desc: "No list markers" },
+                { task: "Set width", correct: "width: 100px;", wrong: ["broad: 100px;", "size: 100px;", "inline: 100px;", "w: 100px;"], desc: "Element width" },
+                { task: "Set height", correct: "height: 50vh;", wrong: ["tall: 50vh;", "h: 50vh;", "size: 50vh;", "vertical: 50vh;"], desc: "Element height" }
             ],
             moderate: [
                 { task: "Remove underline", correct: "text-decoration: none;", wrong: ["font-style: none;", "text-align: none;", "decoration: none;", "no-underline: true;"], desc: "No decoration" },
@@ -5639,7 +5680,11 @@
                 { task: "Z-Index", correct: "z-index: 10;", wrong: ["index: 10;", "layer: 10;", "level: 10;", "stack: 10;"], desc: "Stack order" },
                 { task: "Overflow Hidden", correct: "overflow: hidden;", wrong: ["scroll: hidden;", "clip: hidden;", "view: hidden;", "hide: true;"], desc: "Hide content" },
                 { task: "Opacity", correct: "opacity: 0.5;", wrong: ["transparent: 0.5;", "alpha: 0.5;", "visible: 0.5;", "color: 0.5;"], desc: "Transparency" },
-                { task: "Box Shadow", correct: "box-shadow: 5px 5px;", wrong: ["shadow: 5px;", "drop-shadow: 5px;", "border-shadow: 5px;", "shade: 5px;"], desc: "Drop shadow" }
+                { task: "Box Shadow", correct: "box-shadow: 5px 5px;", wrong: ["shadow: 5px;", "drop-shadow: 5px;", "border-shadow: 5px;", "shade: 5px;"], desc: "Drop shadow" },
+                { task: "Gap in Grid", correct: "gap: 1rem;", wrong: ["space: 1rem;", "margin: 1rem;", "gutter: 1rem;", "padding: 1rem;"], desc: "Spacing between items" },
+                { task: "Max Width", correct: "max-width: 100%;", wrong: ["width: max;", "limit: 100%;", "bound: 100%;", "clip: 100%;"], desc: "Responsive limit" },
+                { task: "Cursor Pointer", correct: "cursor: pointer;", wrong: ["mouse: hand;", "pointer: click;", "click: yes;", "hand: true;"], desc: "Change mouse icon" },
+                { task: "Sticky Position", correct: "position: sticky;", wrong: ["display: sticky;", "float: sticky;", "place: sticky;", "attach: sticky;"], desc: "Sticks on scroll" }
             ],
             hard: [
                 { task: "Grid layout", correct: "display: grid;", wrong: ["layout: grid;", "position: grid;", "grid: true;", "view: grid;"], desc: "Grid system" },
@@ -5649,7 +5694,12 @@
                 { task: "Transition", correct: "transition: all 0.3s;", wrong: ["animate: 0.3s;", "move: 0.3s;", "change: 0.3s;", "morph: 0.3s;"], desc: "Smooth change" },
                 { task: "Keyframes", correct: "@keyframes move {}", wrong: ["@animate move {}", "@motion move {}", "@frame move {}"], desc: "Animation definition" },
                 { task: "Media Query", correct: "@media (max-width: 600px)", wrong: ["@screen (width: 600px)", "@view (max: 600px)", "@responsive 600px"], desc: "Responsive rule" },
-                { task: "Filter Blur", correct: "filter: blur(5px);", wrong: ["effect: blur(5px);", "style: blur(5px);", "mask: blur(5px);", "fog: 5px;"], desc: "Blur effect" }
+                { task: "Filter Blur", correct: "filter: blur(5px);", wrong: ["effect: blur(5px);", "style: blur(5px);", "mask: blur(5px);", "fog: 5px;"], desc: "Blur effect" },
+                { task: "Flex Center", correct: "justify-content: center;", wrong: ["align: center;", "flex: center;", "place: center;", "content: center;"], desc: "Horizontal center" },
+                { task: "Variable Definition", correct: "--main-color: red;", wrong: ["$main-color: red;", "var-main: red;", "@main: red;", "def-color: red;"], desc: "CSS Variable" },
+                { task: "Grid Columns", correct: "grid-template-columns: 1fr 1fr;", wrong: ["grid-cols: 2;", "columns: 2;", "layout: 50% 50%;", "division: 1fr;"], desc: "Two equal cols" },
+                { task: "Transform Rotate", correct: "transform: rotate(45deg);", wrong: ["rotate: 45deg;", "spin: 45deg;", "turn: 45deg;", "move: rotate(45);"], desc: "Rotate element" },
+                { task: "Calculate width", correct: "width: calc(100% - 20px);", wrong: ["width: 100% - 20px;", "calc: 100% - 20px;", "math: 100% - 20px;", "size: calc(100, 20);"], desc: "Dynamic calc" }
             ]
         };
 
@@ -5664,7 +5714,11 @@
                 { code: "&lt;div&gt;", desc: "Container" },
                 { code: "&lt;span&gt;", desc: "Inline Container" },
                 { code: "&lt;button&gt;", desc: "Clickable Button" },
-                { code: "&lt;input&gt;", desc: "Input Field" }
+                { code: "&lt;input&gt;", desc: "Input Field" },
+                { code: "&lt;table&gt;", desc: "Data Table" },
+                { code: "&lt;form&gt;", desc: "User Input & Submit" },
+                { code: "&lt;nav&gt;", desc: "Navigation Links" },
+                { code: "&lt;footer&gt;", desc: "Bottom Section" }
             ],
             moderate: [
                 { code: "color:red;", desc: "Red Text" },
@@ -5676,7 +5730,11 @@
                 { code: "padding:10px;", desc: "Inner Spacing" },
                 { code: "width:100%;", desc: "Full Width" },
                 { code: "text-align:center;", desc: "Center Text" },
-                { code: "font-weight:bold;", desc: "Bold Text" }
+                { code: "font-weight:bold;", desc: "Bold Text" },
+                { code: "float:left;", desc: "Align Left" },
+                { code: "opacity:0;", desc: "Invisible" },
+                { code: "cursor:pointer;", desc: "Hand Cursor" },
+                { code: "display:none;", desc: "Hide Element" }
             ],
             hard: [
                 { code: "z-index:10;", desc: "Stacking Order" },
@@ -5688,7 +5746,11 @@
                 { code: "position:absolute;", desc: "Absolute Pos" },
                 { code: "justify-content:center;", desc: "Flex Center" },
                 { code: "align-items:center;", desc: "Flex Align" },
-                { code: "flex-direction:column;", desc: "Vertical Layout" }
+                { code: "flex-direction:column;", desc: "Vertical Layout" },
+                { code: "box-shadow", desc: "Drop Shadow" },
+                { code: "transition", desc: "Smooth Change" },
+                { code: "keyframes", desc: "Animation Steps" },
+                { code: "filter:blur", desc: "Blur Effect" }
             ]
         };
 
@@ -5699,7 +5761,11 @@
                 { q: "Boolean(0)", a: ["false", "true", "null", "undefined"], r: "false" },
                 { q: "Which symbol is for comments?", a: ["//", "#", "<!--", "**"], r: "//" },
                 { q: "Which declares a constant?", a: ["const", "let", "var", "fixed"], r: "const" },
-                { q: "Output of: console.log(5 == '5')", a: ["true", "false", "error", "undefined"], r: "true" }
+                { q: "Output of: console.log(5 == '5')", a: ["true", "false", "error", "undefined"], r: "true" },
+                { q: "What is NaN?", a: ["Not a Number", "Null", "New Array", "No Action"], r: "Not a Number" },
+                { q: "Correct array syntax?", a: ["[]", "{}", "()", "<>"], r: "[]" },
+                { q: "Operator for increment?", a: ["++", "+=", "+", "add"], r: "++" },
+                { q: "Method to convert to string?", a: ["toString()", "string()", "text()", "toText()"], r: "toString()" }
             ],
             moderate: [
                 { q: "[1, 2, 3].length", a: ["3", "2", "4", "undefined"], r: "3" },
@@ -5707,7 +5773,11 @@
                 { q: "Output: !true", a: ["false", "true", "undefined", "null"], r: "false" },
                 { q: "Correct way to write a function?", a: ["function myFunc() {}", "func myFunc() {}", "def myFunc() {}", "function:myFunc()"], r: "function myFunc() {}" },
                 { q: "5 === '5'", a: ["false", "true", "error", "null"], r: "false" },
-                { q: "Logical AND operator", a: ["&&", "||", "&", "and"], r: "&&" }
+                { q: "Logical AND operator", a: ["&&", "||", "&", "and"], r: "&&" },
+                { q: "Result of 10 % 3?", a: ["1", "3", "0", "10"], r: "1" },
+                { q: "Method to remove last array item?", a: ["pop()", "push()", "delete()", "remove()"], r: "pop()" },
+                { q: "Which is a valid object?", a: ["{x:1}", "[x:1]", "(x:1)", "<x:1>"], r: "{x:1}" },
+                { q: "Keyword for current object?", a: ["this", "self", "me", "obj"], r: "this" }
             ],
             hard: [
                 { q: "typeof null", a: ["object", "null", "undefined", "number"], r: "object" },
@@ -5715,7 +5785,11 @@
                 { q: "Which is NOT a loop?", a: ["foreach", "for", "while", "do...while"], r: "foreach" },
                 { q: "[...'Hello']", a: ["['H','e','l','l','o']", "'Hello'", "Error", "undefined"], r: "['H','e','l','l','o']" },
                 { q: "JSON.parse('{\"a\":1}')", a: ["{a: 1}", "Error", "'{\"a\":1}'", "undefined"], r: "{a: 1}" },
-                { q: "What is a Promise?", a: ["Async Operation", "Sync Operation", "Loop", "Array"], r: "Async Operation" }
+                { q: "What is a Promise?", a: ["Async Operation", "Sync Operation", "Loop", "Array"], r: "Async Operation" },
+                { q: "What does 'use strict' do?", a: ["Enforces strict mode", "Fixes bugs", "Runs faster", "Includes library"], r: "Enforces strict mode" },
+                { q: "Output: [] == ![]", a: ["true", "false", "error", "undefined"], r: "true" },
+                { q: "Event loop manages?", a: ["Async callbacks", "Memory", "Variables", "DOM"], r: "Async callbacks" },
+                { q: "Closure involves?", a: ["A function within a function", "Closing window", "Ending loop", "DOM events"], r: "A function within a function" }
             ]
         };
 
@@ -6742,7 +6816,7 @@
             // 8. Specific Initializations
 
             if (tabId === 'resources') {
-                if (window.renderResources) window.renderResources();
+                if (window.fetchResources) window.fetchResources();
             }
 
             if (tabId === 'playground') {
