@@ -10,7 +10,7 @@ Enter these details in: Supabase Dashboard > Project Settings > Auth > SMTP Sett
 1. Host: smtp.gmail.com
 2. Port: 465
 3. User: your-email@gmail.com
-4. Password: [YOUR APP PASSWORD] 
+4. Password: exjf dvas zcza jnrw
    - DO NOT use your normal Gmail password.
    - Go to Google Account (myaccount.google.com).
    - Security > 2-Step Verification (Must be ON).

@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BBSYDP STUDENT's LMS | Enterprise Learning System</title>
+    <title>BBSYDP LMS v2.0 | Enterprise Learning System</title>
     <link rel="icon" href="assets/bbsydp_logo.png" type="image/png">
 
     <!-- Core Libraries -->
@@ -68,17 +68,47 @@
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: var(--plus-bg);
+            /* Education Icon Pattern Background */
+            background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%236366f1' fill-opacity='0.03'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
             color: var(--plus-text);
             line-height: 1.5;
             font-size: 13px;
             transition: background 0.3s ease;
+            overflow-y: scroll;
+            /* Force scrollbar */
+        }
+
+        /* Global Premium Scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+            border: 2px solid var(--plus-bg);
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: #94a3b8;
+        }
+
+        .dark ::-webkit-scrollbar-thumb {
+            background: #334155;
+            border-color: #0f172a;
         }
 
         .v-card {
             background-color: var(--plus-card);
             border: 1px solid var(--plus-border);
             border-radius: 20px;
-            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05);
+            box-shadow: 0 4px 20px -2px rgba(99, 102, 241, 0.05);
+            /* Colored Premium Shadow */
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         }
 
@@ -89,19 +119,302 @@
         }
 
         .sidebar {
-            width: 220px;
+            width: 260px;
             height: 100vh;
             position: fixed;
             left: 0;
             top: 0;
-            background-color: var(--plus-card);
-            border-right: 1px solid var(--plus-border);
+            background-color: rgba(255, 255, 255, 0.85);
+            /* Glassmorphism Base */
+            backdrop-filter: blur(20px);
+            /* Frosted Effect */
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid rgba(226, 232, 240, 0.6);
             z-index: 1000;
-            padding: 20px 8px;
+            padding: 24px 12px;
+            overflow: visible !important;
+            transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            /* Bouncy Spring Effect */
+            will-change: width;
+        }
+
+        /* Core Utilities */
+        /* .hidden override removed to allow responsive modifiers */
+
+        /* Desktop Sidebar Base */
+        .sidebar {
+            width: 280px;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* Mobile Responsive Sidebar */
+        @media (max-width: 768px) {
+            .sidebar {
+                transform: translateX(-100%);
+                width: 260px !important;
+                /* Always full width when open on mobile */
+                z-index: 9999;
+                box-shadow: 10px 0 25px rgba(0, 0, 0, 0.2);
+
+                /* FORCE SOLID BACKGROUND for Mobile */
+                background: #ffffff !important;
+                background-image: none !important;
+                background-color: #ffffff !important;
+                backdrop-filter: none !important;
+                -webkit-backdrop-filter: none !important;
+            }
+
+            /* Dark Mode Override */
+            html.dark .sidebar,
+            .dark .sidebar {
+                background: #1e293b !important;
+                background-image: none !important;
+                background-color: #1e293b !important;
+            }
+
+            .sidebar.mobile-open {
+                transform: translateX(0) !important;
+            }
+
+            /* Ensure text contrast on mobile */
+            .sidebar .nav-item span,
+            .sidebar h1,
+            .sidebar p {
+                color: #0f172a;
+                /* Slate-900 */
+            }
+
+            .dark .sidebar .nav-item span,
+            .dark .sidebar h1,
+            .dark .sidebar p {
+                color: #f1f5f9;
+                /* Slate-100 */
+            }
+
+            /* FORCE VISIBILITY OF CONTENT ON MOBILE regardless of collapsed state */
+            .sidebar.collapsed .hide-on-collapse,
+            .sidebar.collapsed span:not(.badge),
+            .sidebar.collapsed h1,
+            .sidebar.collapsed p,
+            .sidebar.collapsed .text-\[9px\] {
+                opacity: 1 !important;
+                visibility: visible !important;
+                width: auto !important;
+                height: auto !important;
+                margin: 0 !important;
+                /* Adjust if needed */
+                padding: 0 !important;
+                position: static !important;
+                overflow: visible !important;
+            }
+
+            /* Un-center the logo on mobile if it was centered by collapsed rules */
+            .sidebar.collapsed .mb-8 {
+                justify-content: flex-start !important;
+            }
+
+            .sidebar.collapsed .logo-container {
+                margin: 0 !important;
+            }
+
+            /* Reset Nav Item Styling on Mobile */
+            .sidebar.collapsed .nav-item {
+                width: 100% !important;
+                justify-content: flex-start !important;
+                padding: 12px !important;
+                margin-bottom: 4px !important;
+            }
+
+            .sidebar.collapsed .nav-item i {
+                margin-right: 12px !important;
+            }
+
+            /* Overlay backdrop for mobile (Invisible but clickable) */
+            #mobile-overlay {
+                display: none;
+                position: fixed;
+                inset: 0;
+                background: transparent;
+                /* No dark tint */
+                backdrop-filter: none;
+                /* No blur */
+                z-index: 9000;
+                pointer-events: none !important;
+                /* Allow clicks to pass through to the specific high-z-index button */
+            }
+
+            #mobile-overlay.active {
+                display: block;
+            }
+
+            /* Mobile Header Container (as per instruction) */
+            .md\:hidden {
+                position: relative;
+                z-index: 9050;
+            }
+
+            /* Content takes full width on mobile */
+            .content-main,
+            .content-main.expanded {
+                margin-left: 0 !important;
+                width: 100% !important;
+                padding: 16px !important;
+            }
+
+            /* Hide the desktop toggle pill on mobile */
+            #main-sidebar>button.absolute {
+                display: none !important;
+            }
+        }
+
+        /* Minimal Collapsed State */
+        .sidebar.collapsed {
+            width: 80px;
+            padding: 24px 12px;
+            align-items: center;
+        }
+
+        /* Logo Centering */
+        /* Logo Centering */
+        .sidebar.collapsed .mb-8 {
+            margin-bottom: 32px;
+            justify-content: center;
+            width: 100%;
+            padding-left: 0;
+            /* Removing padding to center correctly */
+        }
+
+
+        /* Hide Logo Text container specifically */
+
+
+        .sidebar.collapsed .logo-container {
+            margin: 0 auto;
+        }
+
+        .sidebar.collapsed .nav-item {
+            justify-content: center;
+            width: 44px;
+            height: 44px;
+            padding: 0;
+            margin: 0 auto 8px auto;
+            /* Center with auto margins */
+            border-radius: 12px;
+        }
+
+        .sidebar.collapsed .nav-item i {
+            margin-right: 0;
+            width: 22px;
+            height: 22px;
+        }
+
+        /* Clean Active State for Collapsed */
+        .sidebar.collapsed .nav-item.active {
+            background: var(--plus-indigo) !important;
+            color: white !important;
+            box-shadow: 0 4px 12px var(--plus-indigo-glow);
+        }
+
+        /* Remove the side-bar indicator from previous step */
+        .sidebar.collapsed .nav-item.active::before {
+            display: none;
+        }
+
+        /* Tooltip style remains */
+        .sidebar.collapsed .nav-item:hover::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            left: 60px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: #0f172a;
+            color: white;
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 11px;
+            font-weight: 600;
+            white-space: nowrap;
+            z-index: 5000;
+            pointer-events: none;
+            opacity: 0;
+            animation: fadeIn 0.2s forwards;
+        }
+
+        @keyframes fadeIn {
+            to {
+                opacity: 1;
+            }
+        }
+
+        /* STRICTLY Hide all text in collapsed mode */
+        .hide-on-collapse,
+        .sidebar span:not(.badge),
+        .sidebar h1,
+        .sidebar p,
+        .sidebar .text-\[9px\] {
+            transition: opacity 0.2s ease, visibility 0.2s ease;
+        }
+
+        .sidebar.collapsed .hide-on-collapse,
+        .sidebar.collapsed span:not(.badge),
+        .sidebar.collapsed h1,
+        .sidebar.collapsed p,
+        .sidebar.collapsed .text-\[9px\] {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            width: 0 !important;
+            height: 0 !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            overflow: hidden !important;
+            position: absolute !important;
+            /* Remove from flow completely */
+        }
+
+        .sidebar.collapsed #profile-card-container {
+            padding: 0;
+            border: none;
+            width: 100%;
+            margin-top: auto;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            /* Vertical alignment */
+            flex-direction: column;
+            /* Stack avatar and logout */
+            gap: 16px;
+            /* Space between avatar and logout */
+        }
+
+        /* Show specialized logout button only in collapsed mode */
+        .sidebar.collapsed #collapsed-logout-btn {
+            display: flex !important;
+        }
+
+        /* Resize Avatar in Collapsed Mode */
+        .sidebar.collapsed #sidebar-mini-avatar {
+            width: 40px !important;
+            height: 40px !important;
+            font-size: 14px !important;
+            border-width: 2px !important;
+        }
+
+        .sidebar.collapsed #sidebar-overlay-status {
+            /* The green dot */
+            width: 10px;
+            height: 10px;
+            bottom: 0;
+            right: 0;
+        }
+
+        .dark .sidebar {
+            background-color: rgba(15, 23, 42, 0.85);
+            /* Dark Mode Glass */
+            border-right: 1px solid rgba(30, 41, 59, 0.6);
         }
 
         .content-main {
-            margin-left: 220px;
+            margin-left: 260px;
             padding: 24px;
             min-height: 100vh;
             background-color: var(--plus-bg);
@@ -109,7 +422,16 @@
             display: flex;
             flex-direction: column;
             align-items: center;
-            /* Center horizontally */
+            transition: margin-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            /* Smooth Transition */
+        }
+
+        .content-main.expanded {
+            margin-left: 80px;
+        }
+
+        .content-main {
+            transition: margin-left 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
         }
 
         .content-wrapper {
@@ -123,26 +445,28 @@
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px 20px;
-            margin-bottom: 8px;
-            border-radius: 16px;
+            padding: 12px 16px;
+            margin-bottom: 6px;
+            border-radius: 12px;
             font-weight: 700;
             color: var(--plus-text-muted);
-            text-transform: uppercase;
-            font-size: 0.75rem;
-            letter-spacing: 0.1em;
-            transition: all 0.3s ease;
+            font-size: 0.8rem;
+            letter-spacing: 0.02em;
+            transition: all 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
+            border: 1px solid transparent;
         }
 
         .nav-item:hover {
-            background: rgba(99, 102, 241, 0.05);
+            background: rgba(99, 102, 241, 0.08);
             color: var(--plus-indigo);
+            transform: translateX(4px);
         }
 
         .nav-item.active {
-            background: linear-gradient(135deg, var(--plus-indigo) 0%, #4338ca 100%);
+            background: linear-gradient(135deg, var(--plus-indigo) 0%, #4f46e5 100%);
             color: #ffffff !important;
-            box-shadow: 0 8px 16px -4px var(--plus-indigo-glow);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+            border-color: rgba(255, 255, 255, 0.1);
         }
 
         .btn-command {
@@ -228,6 +552,13 @@
             bottom: 0;
             right: 0;
             box-shadow: 0 0 10px rgba(16, 185, 129, 0.4);
+        }
+
+        .custom-scrollbar {
+            scrollbar-width: thin;
+            /* Firefox */
+            scrollbar-color: rgba(99, 102, 241, 0.2) transparent;
+            /* Firefox */
         }
 
         .custom-scrollbar::-webkit-scrollbar {
@@ -912,6 +1243,100 @@
         .content-view {
             width: 100%;
         }
+
+        /* FORCE MOBILE OVERRIDES AT THE END TO WIN SPECIFICITY WARS */
+        /* FORCE MOBILE OVERRIDES AT THE END TO WIN SPECIFICITY WARS */
+        @media (max-width: 768px) {
+            #main-sidebar {
+                width: 260px !important;
+                /* Default expanded width */
+                transform: translateX(-100%);
+                /* Default closed position */
+                transition: width 0.3s cubic-bezier(0.4, 0, 0.2, 1), transform 0.3s cubic-bezier(0.4, 0, 0.2, 1) !important;
+                z-index: 9999;
+            }
+
+            /* When Mobile Menu is Open: Show Sidebar */
+            #main-sidebar.mobile-open {
+                transform: translateX(0) !important;
+            }
+
+            /* SUPPORT COLLAPSED STATE ON MOBILE */
+            #main-sidebar.collapsed {
+                width: 80px !important;
+            }
+
+            /* If Collapsed, we MUST hide text again. We revert the previous forced visibility rules. */
+            /* Standard .hide-on-collapse rules will apply normally because we removed the overrides. */
+
+            /* Fix nav items alignment when collapsed */
+            #main-sidebar.collapsed .nav-item {
+                justify-content: center !important;
+                padding-left: 0 !important;
+                padding-right: 0 !important;
+            }
+
+            /* Ensure close button (X) is visible but adapts */
+            /* We need to ensure the header layout supports 80px width */
+            /* Header Layout Fix for Collapsed Mobile State */
+            /* Header Layout Fix for Collapsed Mobile State */
+            /* Header Layout Fix for Collapsed Mobile State: Vertical Stack */
+            #main-sidebar.collapsed .px-2.mb-8 {
+                position: relative;
+                height: auto !important;
+                display: flex !important;
+                flex-direction: column-reverse !important;
+                /* Button Top, Logo Bottom */
+                align-items: center !important;
+                justify-content: flex-end !important;
+                gap: 12px !important;
+                /* Space between X and Logo */
+                margin-top: 10px !important;
+                margin-bottom: 30px !important;
+            }
+
+            /* Logo Wrapper (Bottom) */
+            #main-sidebar.collapsed .px-2.mb-8>div:first-child {
+                opacity: 1 !important;
+                width: 100% !important;
+                justify-content: center !important;
+            }
+
+            /* Ensure text is hidden */
+            #main-sidebar.collapsed .px-2.mb-8>div:first-child .hide-on-collapse {
+                display: none !important;
+            }
+
+            /* X Button (Top) */
+            #main-sidebar.collapsed .px-2.mb-8>button {
+                position: static !important;
+                transform: none !important;
+                right: auto;
+                top: auto;
+                background-color: transparent !important;
+                box-shadow: none !important;
+                padding: 4px;
+                /* Make icon red/prominent if desired, or keep default */
+            }
+
+            /* Dark mode text/icon colors are inherited */
+
+            /* Dark mode adjustment for button bg */
+            .dark #main-sidebar.collapsed .px-2.mb-8>button {
+                background-color: rgba(30, 41, 59, 0.8);
+            }
+
+            /* SMART TOGGLE VISIBILITY ON MOBILE */
+            /* 1. Default: Hide the toggle button on mobile (so it doesn't float when closed) */
+            #desktop-toggle-btn {
+                display: none !important;
+            }
+
+            /* 2. When Sidebar is OPEN: Show it (to allow collapsing) */
+            #main-sidebar.mobile-open #desktop-toggle-btn {
+                display: flex !important;
+            }
+        }
     </style>
 
 </head>
@@ -923,13 +1348,6 @@
         <div class="loader">
             <div>
                 <ul>
-                    <li>
-                        <svg fill="currentColor" viewBox="0 0 90 120">
-                            <path
-                                d="M90,0 L90,120 L11,120 C4.92486775,120 0,115.075132 0,109 L0,11 C0,4.92486775 4.92486775,0 11,0 L90,0 Z M71.5,81 L18.5,81 C17.1192881,81 16,82.1192881 16,83.5 C16,84.8254834 17.0315359,85.9100387 18.3356243,85.9946823 L18.5,86 L71.5,86 C72.8807119,86 74,84.8807119 74,83.5 C74,82.1745166 72.9684641,81.0899613 71.6643757,81.0053177 L71.5,81 Z M71.5,57 L18.5,57 C17.1192881,57 16,58.1192881 16,59.5 C16,60.8254834 17.0315359,61.9100387 18.3356243,61.9946823 L18.5,62 L71.5,62 C72.8807119,62 74,60.8807119 74,59.5 C74,58.1192881 72.8807119,57 71.5,57 Z M71.5,33 L18.5,33 C17.1192881,33 16,34.1192881 16,35.5 C16,36.8254834 17.0315359,37.9100387 18.3356243,37.9946823 L18.5,38 L71.5,38 C72.8807119,38 74,36.8807119 74,35.5 C74,34.1192881 72.8807119,33 71.5,33 Z">
-                            </path>
-                        </svg>
-                    </li>
                     <li>
                         <svg fill="currentColor" viewBox="0 0 90 120">
                             <path
@@ -973,11 +1391,11 @@
                 <div class="inline-flex items-center justify-center w-24 h-24 mb-4">
                     <img src="assets/bbsydp_logo.png" alt="BBSYDP Logo" class="w-full h-full object-contain">
                 </div>
-                <h1
-                    class="text-2xl font-black tracking-tighter text-slate-900 dark:text-slate-200 uppercase leading-none">
-                    BBSYDP <span class="text-indigo-500">LMS</span></h1>
+                <h1 BBSYDP <span class="text-indigo-500">LMS</span> <sup
+                        class="text-[10px] text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800 ml-1">v2.0</sup>
+                </h1>
                 <p class="text-slate-500 dark:text-slate-400 mt-2 font-bold uppercase tracking-widest text-[8px]">
-                    Student Learning Portal</p>
+                    Enterprise Learning Portal</p>
 
             </div>
 
@@ -998,6 +1416,15 @@
                     <input type="text" id="auth-name"
                         class="w-full px-4 py-3.5 rounded-xl bg-slate-50 dark:bg-[#0b1120] border border-slate-200 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all font-semibold text-sm text-slate-900 dark:text-slate-100"
                         placeholder="Enter your full name">
+                </div>
+                <!-- Profile Picture Upload (Optional) -->
+                <div id="avatar-field" class="hidden space-y-1.5 animate-in fade-in slide-in-from-top-2">
+                    <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Profile Picture
+                        <span class="text-slate-300 font-bold opacity-50">(Optional)</span></label>
+                    <div class="relative group">
+                        <input type="file" id="auth-avatar" accept="image/*"
+                            class="w-full text-xs font-bold text-slate-500 file:mr-4 file:py-2.5 file:px-4 file:rounded-xl file:border-0 file:text-[10px] file:font-black file:uppercase file:tracking-widest file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100 dark:file:bg-indigo-900/30 dark:file:text-indigo-400 cursor-pointer bg-slate-50 dark:bg-[#0b1120] rounded-xl border border-slate-200 dark:border-slate-800">
+                    </div>
                 </div>
                 <div class="space-y-1.5">
                     <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">Email
@@ -1035,7 +1462,7 @@
 
                 <p id="auth-footer"
                     class="text-center text-[9px] font-black uppercase tracking-widest text-slate-400 mt-6">
-                    New here? <button onclick="toggleMode()" class="text-indigo-500 hover:underline">Create
+                    New here? <button onclick="customToggleMode()" class="text-indigo-500 hover:underline">Create
                         Account</button>
                 </p>
             </form>
@@ -1047,83 +1474,196 @@
 
     <!-- 2. DASHBOARD LAYOUT -->
     <div id="dashboard-layout" class="hidden">
+
+        <!-- Mobile Overlay Backdrop (Click to close disabled as requested) -->
+        <div id="mobile-overlay"></div>
+
         <!-- Sidebar -->
-        <aside class="sidebar flex flex-col transition-all duration-300">
-            <div class="px-4 mb-8 flex items-center justify-between">
+        <aside id="main-sidebar"
+            class="sidebar flex flex-col transition-all duration-300 bg-gradient-to-b from-white to-slate-50 dark:from-[#1e293b] dark:to-[#0f172a]">
+            <!-- Modern Vertical Floating Toggle (Centered) -->
+            <!-- Modern Vertical Floating Toggle (Centered) -->
+            <!-- Modern Vertical Floating Toggle (Centered) -->
+            <button onclick="window.toggleSidebarCollapse()" id="desktop-toggle-btn"
+                class="absolute -right-3 top-1/2 -translate-y-1/2 z-[9999] flex items-center justify-center w-6 h-12 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-full shadow-lg text-slate-400 hover:text-indigo-500 hover:scale-110 transition-all cursor-pointer group hover:shadow-indigo-500/20 active:scale-95 duration-300">
+                <i id="collapse-icon" data-lucide="chevron-left"
+                    class="w-3 h-3 transition-transform duration-500 group-hover:scale-125"></i>
+            </button>
+
+            <!-- Header with Toggle -->
+            <!-- Header with Toggle -->
+            <div class="px-2 mb-8 flex items-center justify-between">
+                <!-- Left: Logo & Text -->
+                <!-- Left: Logo & Text -->
                 <div class="flex items-center gap-3">
-                    <div class="w-12 h-12 flex items-center justify-center">
+                    <div class="logo-container w-10 h-10 flex-shrink-0 flex items-center justify-center">
                         <img src="assets/bbsydp_logo.png" alt="BBSYDP Logo" class="w-full h-full object-contain">
                     </div>
-                    <div>
-                        <h1 class="font-black text-xl tracking-tighter uppercase leading-none">BBSYDP</h1>
-                        <p class="text-[7px] font-black tracking-[0.2em] text-indigo-500 uppercase mt-1">Learning Portal
+                    <div
+                        class="hide-on-collapse flex flex-col justify-center overflow-hidden transition-all duration-300">
+                        <h1
+                            class="font-black text-lg tracking-tighter uppercase leading-none flex items-center gap-1 text-slate-800 dark:text-white">
+                            BBSYDP <span
+                                class="text-[8px] bg-indigo-600 text-white px-1 py-0.5 rounded ml-1 align-top">v2.0</span>
+                        </h1>
+                        <p
+                            class="text-[8px] font-bold tracking-[0.15em] text-indigo-500 uppercase mt-0.5 leading-tight">
+                            Enterprise Portal
                         </p>
                     </div>
                 </div>
-                <button onclick="toggleSidebar()" class="lg:hidden p-2 text-slate-400">
+
+                <!-- Right: Mobile Close Button (X) -->
+                <button onclick="window.toggleMobileSidebar()"
+                    class="md:hidden p-2 rounded-lg text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-colors">
                     <i data-lucide="x" class="w-6 h-6"></i>
                 </button>
             </div>
 
             <nav class="flex-1 space-y-1">
-                <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-6 mb-2">Menu
-                </div>
-                <button onclick="switchTab('dashboard')" class="nav-item w-full active" id="nav-dashboard">
-                    <i data-lucide="layout-grid" class="w-5 h-5"></i> Dashboard
+                <div
+                    class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-4 mb-2 mt-2 hide-on-collapse">
+                    Menu</div>
+
+                <button onclick="switchTab('dashboard')" id="nav-dashboard" class="nav-item w-full active"
+                    data-tooltip="Dashboard">
+                    <i data-lucide="layout-grid" class="w-5 h-5"></i> <span class="hide-on-collapse">Dashboard</span>
+                </button>
+                <button onclick="switchTab('tasks')" id="nav-tasks" class="nav-item w-full" data-tooltip="My Tasks">
+                    <i data-lucide="clipboard-list" class="w-5 h-5"></i> <span class="hide-on-collapse">My Tasks</span>
+                </button>
+                <button onclick="switchTab('resources')" id="nav-resources" class="nav-item w-full"
+                    data-tooltip="Resources">
+                    <i data-lucide="folder-open" class="w-5 h-5"></i> <span class="hide-on-collapse">Resources</span>
+                </button>
+                <button onclick="switchTab('leaderboard')" id="nav-leaderboard" class="nav-item w-full"
+                    data-tooltip="Leaderboard">
+                    <i data-lucide="trophy" class="w-5 h-5"></i> <span class="hide-on-collapse">Leaderboard</span>
+                </button>
+                <button onclick="switchTab('arcade')" id="nav-arcade" class="nav-item w-full" data-tooltip="Arcade">
+                    <i data-lucide="gamepad-2" class="w-5 h-5"></i> <span class="hide-on-collapse">Play Arcade</span>
+                </button>
+                <button onclick="switchTab('playground')" id="nav-playground" class="nav-item w-full"
+                    data-tooltip="Live Editor">
+                    <i data-lucide="code-2" class="w-5 h-5"></i> <span class="hide-on-collapse">Live Editor</span>
                 </button>
 
-                <button onclick="switchTab('tasks')" class="nav-item w-full" id="nav-tasks">
-                    <i data-lucide="clipboard-list" class="w-5 h-5"></i> My Tasks
-                </button>
-                <button onclick="switchTab('resources')" class="nav-item w-full" id="nav-resources">
-                    <i data-lucide="folder-open" class="w-5 h-5"></i> Resources
-                </button>
-                <button onclick="switchTab('leaderboard')" class="nav-item w-full" id="nav-leaderboard">
-                    <i data-lucide="trophy" class="w-5 h-5"></i> Leaderboard
-                </button>
-                <button onclick="switchTab('arcade')" class="nav-item w-full" id="nav-arcade">
-                    <i data-lucide="gamepad-2" class="w-5 h-5"></i> Play Arcade
-                </button>
-                <button onclick="switchTab('playground')" class="nav-item w-full" id="nav-playground">
-                    <i data-lucide="code-2" class="w-5 h-5"></i> Live Editor
-                </button>
-
-
-                <!-- Community Status removed as per request -->
-
+                <!-- Admin items -->
                 <div id="admin-nav" class="hidden pt-6 mt-6 border-t border-slate-100 dark:border-slate-800">
-                    <div class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-6 mb-2">Admin Panel
+                    <div
+                        class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-6 mb-2 hide-on-collapse">
+                        Admin Panel
                     </div>
-                    <button onclick="switchTab('grading')" class="nav-item w-full">
-                        <i data-lucide="award" class="w-5 h-5"></i> Grade Tasks
+                    <button onclick="switchTab('grading')" class="nav-item w-full" data-tooltip="Grade Tasks">
+                        <i data-lucide="award" class="w-5 h-5"></i> <span class="hide-on-collapse">Grade Tasks</span>
                     </button>
-                    <button onclick="switchTab('users')" class="nav-item w-full">
-                        <i data-lucide="users" class="w-5 h-5"></i> Students
+                    <button onclick="switchTab('users')" class="nav-item w-full" data-tooltip="Students">
+                        <i data-lucide="users" class="w-5 h-5"></i> <span class="hide-on-collapse">Students</span>
                     </button>
                 </div>
             </nav>
 
-            <div class="mt-auto px-6 border-t border-slate-100 dark:border-slate-800 pt-6">
-                <button onclick="switchTab('profile')" class="nav-item w-full mb-4">
-                    <i data-lucide="user-cog" class="w-5 h-5"></i> Profile
-                </button>
-                <button onclick="handleLogout()"
-                    class="nav-item w-full text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10">
-                    <i data-lucide="log-out" class="w-5 h-5"></i> Logout
-                </button>
+            <div id="profile-card-container"
+                class="mt-auto px-6 pb-6 pt-4 border-t border-slate-100 dark:border-slate-800">
+                <div class="flex flex-col items-center text-center">
+                    <!-- Avatar Circle -->
+                    <div class="relative mb-3 group cursor-pointer" onclick="switchTab('profile')">
+                        <div id="sidebar-mini-avatar"
+                            class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-xl overflow-hidden border-4 border-white dark:border-slate-900 shadow-lg group-hover:scale-105 transition-transform duration-300">
+                            ?
+                        </div>
+                        <div
+                            class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full z-10">
+                        </div>
+                    </div>
+
+                    <!-- Collapsed ONLY Logout Button -->
+                    <button id="collapsed-logout-btn" onclick="handleLogout()"
+                        class="hidden w-8 h-8 rounded-full bg-rose-50 dark:bg-rose-900/20 text-rose-500 items-center justify-center hover:bg-rose-100 hover:text-rose-600 transition-colors"
+                        data-tooltip="Logout">
+                        <i data-lucide="log-out" class="w-4 h-4"></i>
+                    </button>
+
+                    <!-- User Info -->
+                    <div class="hide-on-collapse w-full">
+                        <h4 id="sidebar-mini-name"
+                            class="text-sm font-black text-slate-900 dark:text-white mb-0.5 w-full truncate">Loading...
+                        </h4>
+                        <p id="sidebar-mini-role"
+                            class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Student</p>
+
+                        <!-- Action Buttons -->
+                        <div class="flex items-center justify-center gap-2 w-full">
+                            <button onclick="switchTab('profile')"
+                                class="flex-1 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
+                                Profile
+                            </button>
+                            <button onclick="handleLogout()"
+                                class="p-2 rounded-xl bg-rose-50 dark:bg-rose-900/10 text-rose-500 hover:bg-rose-100 hover:text-rose-600 transition-colors"
+                                title="Logout">
+                                <i data-lucide="log-out" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
             </div>
         </aside>
 
         <main class="content-main">
             <div class="content-wrapper">
+                <!-- Mobile Header (Visible only on mobile) -->
+                <!-- Mobile Header (Visible only on mobile) -->
+                <div class="md:hidden flex items-center justify-start gap-4 mb-6 relative z-[9050]">
+                    <!-- 1. Hamburger Button (Left) -->
+                    <button id="mobile-menu-btn"
+                        onclick="window.toggleMobileSidebar?.() || console.error('Toggle fn not found')"
+                        class="p-2 rounded-lg bg-white dark:bg-slate-800 shadow-sm border border-slate-100 dark:border-slate-700 text-slate-600 dark:text-slate-300 active:scale-95 transition-all duration-300"
+                        style="z-index: 9001;">
+                        <i data-lucide="menu" class="w-6 h-6"></i>
+                    </button>
+
+                    <!-- 2. Logo Container (Right of Button) -->
+                    <div id="mobile-logo-container" class="flex items-center gap-2 transition-opacity duration-300">
+                        <img src="assets/bbsydp_logo.png" class="w-8 h-8 object-contain">
+                        <span class="font-black text-slate-800 dark:text-white uppercase tracking-tighter">BBSYDP
+                            v2.0</span>
+                    </div>
+                </div>
+
+                <!-- v2.0 Welcome Banner -->
+                <div id="v2-banner"
+                    class="w-full bg-gradient-to-r from-indigo-600 to-violet-600 rounded-2xl p-6 text-white mb-8 relative overflow-hidden shadow-xl shadow-indigo-500/20 group animate-in slide-in-from-top-4 duration-700">
+                    <div class="absolute top-0 right-0 p-4 opacity-10 group-hover:opacity-20 transition-opacity">
+                        <i data-lucide="sparkles" class="w-32 h-32"></i>
+                    </div>
+                    <div class="relative z-10">
+                        <div class="flex items-center gap-3 mb-2">
+                            <span
+                                class="px-2 py-1 rounded-lg bg-white/20 backdrop-blur-md text-[9px] font-black uppercase tracking-widest border border-white/10">New
+                                Update</span>
+                            <span class="text-[10px] font-bold text-indigo-100 uppercase tracking-wide">Introducing
+                                v2.0</span>
+                        </div>
+                        <h2 class="text-2xl md:text-3xl font-black tracking-tight mb-2">Welcome to the Future of
+                            Learning</h2>
+                        <p class="text-indigo-100 text-sm font-medium max-w-xl mb-6">Experience the all-new Enterprise
+                            Portal with enhanced performance, gamified learning, and a premium interface designed for
+                            your success.</p>
+
+                        <div class="flex items-center gap-3">
+                            <button onclick="$('#v2-banner').slideUp()"
+                                class="px-5 py-2.5 bg-white text-indigo-600 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-indigo-50 transition-colors shadow-lg shadow-black/5">Dismiss</button>
+                            <button onclick="switchTab('arcade')"
+                                class="px-5 py-2.5 bg-indigo-500/30 text-white border border-white/20 rounded-xl text-xs font-black uppercase tracking-widest hover:bg-white/10 transition-colors">Try
+                                Arcade</button>
+                        </div>
+                    </div>
+                </div>
                 <!-- Top Navigation Bar -->
                 <!-- Top Navigation Bar -->
-                <header class="flex justify-between items-center mb-6 gap-4">
+                <!-- Top Navigation Bar -->
+                <header class="flex justify-between items-center mb-6 gap-4 hidden md:flex">
                     <div class="flex items-center gap-4">
-                        <button onclick="toggleSidebar()"
-                            class="lg:hidden p-2 bg-indigo-50 dark:bg-indigo-500/10 rounded-xl hover:bg-indigo-100 transition-colors">
-                            <i data-lucide="menu" class="w-6 h-6 text-indigo-500"></i>
-                        </button>
                         <div class="flex items-center gap-2">
                             <img src="assets/bbsydp_logo.png" alt="Logo" class="w-8 h-8 lg:hidden object-contain">
                             <div>
@@ -1225,6 +1765,8 @@
                 </header>
 
                 <!-- 1. Strategy Overview -->
+
+
                 <div id="view-dashboard" class="content-view animate-in fade-in duration-500">
 
                     <!-- Professional Greeting Banner -->
@@ -1311,62 +1853,102 @@
 
                     <!-- Stats Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-                        <div class="v-card p-4 flex items-center gap-4 glow-border group">
+                        <!-- Stat 1: Pending Tasks (Gradient) -->
+                        <div
+                            class="v-card p-5 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 border-0 shadow-lg bg-gradient-to-br from-indigo-500 to-indigo-600">
                             <div
-                                class="w-12 h-12 bg-indigo-500/10 text-indigo-500 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-indigo-500 group-hover:text-white shadow-lg">
-                                <i data-lucide="target" class="w-6 h-6"></i>
+                                class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-white/20 transition-all">
                             </div>
-                            <div>
-                                <p id="stat-label-1"
-                                    class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">
-                                    Pending Tasks</p>
-                                <h3 class="text-2xl font-black tracking-tighter" id="stat-active">0</h3>
+
+                            <div class="relative z-10 flex flex-col h-full justify-between">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div
+                                        class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm text-white border border-white/10">
+                                        <i data-lucide="target" class="w-5 h-5"></i>
+                                    </div>
+                                    <span
+                                        class="text-[9px] font-black text-indigo-100 bg-indigo-500/40 px-2 py-1 rounded-lg uppercase tracking-widest">Active</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-black text-white tracking-tighter mb-1" id="stat-active">0
+                                    </h3>
+                                    <p class="text-[9px] font-bold text-indigo-100 uppercase tracking-widest opacity-80"
+                                        id="stat-label-1">Pending Tasks</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="v-card p-4 flex items-center gap-4 glow-border group">
+
+                        <!-- Stat 2: Completed Tasks (Gradient) -->
+                        <div
+                            class="v-card p-5 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 border-0 shadow-lg bg-gradient-to-br from-emerald-500 to-emerald-600">
                             <div
-                                class="w-12 h-12 bg-cyan-500/10 text-cyan-500 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-cyan-500 group-hover:text-white shadow-lg">
-                                <i data-lucide="shield-check" class="w-6 h-6"></i>
+                                class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-white/20 transition-all">
                             </div>
-                            <div>
-                                <p id="stat-label-2"
-                                    class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">
-                                    Completed Tasks</p>
-                                <h3 class="text-2xl font-black tracking-tighter" id="stat-completed">0</h3>
+
+                            <div class="relative z-10 flex flex-col h-full justify-between">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div
+                                        class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm text-white border border-white/10">
+                                        <i data-lucide="shield-check" class="w-5 h-5"></i>
+                                    </div>
+                                    <span
+                                        class="text-[9px] font-black text-emerald-100 bg-emerald-500/40 px-2 py-1 rounded-lg uppercase tracking-widest">Achieved</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-black text-white tracking-tighter mb-1"
+                                        id="stat-completed">0</h3>
+                                    <p class="text-[9px] font-bold text-emerald-100 uppercase tracking-widest opacity-80"
+                                        id="stat-label-2">Completed Tasks</p>
+                                </div>
                             </div>
                         </div>
-                        <div class="v-card p-4 flex items-center gap-4 glow-border group sm:col-span-2 lg:col-span-1">
+                        <!-- Stat 3: Avg Grade (Gradient) -->
+                        <div
+                            class="v-card p-5 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 border-0 shadow-lg bg-gradient-to-br from-violet-500 to-purple-600 sm:col-span-2 lg:col-span-1">
                             <div
-                                class="w-12 h-12 bg-emerald-500/10 text-emerald-500 rounded-xl flex items-center justify-center transition-all group-hover:scale-110 group-hover:bg-emerald-500 group-hover:text-white shadow-lg">
-                                <i data-lucide="activity" class="w-6 h-6"></i>
+                                class="absolute top-0 right-0 w-24 h-24 bg-white/10 rounded-full -mr-8 -mt-8 blur-2xl group-hover:bg-white/20 transition-all">
                             </div>
-                            <div>
-                                <p id="stat-label-3"
-                                    class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">
-                                    Average Grade</p>
-                                <h3 class="text-2xl font-black tracking-tighter" id="stat-score">0%</h3>
+
+                            <div class="relative z-10 flex flex-col h-full justify-between">
+                                <div class="flex justify-between items-start mb-4">
+                                    <div
+                                        class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm text-white border border-white/10">
+                                        <i data-lucide="bar-chart-2" class="w-5 h-5"></i>
+                                    </div>
+                                    <span
+                                        class="text-[9px] font-black text-violet-100 bg-violet-500/40 px-2 py-1 rounded-lg uppercase tracking-widest">Performance</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-3xl font-black text-white tracking-tighter mb-1" id="stat-score">0%
+                                    </h3>
+                                    <p class="text-[9px] font-bold text-violet-100 uppercase tracking-widest opacity-80"
+                                        id="stat-label-3">Average Grade</p>
+                                </div>
                             </div>
                         </div>
                         <!-- NEW GAMIFICATION STAT -->
+                        <!-- NEW GAMIFICATION STAT (Gradient) -->
                         <div id="student-level-ui"
-                            class="v-card p-4 flex items-center gap-4 glow-border group sm:col-span-2 lg:col-span-1 hidden">
+                            class="v-card p-5 relative overflow-hidden group hover:-translate-y-1 transition-transform duration-300 border-0 shadow-lg bg-gradient-to-br from-amber-400 to-orange-500 hidden sm:col-span-2 lg:col-span-1">
+
                             <div
-                                class="relative w-12 h-12 bg-amber-500/10 text-amber-500 rounded-xl flex items-center justify-center shadow-lg overflow-hidden group-hover:scale-110 transition-transform">
-                                <i data-lucide="crown" class="w-6 h-6 z-10"></i>
-                                <div id="xp-bar-bg"
-                                    class="absolute bottom-0 left-0 w-full bg-amber-500/20 h-full origin-bottom scale-y-0 transition-transform duration-1000">
-                                </div>
+                                class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-3xl group-hover:bg-white/20 transition-all">
                             </div>
-                            <div class="flex-1">
-                                <p
-                                    class="text-[8px] font-black text-slate-400 uppercase tracking-[0.2em] mb-1 leading-none">
-                                    Your Rank</p>
-                                <h3 class="text-xl font-black tracking-tighter bg-clip-text text-transparent bg-gradient-to-r from-amber-500 to-orange-600"
-                                    id="rank-name">Rookie</h3>
-                                <div
-                                    class="w-full h-1.5 bg-slate-100 dark:bg-slate-700/50 rounded-full mt-2 overflow-hidden">
-                                    <div id="xp-bar"
-                                        class="h-full bg-gradient-to-r from-amber-400 to-orange-500 w-0 transition-all duration-1000 rounded-full">
+
+                            <div class="relative z-10 flex flex-col h-full justify-between">
+                                <div class="flex justify-between items-start mb-3">
+                                    <div
+                                        class="p-2.5 bg-white/20 rounded-xl backdrop-blur-sm text-white border border-white/10">
+                                        <i data-lucide="crown" class="w-5 h-5"></i>
+                                    </div>
+                                    <span
+                                        class="text-[9px] font-bold text-amber-900/60 uppercase tracking-wide">Rank</span>
+                                </div>
+                                <div>
+                                    <h3 class="text-2xl font-black text-white tracking-tighter mb-2" id="rank-name">
+                                        Rookie</h3>
+                                    <div class="w-full h-1.5 bg-black/10 rounded-full overflow-hidden">
+                                        <div id="xp-bar" class="h-full bg-white w-0 transition-all duration-1000"></div>
                                     </div>
                                 </div>
                             </div>
@@ -1501,16 +2083,18 @@
                     </div>
                 </div>
 
-                <!-- 4. Leaderboard View -->
+                <!-- 4. LEADERBOARD VIEW -->
                 <div id="view-leaderboard" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
                     <div class="v-card overflow-hidden">
                         <div
                             class="p-5 bg-gradient-to-br from-indigo-600 to-indigo-800 text-white flex justify-between items-center">
                             <div>
-                                <h3 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">Student
+                                <h3 class="text-xl font-black uppercase tracking-tighter leading-none mb-1">
+                                    Student
                                     Ranking
                                 </h3>
-                                <p class="text-indigo-100/70 text-[8px] font-black uppercase tracking-widest">Best
+                                <p class="text-indigo-100/70 text-[8px] font-black uppercase tracking-widest">
+                                    Best
                                     Performers</p>
                             </div>
                             <div
@@ -1547,7 +2131,8 @@
                                 class="text-xl font-black uppercase tracking-tighter text-slate-900 dark:text-slate-200">
                                 Code
                                 Arcade</h3>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Level up your
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Level
+                                up your
                                 skills</p>
                             <button id="back-to-menu-btn" onclick="exitArcadeGame()"
                                 class="hidden mt-4 px-5 py-2.5 rounded-xl bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 hover:border-indigo-500 text-slate-500 hover:text-indigo-600 font-black text-[10px] uppercase tracking-widest transition-all flex items-center gap-2 shadow-sm w-fit">
@@ -1592,7 +2177,8 @@
                                 <h4
                                     class="font-black text-lg text-slate-900 dark:text-slate-200 mb-2 uppercase tracking-tighter">
                                     HTML Tag Master</h4>
-                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Race
+                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">
+                                    Race
                                     against
                                     the clock to identify the correct HTML tags.</p>
                                 <span
@@ -1615,7 +2201,8 @@
                                 <h4
                                     class="font-black text-lg text-slate-900 dark:text-slate-200 mb-2 uppercase tracking-tighter">
                                     CSS Speedrun</h4>
-                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Select
+                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">
+                                    Select
                                     the
                                     correct CSS property to fix the layout.</p>
                                 <span
@@ -1638,7 +2225,8 @@
                                 <h4
                                     class="font-black text-lg text-slate-900 dark:text-slate-200 mb-2 uppercase tracking-tighter">
                                     Code Drag Master</h4>
-                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Drag
+                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">
+                                    Drag
                                     code
                                     blocks
                                     to their correct descriptions.</p>
@@ -1662,7 +2250,8 @@
                                 <h4
                                     class="font-black text-lg text-slate-900 dark:text-slate-200 mb-2 uppercase tracking-tighter">
                                     JS Logic Lab</h4>
-                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Predict
+                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">
+                                    Predict
                                     the output of JavaScript snippets.</p>
                                 <span
                                     class="px-3 py-1.5 rounded-lg bg-yellow-50 text-yellow-600 text-[9px] font-black uppercase tracking-widest">Start
@@ -1684,7 +2273,8 @@
                                 <h4
                                     class="font-black text-lg text-slate-900 dark:text-slate-200 mb-2 uppercase tracking-tighter">
                                     Syntax Balloons</h4>
-                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">Pop the
+                                <p class="text-[10px] font-bold text-slate-400 mb-4 uppercase tracking-wide">
+                                    Pop the
                                     correct code bubbles! HTML, CSS, & JS.</p>
                                 <span
                                     class="px-3 py-1.5 rounded-lg bg-sky-50 text-sky-600 text-[9px] font-black uppercase tracking-widest">Start
@@ -1713,7 +2303,8 @@
                                 class="text-xl font-black uppercase tracking-tighter text-slate-900 dark:text-slate-200">
                                 Grading
                                 Center</h3>
-                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Review and
+                            <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Review
+                                and
                                 grade
                                 student tasks</p>
                         </div>
@@ -1808,7 +2399,8 @@
                                     <h3 class="text-2xl font-black text-slate-900 dark:text-slate-200 uppercase tracking-tighter mb-1"
                                         id="profile-page-name">
                                         My Account</h3>
-                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">Update
+                                    <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest">
+                                        Update
                                         your personal profile & avatar</p>
                                     <p class="text-[8px] text-indigo-500 font-bold uppercase tracking-widest mt-2 hidden"
                                         id="upload-status">Uploading...</p>
@@ -1837,7 +2429,8 @@
                                             <input type="email" id="profile-email" disabled
                                                 class="w-full pl-10 pr-4 py-3 bg-slate-100 dark:bg-slate-900/50 border border-transparent dark:border-slate-800/50 rounded-xl text-sm font-bold text-slate-500 cursor-not-allowed">
                                         </div>
-                                        <p class="text-[9px] text-slate-400 italic px-1">Email cannot be changed
+                                        <p class="text-[9px] text-slate-400 italic px-1">Email cannot be
+                                            changed
                                             directly.</p>
                                     </div>
 
@@ -1846,7 +2439,8 @@
                                         class="pt-6 border-t border-slate-100 dark:border-slate-800">
                                         <h4
                                             class="text-xs font-black uppercase tracking-widest text-slate-900 dark:text-slate-200 mb-4 flex items-center gap-2">
-                                            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i> Trophy Case
+                                            <i data-lucide="trophy" class="w-4 h-4 text-amber-500"></i>
+                                            Trophy Case
                                         </h4>
                                         <div class="grid grid-cols-2 md:grid-cols-4 gap-4" id="badges-grid">
                                             <!-- Badges will be injected here via JS -->
@@ -1921,7 +2515,8 @@
                             <div>
                                 <h3 class="text-white font-bold text-sm tracking-tight leading-none"></h3>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] text-slate-400 font-medium">BBSYDP Editor</span>
+                                    <span class="text-[10px] text-slate-400 font-medium">BBSYDP
+                                        Editor</span>
                                 </div>
                             </div>
                         </div>
@@ -1954,7 +2549,8 @@
                                     class="bg-[#1e1f26] border-b border-[#2c303a] py-2 px-3 flex items-center justify-between select-none h-9">
                                     <span
                                         class="text-[11px] font-black text-[#aaaaaa] uppercase tracking-wide flex items-center gap-2">
-                                        <div class="w-3 h-3 bg-[#e34c26] rounded-[2px] shadow-sm"></div> HTML
+                                        <div class="w-3 h-3 bg-[#e34c26] rounded-[2px] shadow-sm"></div>
+                                        HTML
                                     </span>
                                     <div class="flex gap-1">
                                         <div class="w-1.5 h-1.5 bg-[#444857] rounded-full"></div>
@@ -2017,41 +2613,61 @@
                 </div>
 
                 <!-- Global Footer -->
-                <footer class="mt-auto py-4 text-center sm:text-left">
-                    <div class="v-card p-6 border-0 bg-transparent shadow-none">
+                <!-- Premium Footer -->
+                <footer class="mt-auto py-6 px-4 md:px-8">
+                    <div
+                        class="bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+
+                        <!-- Decorative Gradient Pulse -->
                         <div
-                            class="flex flex-col md:flex-row items-center justify-between gap-6 border-t border-slate-200 dark:border-slate-800 pt-8">
-
-                            <!-- Brand -->
-                            <div class="flex flex-col items-center md:items-start gap-1">
-                                <div class="flex items-center justify-center md:justify-start gap-3 mb-2">
-                                    <img src="assets/bbsydp_logo.png" alt="BBSYDP Logo"
-                                        class="w-8 h-8 rounded-lg shadow-lg shadow-indigo-500/30 object-contain bg-white">
-                                    <span
-                                        class="font-black text-sm tracking-tight text-slate-900 dark:text-slate-200">BBSYDP
-                                        LMS</span>
-                                </div>
-                                <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                    &copy; 2025 Enterprise Learning System. All Rights Reserved.
-                                </p>
-                            </div>
-
-                            <!-- Social / Status -->
-                            <div class="flex items-center gap-4">
-                                <div
-                                    class="flex items-center gap-2 px-3 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-900/20 border border-emerald-100 dark:border-emerald-900/30">
-                                    <span class="relative flex h-2 w-2">
-                                        <span
-                                            class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-                                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                                    </span>
-                                    <span
-                                        class="text-[9px] font-black uppercase tracking-widest text-emerald-600 dark:text-emerald-400">System
-                                        Online</span>
-                                </div>
-                            </div>
-
+                            class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 via-purple-500 to-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity">
                         </div>
+
+                        <!-- Left: System Identity -->
+                        <div class="flex items-center gap-3">
+                            <div
+                                class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center p-2 border border-indigo-100 dark:border-indigo-900/30">
+                                <img src="assets/bbsydp_logo.png" class="w-full h-full object-contain">
+                            </div>
+                            <div class="flex flex-col">
+                                <span
+                                    class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-none mb-1">BBSYDP
+                                    LMS <span class="text-indigo-500 text-[10px] ml-1">v2.0</span></span>
+                                <span
+                                    class="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">©
+                                    2025 Super Sys-Tech Computers Umerkot</span>
+                            </div>
+                        </div>
+
+                        <!-- Right: Creator Identity & Status -->
+                        <div class="flex flex-col md:flex-row items-center gap-3 md:gap-6">
+
+                            <div class="flex flex-col items-center md:items-end">
+                                <div class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-0.5">
+                                    Designed & Developed By</div>
+                                <div class="flex items-center gap-1.5">
+                                    <span
+                                        class="text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Mukesh
+                                        Kumar</span>
+                                    <i data-lucide="badge-check"
+                                        class="w-3.5 h-3.5 text-indigo-500 fill-indigo-100 dark:fill-indigo-900/50"></i>
+                                </div>
+                            </div>
+
+                            <div class="hidden md:block w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
+
+                            <div
+                                class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
+                                <div class="relative flex h-2 w-2">
+                                    <span
+                                        class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                                    <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                                </div>
+                                <span
+                                    class="text-[9px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider">Online</span>
+                            </div>
+                        </div>
+
                     </div>
                 </footer>
 
@@ -2833,6 +3449,46 @@
             }, 12000);
         });
 
+        // --- TOGGLE MODE OVERRIDE ---
+        window.customToggleMode = () => {
+            const nameField = $('#name-field');
+            const avatarField = $('#avatar-field');
+            const btn = $('#auth-btn');
+            const footer = $('#auth-footer');
+            const isSwitchingToSignup = nameField.hasClass('hidden');
+
+            console.log("Custom Toggle Triggered. Switching to Signup?", isSwitchingToSignup);
+
+            if (isSwitchingToSignup) {
+                // SWITCH TO SIGNUP
+                nameField.removeClass('hidden');
+                avatarField.removeClass('hidden');
+
+                btn.find('span').text('Create Account');
+                // Icon Logic
+                btn.find('svg, i').remove();
+                btn.append('<i data-lucide="user-plus" class="w-3.5 h-3.5"></i>');
+
+                footer.html('Already have an account? <button onclick="customToggleMode()" class="text-indigo-500 hover:underline">Sign In</button>');
+            } else {
+                // SWITCH TO LOGIN
+                nameField.addClass('hidden');
+                avatarField.addClass('hidden');
+
+                btn.find('span').text('Sign In');
+                // Icon Logic
+                btn.find('svg, i').remove();
+                btn.append('<i data-lucide="log-in" class="w-3.5 h-3.5"></i>');
+
+                // Clear inputs
+                $('#auth-name').val('');
+                $('#auth-avatar').val('');
+
+                footer.html('New here? <button onclick="customToggleMode()" class="text-indigo-500 hover:underline">Create Account</button>');
+            }
+            lucide.createIcons();
+        };
+
         window.handleAuthSubmit = async (e) => {
             e.preventDefault();
             console.log("[Global] Auth Submit Detected");
@@ -2842,6 +3498,8 @@
             const errorElement = $('#auth-error');
             const email = $('#auth-email').val();
             const pass = $('#auth-pass').val();
+            const name = $('#auth-name').val(); // Capture name early
+            const fileInput = document.getElementById('auth-avatar');
 
             errorElement.addClass('hidden').text('');
             btn.prop('disabled', true).find('span').text('Verifying...');
@@ -2853,7 +3511,7 @@
                 const mockUser = { id: 'offline-user-id', email: email || 'offline@local' };
                 const mockProfile = {
                     uid: 'offline-user-id',
-                    name: 'Guest User',
+                    name: name || 'Guest User',
                     email: email || 'offline@local',
                     role: role,
                     status: 'approved',
@@ -2871,16 +3529,102 @@
 
             try {
                 if (originalText === 'Create Account') {
-                    const { data, error } = await client.auth.signUp({ email, password: pass });
+                    // SIGNUP FLOW
+                    if (!name) throw new Error("Full Name is required.");
+
+                    let data, error;
+                    // SignUp
+                    // We MUST pass metadata (Name) because your Supabase Database Triggers likely require it.
+                    // Without this, the database rejects the new user (500 Error).
+                    const signUpResult = await client.auth.signUp({ 
+                        email, 
+                        password: pass, 
+                        options: { data: { name: name } } 
+                    });
+
+                    if (signUpResult.error && signUpResult.error.message.toLowerCase().includes('already registered')) {
+                        // Check for Partial Deletion (Zombie User) because SQL Script wasn't run
+                        const { data: loginData, error: loginError } = await client.auth.signInWithPassword({ email, password: pass });
+
+                        if (!loginError && loginData.user) {
+                            const { data: existingProfile } = await client.from('profiles').select('uid').eq('uid', loginData.user.id).single();
+                            if (!existingProfile) {
+                                // Profile is missing - Allow Re-creation
+                                console.log("Recovering Zombie Account");
+                                data = { user: loginData.user };
+                                error = null;
+                            } else {
+                                throw signUpResult.error; // Normal duplicate error
+                            }
+                        } else {
+                            throw signUpResult.error; // Password mismatch or other error
+                        }
+                    } else {
+                        data = signUpResult.data;
+                        error = signUpResult.error;
+                    }
+
                     if (error) throw error;
-                    await client.from('profiles').insert([{ uid: data.user.id, name: $('#auth-name').val(), email, role: 'student', status: 'pending' }]);
+
+                    const userId = data.user.id;
+                    let avatarUrl = null;
+
+                    // Upload Avatar Logic
+                    if (fileInput && fileInput.files && fileInput.files.length > 0) {
+                        try {
+                            const file = fileInput.files[0];
+                            const fileExt = file.name.split('.').pop();
+                            const fileName = `${userId}-${Math.random().toString(36).substring(7)}.${fileExt}`;
+
+                            // Attempt Upload to Supabase
+                            const { error: uploadError } = await client.storage
+                                .from('avatars')
+                                .upload(fileName, file);
+
+                            if (!uploadError) {
+                                const { data: { publicUrl } } = client.storage
+                                    .from('avatars')
+                                    .getPublicUrl(fileName);
+                                avatarUrl = publicUrl;
+                            } else {
+                                console.warn("Cloud Upload Failed (Bucket might be missing). Using Local Fallback.");
+                                // Fallback: Convert to Base64 and save locally
+                                const getBase64 = (f) => new Promise((resolve) => {
+                                    const reader = new FileReader();
+                                    reader.readAsDataURL(f);
+                                    reader.onload = () => resolve(reader.result);
+                                    reader.onerror = () => resolve(null);
+                                });
+
+                                const base64Data = await getBase64(file);
+                                if (base64Data) {
+                                    localStorage.setItem(`cached_avatar_${userId}`, base64Data);
+                                }
+                            }
+                        } catch (uploadErr) {
+                            console.warn("Avatar upload exception:", uploadErr);
+                        }
+                    }
+
+                    // Create or Update Profile (Upsert ensures data sync)
+                    const { error: profileError } = await client.from('profiles').upsert({
+                        uid: userId,
+                        name: name,
+                        email,
+                        role: 'student',
+                        status: 'pending',
+                        avatar_url: avatarUrl
+                    }, { onConflict: 'uid' });
+
+                    if (profileError) throw profileError;
+
                     showToast("Account created! Waiting for Admin Approval.", "success");
                     await client.auth.signOut();
                     $('#auth-error').removeClass('hidden').text("Registration Successful! Please wait for Admin Approval before logging in.");
 
                     // Switch back to Login View
-                    btn.find('span').text('Create Account'); // Temporarily restore for toggle logic
-                    toggleMode();
+                    // Reset UI manually since toggleMode checks classes
+                    customToggleMode();
                     btn.prop('disabled', false);
                 } else {
                     // Standard Login
@@ -2894,7 +3638,13 @@
                     }
                 }
             } catch (err) {
-                errorElement.text(err.message).removeClass('hidden');
+                console.error("Auth Error:", err);
+                let msg = err.message;
+                // Specific handling for the 500 Trigger Error (Duplicate Key / Zombie Profile)
+                if (msg.includes('500') || (err.status === 500) || msg.includes('Database error')) {
+                     msg = "Database Error (500). An old Profile is likely blocking registration. Please run the 'fix_signup_error.sql' script in your Supabase Dashboard.";
+                }
+                errorElement.text(msg).removeClass('hidden');
                 btn.prop('disabled', false).find('span').text(originalText);
             }
         };
@@ -3290,28 +4040,39 @@
             $('#header-user-name').text(userProfile.name);
             $('#user-role').text(userProfile.role.toUpperCase());
 
+            // Sidebar Mini-Profile Update
+            $('#sidebar-mini-name').text(userProfile.name);
+            $('#sidebar-mini-role').text(userProfile.role);
+
             // 2. Avatar Rendering
             const initial = userProfile.name.charAt(0).toUpperCase();
             $('#header-initial').text(initial);
             $('#profile-initial-lg').text(initial);
 
-            if (userProfile.avatar_url) {
-                $('#header-avatar-container').html(`<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">`);
-                $('#profile-avatar-display').html(`<img src="${userProfile.avatar_url}" class="w-full h-full object-cover">`);
+            // Avatar Prioritization: Cloud -> Local Fallback -> Initials
+            const cachedAvatar = localStorage.getItem(`cached_avatar_${userProfile.uid || userProfile.id}`);
+            const finalAvatar = userProfile.avatar_url || cachedAvatar;
+
+            if (finalAvatar) {
+                const imgTag = `<img src="${finalAvatar}" class="w-full h-full object-cover">`;
+                $('#header-avatar-container').html(imgTag);
+                $('#profile-avatar-display').html(imgTag);
+                $('#sidebar-mini-avatar').html(imgTag);
             } else {
                 $('#header-avatar-container').html(`<span id="header-initial">${initial}</span>`);
                 $('#profile-avatar-display').html(`<span id="profile-initial-lg">${initial}</span>`);
+                $('#sidebar-mini-avatar').text(initial);
             }
 
             // 3. Navigation & Mode Setup
             if (userProfile.role === 'admin') {
                 $('#nav-dashboard, #nav-grading, #nav-users, #nav-leaderboard').removeClass('hidden');
                 $('#admin-nav').removeClass('hidden');
-                $('#nav-tasks').removeClass('hidden').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> Manage Tasks');
+                $('#nav-tasks').removeClass('hidden').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> <span class="hide-on-collapse">Manage Tasks</span>');
                 $('#nav-arcade, #nav-playground').addClass('hidden');
             } else {
                 $('#nav-dashboard, #nav-tasks, #nav-leaderboard, #nav-resources, #profile-tab, #nav-arcade, #nav-playground').removeClass('hidden');
-                $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> My Tasks');
+                $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> <span class="hide-on-collapse">My Tasks</span>');
                 $('#admin-nav').addClass('hidden');
             }
 
@@ -3579,7 +4340,12 @@
                 const progressPct = total ? Math.round((mySubs.length / total) * 100) : 0;
                 const avgScore = mySubs.filter(s => s.status === 'graded').reduce((a, b) => a + (parseInt(b.grade) || 0), 0) / (mySubs.filter(s => s.status === 'graded').length || 1);
 
-                $('#stat-label-1').text("Pending Tasks"); $('#stat-active').text(total - mySubs.length);
+                const pendingCount = tasks.filter(t => {
+                    const isSubmitted = mySubs.some(s => s.task_id === t.id);
+                    const isExpired = t.deadline && new Date().getTime() > new Date(t.deadline).getTime();
+                    return !isSubmitted && !isExpired;
+                }).length;
+                $('#stat-label-1').text("Pending Tasks"); $('#stat-active').text(pendingCount);
                 $('#stat-label-2').text("Completed"); $('#stat-completed').text(completed);
                 $('#stat-label-3').text("Avg. Grade"); $('#stat-score').text(Math.round(avgScore) + '%');
 
@@ -3695,7 +4461,11 @@
 
             // 1. Status Filter
             if (filter === 'pending') {
-                filteredTasks = tasks.filter(t => !subs.find(s => s.student_id === currentUser?.id && s.task_id === t.id));
+                filteredTasks = tasks.filter(t => {
+                    const isSubmitted = subs.find(s => s.student_id === currentUser?.id && s.task_id === t.id);
+                    const isExpired = t.deadline && new Date().getTime() > new Date(t.deadline).getTime();
+                    return !isSubmitted && !isExpired;
+                });
             } else if (filter === 'completed') {
                 filteredTasks = tasks.filter(t => subs.find(s => s.student_id === currentUser?.id && s.task_id === t.id));
             } else if (filter === 'expired') {
@@ -4164,8 +4934,9 @@
                 const cssLvl = prog?.css_level || '-';
                 const jsLvl = prog?.js_level || '-';
 
-                // Fallback for avatar
-                const avatar = u.avatar_url || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`;
+                // Fallback for avatar: DB -> Local Cache (Same Device) -> Initials
+                const localCache = localStorage.getItem(`cached_avatar_${u.uid || u.id}`);
+                const avatar = u.avatar_url || localCache || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`;
                 // Default status if null
                 const status = u.status || 'active';
 
@@ -4321,6 +5092,67 @@
             }
         };
 
+        window.switchTab = (tabId) => {
+            console.log("FORCE SWITCH TO:", tabId);
+
+            // 1. Navigation State
+            $('.nav-item').removeClass('active');
+            $(`#nav-${tabId}`).addClass('active');
+
+            // 2. Hide ALL content views deeply
+            document.querySelectorAll('.content-view').forEach(el => {
+                el.style.display = 'none';
+                el.classList.add('hidden');
+            });
+            $('#v2-banner').hide().addClass('hidden');
+
+            // 3. Show Target
+            const targetEl = document.getElementById(`view-${tabId}`);
+            if (targetEl) {
+                targetEl.style.display = 'block';
+                targetEl.classList.remove('hidden');
+                // Optional: Scroll into view if needed
+            } else {
+                console.error("Target view not found:", tabId);
+            }
+
+            // 4. Header & Banner Updates
+            const titles = {
+                'dashboard': 'Dashboard',
+                'tasks': 'My Tasks',
+                'resources': 'Resources',
+                'leaderboard': 'Leaderboard',
+                'arcade': 'Arcade',
+                'grading': 'Grading Center',
+                'users': 'Student Directory',
+                'profile': 'My Profile',
+                'playground': 'Live Editor'
+            };
+            $('#page-title').text(titles[tabId] || 'BBSYDP LMS');
+
+            if (tabId === 'dashboard') {
+                $('#v2-banner').show().removeClass('hidden');
+            }
+
+            // 5. Mobile Sidebar Close
+            if (window.innerWidth <= 768) {
+                setTimeout(() => {
+                    // Use the toggle function which now handles icons
+                    const sidebar = document.getElementById('main-sidebar');
+                    if (sidebar && sidebar.classList.contains('mobile-open')) {
+                        window.toggleMobileSidebar();
+                    }
+                }, 50);
+            }
+
+            window.scrollTo(0, 0);
+
+            // 6. Post-render updates
+            if (tabId === 'profile' && typeof renderProfileChart === 'function') renderProfileChart();
+            if (tabId === 'performance' && typeof renderPerformanceChart === 'function') renderPerformanceChart();
+            if (tabId === 'tasks' && typeof filterTasks === 'function') filterTasks('all');
+        };
+
         window.deleteSubmission = async (id) => {
             if (!confirm('Are you sure you want to delete this submission?')) return;
             const { error } = await client.from('submissions').delete().eq('id', id);
@@ -4406,6 +5238,11 @@
             };
 
             // ARCADE GLOBAL SYNC (REALTIME)
+            // Auto-Dismiss Update Banner
+            setTimeout(() => {
+                $('#v2-banner').fadeOut(500);
+            }, 5000);
+
             // ARCADE GLOBAL SYNC (REALTIME DB)
             const arcadeChannel = client.channel('arcade-control');
             arcadeChannel.on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'arcade_config' }, payload => {
@@ -4493,6 +5330,32 @@
         };
 
         $('#comment-input').on('keydown', () => broadcastTyping(currentTask?.id));
+
+
+        window.toggleSidebarCollapse = () => {
+            const sidebar = $('#main-sidebar');
+            const content = $('.content-main');
+            const icon = $('#collapse-icon');
+
+            sidebar.toggleClass('collapsed');
+            content.toggleClass('expanded');
+
+            // Rotate Icon
+            if (sidebar.hasClass('collapsed')) {
+                icon.css('transform', 'rotate(180deg)');
+                localStorage.setItem('sidebar_collapsed', 'true');
+            } else {
+                icon.css('transform', 'rotate(0deg)');
+                localStorage.setItem('sidebar_collapsed', 'false');
+            }
+        };
+
+        // Init State
+        $(document).ready(() => {
+            if (localStorage.getItem('sidebar_collapsed') === 'true') {
+                window.toggleSidebarCollapse();
+            }
+        });
 
         window.openDetail = async (taskId) => {
             // Updated to maybeSingle() to avoid 406 errors when no data exists
@@ -5026,15 +5889,33 @@
         };
 
         window.deleteUser = async (uid) => {
-            if (confirm("Delete this student?")) {
-                if (!client) { showToast("Offline: Cannot delete."); return; }
-                const { data: { session } } = await client.auth.getSession();
-                $.ajax({
-                    url: `${SUPABASE_URL}/rest/v1/profiles?uid=eq.${uid}`,
-                    type: 'DELETE',
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}` },
-                    success: () => fetchUsers()
-                });
+            if (!confirm("Are you sure you want to PERMANENTLY delete this student?")) return;
+            if (!client) { showToast("Offline: Cannot delete."); return; }
+
+            try {
+                // 1. Attempt RPC call to delete Auth User + Profile
+                // (Requires 'delete_user_via_admin' function in Supabase)
+                const { error: rpcError } = await client.rpc('delete_user_via_admin', { target_uid: uid });
+
+                if (!rpcError) {
+                    showToast("User and Login permanently deleted.");
+                } else {
+                    // 2. Fallback: Delete Profile Only (Client Side)
+                    console.warn("RPC missing, performing soft delete:", rpcError.message);
+
+                    const { error: dbError } = await client.from('profiles').delete().eq('uid', uid);
+                    if (dbError) throw dbError;
+
+                    if (rpcError.code === 'PGRST202' || rpcError.message.includes('function not found')) {
+                        alert("Profile deleted from Dashboard.\n\nIMPORTANT: To allow this email to register again, you MUST run the 'delete_user_script.sql' in your Supabase SQL Editor.");
+                    } else {
+                        showToast("Student profile deleted.");
+                    }
+                }
+                fetchUsers();
+            } catch (err) {
+                console.error("Delete failed:", err);
+                showToast("Error deleting user: " + err.message);
             }
         };
 
@@ -5151,7 +6032,7 @@
 
                 const completed = mySubs.filter(s => s.status === 'graded').length;
                 const submitted = mySubs.filter(s => s.status === 'submitted').length;
-                const remaining = window.allTasks.length - (completed + submitted);
+                const remaining = window.allTasks.filter(t => !mySubs.some(s => s.task_id === t.id) && (!t.deadline || new Date().getTime() <= new Date(t.deadline).getTime())).length;
 
                 if (performanceChart) {
                     performanceChart.data.labels = ['Completed', 'Pending Review', 'To Do'];
@@ -7135,8 +8016,81 @@
     <script>
         // FAILSAFE: Removed aggressive loader removal.
         // We rely on the main initialization logic (8s timeout) to handle this.
-    </script>
 
+        // GLOBAL MOBILE SIDEBAR TOGGLE (Outside initDashboard to guarantee scope)
+        // GLOBAL MOBILE SIDEBAR TOGGLE
+        // DESKTOP SIDEBAR TOGGLE
+        window.toggleSidebarCollapse = function () {
+            const sidebar = document.getElementById('main-sidebar');
+            const content = document.querySelector('.content-main');
+            const icon = document.getElementById('collapse-icon');
+
+            if (sidebar) {
+                sidebar.classList.toggle('collapsed');
+                const isCollapsed = sidebar.classList.contains('collapsed');
+
+                // Save state
+                localStorage.setItem('sidebarCollapsed', isCollapsed);
+
+                // Adjust Content
+                if (content) {
+                    if (isCollapsed) content.classList.add('expanded');
+                    else content.classList.remove('expanded');
+                }
+
+                // Rotate Icon
+                if (icon) {
+                    icon.style.transform = isCollapsed ? 'rotate(180deg)' : 'rotate(0deg)';
+                }
+            }
+        };
+
+        // Initialize Desktop State
+        document.addEventListener('DOMContentLoaded', () => {
+            if (window.innerWidth > 768) {
+                const isCollapsed = localStorage.getItem('sidebarCollapsed') === 'true';
+                const sidebar = document.getElementById('main-sidebar');
+                const content = document.querySelector('.content-main');
+                const icon = document.getElementById('collapse-icon');
+
+                if (isCollapsed && sidebar) {
+                    sidebar.classList.add('collapsed');
+                    if (content) content.classList.add('expanded');
+                    if (icon) icon.style.transform = 'rotate(180deg)';
+                }
+            }
+        });
+
+        window.toggleMobileSidebar = function () {
+            const sidebar = document.getElementById('main-sidebar');
+            const overlay = document.getElementById('mobile-overlay');
+            const iconMenu = document.getElementById('icon-menu-mobile');
+            const iconClose = document.getElementById('icon-close-mobile');
+
+            if (sidebar && overlay) {
+                sidebar.classList.toggle('mobile-open');
+                overlay.classList.toggle('active');
+
+                // Logic:
+                // 1. Open -> Hide Page Logo & Hamburger Button (Sidebar takes over)
+                // 2. Close -> Show Page Logo & Hamburger Button
+
+                const isOpen = sidebar.classList.contains('mobile-open');
+                const pageLogo = document.getElementById('mobile-logo-container');
+                const hamburgerBtn = document.getElementById('mobile-menu-btn');
+
+                if (isOpen) {
+                    if (pageLogo) pageLogo.classList.add('opacity-0');
+                    if (hamburgerBtn) hamburgerBtn.classList.add('opacity-0', 'pointer-events-none');
+                    // FORCE EXPANDED STATE ON MOBILE
+                    sidebar.classList.remove('collapsed');
+                } else {
+                    if (pageLogo) pageLogo.classList.remove('opacity-0');
+                    if (hamburgerBtn) hamburgerBtn.classList.remove('opacity-0', 'pointer-events-none');
+                }
+            }
+        };
+    </script>
 </body>
 
 </html>
