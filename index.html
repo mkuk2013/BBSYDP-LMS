@@ -3426,9 +3426,13 @@
                 $('#auth-wrapper').addClass('hidden');
                 $('#dashboard-layout').removeClass('hidden').css('display', 'flex');
 
+                // Show Mobile Nav
+                $('#mobile-nav-bar').removeClass('hidden').css('display', 'flex');
+
                 // Init Daily Quests
             } else {
                 $('#dashboard-layout').addClass('hidden');
+                $('#mobile-nav-bar').addClass('hidden'); // Hide Mobile Nav
                 $('#auth-wrapper').removeClass('hidden');
                 // Ensure credentials are shown when returning to auth screen
                 if (window.populateRememberedCredentials) window.populateRememberedCredentials();
@@ -8135,8 +8139,8 @@
     </script>
     <!-- MOBILE BOTTOM NAVIGATION (Refined Design A: Centered Top Indicator + Glow + Fill) -->
     <!-- MOBILE BOTTOM NAVIGATION (Strict Design A - Full Height Glow) -->
-    <div
-        class="fixed bottom-0 left-0 right-0 z-[9000] h-[72px] bg-white dark:bg-[#0f172a] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] rounded-t-[16px] flex justify-around items-center md:hidden pb-safe">
+    <div id="mobile-nav-bar"
+        class="hidden fixed bottom-0 left-0 right-0 z-[9000] h-[72px] bg-white dark:bg-[#0f172a] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] rounded-t-[16px] flex justify-around items-center md:hidden pb-safe">
 
         <!-- HOME -->
         <button id="mob-nav-dashboard" onclick="switchTab('dashboard')"
