@@ -4489,12 +4489,78 @@
                 $('#stat-label-2').text("Completed"); $('#stat-completed').text(completed);
                 $('#stat-label-3').text("Avg. Grade"); $('#stat-score').text(Math.round(avgScore) + '%');
 
-                // Notification Logic
+                // --- 1. Pending Tasks Popup Logic ---
+                if (pendingCount > 0 && !sessionStorage.getItem('pendingAlertShown')) {
+                    sessionStorage.setItem('pendingAlertShown', 'true');
+                    // Create and show modal dynamically
+                    const modalId = 'pending-task-modal-' + Date.now();
+                    const modalHtml = `
+                        <div class="modal fade" id="${modalId}" tabindex="-1" aria-hidden="true" data-bs-backdrop="static">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content relative overflow-hidden border-0 rounded-3xl shadow-2xl bg-white dark:bg-[#1e1f26]">
+                                    <!-- Decorative Background -->
+                                    <div class="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-indigo-500 to-purple-600 opacity-10"></div>
+                                    <div class="absolute -top-10 -right-10 w-40 h-40 bg-rose-500 rounded-full blur-[80px] opacity-20"></div>
+
+                                    <div class="relative z-10 p-8 flex flex-col items-center text-center">
+                                        <!-- Animated Icon Container -->
+                                        <div class="mb-6 relative">
+                                            <div class="w-20 h-20 rounded-full bg-rose-50 dark:bg-rose-500/10 flex items-center justify-center animate-pulse">
+                                                <div class="w-14 h-14 rounded-full bg-rose-100 dark:bg-rose-500/20 flex items-center justify-center">
+                                                    <i data-lucide="clock" class="w-8 h-8 text-rose-500"></i>
+                                                </div>
+                                            </div>
+                                            <div class="absolute -bottom-1 -right-1 w-8 h-8 bg-white dark:bg-[#1e1f26] rounded-full flex items-center justify-center border-2 border-rose-500">
+                                                <span class="text-xs font-black text-rose-500">${pendingCount}</span>
+                                            </div>
+                                        </div>
+
+                                        <h3 class="text-2xl font-black text-slate-800 dark:text-white mb-2 tracking-tight">Tasks Waiting</h3>
+                                        <p class="text-slate-500 dark:text-slate-400 text-sm leading-relaxed mb-8 max-w-[80%]">
+                                            You have <span class="font-bold text-rose-500">${pendingCount} task${pendingCount > 1 ? 's' : ''}</span> left to finish. Please complete them to solve more problems and learn new things!
+                                        </p>
+
+                                        <div class="w-full flex flex-col gap-3">
+                                            <button onclick="switchTab('tasks'); bootstrap.Modal.getInstance(document.getElementById('${modalId}')).hide();" 
+                                                class="w-full py-4 rounded-xl bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-700 hover:to-purple-700 text-white font-bold tracking-wide shadow-lg shadow-indigo-500/25 transition-all transform hover:scale-[1.02] flex items-center justify-center gap-2 text-sm uppercase">
+                                                <span>Go to Tasks</span>
+                                                <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                                            </button>
+                                            
+                                            <button data-bs-dismiss="modal" 
+                                                class="w-full py-3 rounded-xl bg-transparent hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 font-bold text-xs uppercase tracking-widest transition-colors">
+                                                Maybe Later
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>`;
+                    $('body').append(modalHtml);
+                    const modalEl = document.getElementById(modalId);
+                    const modal = new bootstrap.Modal(modalEl);
+                    modalEl.addEventListener('shown.bs.modal', () => lucide.createIcons());
+                    modal.show();
+                }
+
+                // --- 2. Motivational Banner Logic ---
                 $('#student-alerts').removeClass('hidden');
-                let msg = "Keep up the good work! Check your tasks regularly.";
+                let msg = "Every step counts! Keep pushing forward to reach your goals.";
                 let accentColor = "indigo";
-                if (progressPct < 30) { msg = "Reminder: Please complete your pending assignments."; accentColor = "rose"; }
-                if (progressPct >= 80) { msg = "Great job! You are almost done with all your tasks."; accentColor = "cyan"; }
+
+                if (progressPct < 30) {
+                    msg = "Beginnings are always hardest. Believe in yourself and tackle those tasks!";
+                    accentColor = "rose"; // Warning/Urgency
+                } else if (progressPct >= 30 && progressPct < 60) {
+                    msg = "You're making solid progress! Consistency is the key to mastery. Keep it up!";
+                    accentColor = "indigo"; // Steady
+                } else if (progressPct >= 60 && progressPct < 90) {
+                    msg = "You are doing amazing! You're well on your way to becoming an expert.";
+                    accentColor = "violet"; // High achievement
+                } else if (progressPct >= 90) {
+                    msg = "Outstanding! You are a true champion. Limitless potential!";
+                    accentColor = "emerald"; // Success
+                }
                 // Level System Logic
                 const totalXP = mySubs.filter(s => s.status === 'graded').reduce((a, b) => a + (parseInt(b.grade) || 0), 0);
                 const level = Math.floor(totalXP / 100) + 1;
