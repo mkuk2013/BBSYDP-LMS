@@ -4351,23 +4351,6 @@
             // Live Chart Update
             if (activeTab === 'dashboard' && performanceChart) updateChart();
         }
-
-        // NEW: AJAX Version of fetchUsers
-        window.fetchUsers = async () => {
-            if (userProfile.role !== 'admin') return;
-            const searchQuery = $('#user-search').val().toLowerCase();
-            const { data: { session } } = await client.auth.getSession();
-
-            $.ajax({
-                url: `${SUPABASE_URL}/rest/v1/profiles?select=*&order=created_at.desc`,
-                headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}` },
-                success: (users) => {
-                    window.allUsersCache = users;
-                    renderUsers(users, searchQuery);
-                }
-            });
-        };
-
         function renderStats(tasks, subs) {
             const isStudent = userProfile.role === 'student';
 
@@ -4497,6 +4480,14 @@
             const container = $('#task-grid').empty();
             let filteredTasks = tasks;
 
+            // 0. Auto-Hide Old Tasks (Clutter Reduction)
+            // Hides tasks created >7 days ago from the main 'All' view, unless searched/filtered specifically
+            if (filter === 'all') {
+                const cleanupDate = new Date();
+                cleanupDate.setDate(cleanupDate.getDate() - 7);
+                filteredTasks = tasks.filter(t => new Date(t.created_at) > cleanupDate);
+            }
+
             // 1. Status Filter
             if (filter === 'pending') {
                 filteredTasks = tasks.filter(t => {
@@ -4601,8 +4592,19 @@
                                     <i data-lucide="calendar" class="w-2.5 h-2.5 text-indigo-500"></i> ${t.deadline ? new Date(t.deadline).toLocaleDateString() : 'No Deadline'}
                                 </div>
                             </div>
-                            <h4 class="font-black text-lg text-slate-900 dark:text-indigo-400 mb-2 group-hover:text-indigo-500 transition-colors uppercase tracking-tighter leading-none">${t.title}</h4>
-                            <p class="text-[9px] text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 font-medium leading-relaxed tracking-tight uppercase">${t.description}</p>
+                            <h4 class="font-black text-lg text-slate-900 dark:text-indigo-400 mb-2 group-hover:text-indigo-500 transition-colors uppercase tracking-tighter leading-none break-words">${t.title}</h4>
+                            <p class="text-[9px] text-slate-500 dark:text-slate-400 mb-4 font-medium leading-relaxed tracking-tight whitespace-pre-line break-words w-full">${(t.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                            
+                            <!-- Tags Rendering -->
+                            <div class="flex flex-wrap gap-1 mb-4">
+                                ${((t.tags && (Array.isArray(t.tags) ? t.tags : (typeof t.tags === 'string' ? t.tags.split(',') : []))) || []).map(tag =>
+                        `<span class="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border border-slate-200 dark:border-slate-700">${tag.trim()}</span>`
+                    ).join('')}
+                            </div>
+
+                            <!-- Reference Asset Indicator -->
+                            ${(t.reference_url || t.reference_file) ? `<p class="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-4">Reference Asset: <span class="text-indigo-500">View Attachment</span></p>` : ''}
+
                             <div class="w-full h-1.5 bg-slate-100 dark:bg-[#0b1120] rounded-full overflow-hidden shadow-inner flex items-center px-0.5">
                                 <div class="h-1 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-[1.5s]" style="width: ${sub ? '100%' : '30%'}"></div>
                             </div>
@@ -5006,7 +5008,16 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-center hidden sm:table-cell">
-                             <div class="font-black text-indigo-500 text-xs tracking-tight">${uSubs.length}</div>
+                        <div class="flex flex-col items-center justify-center gap-1">
+                                <div class="flex items-center gap-2">
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-emerald-500 bg-emerald-50 dark:bg-emerald-900/20 px-1.5 py-0.5 rounded border border-emerald-100 dark:border-emerald-900/30" title="Completed/Submitted">
+                                        ${uSubs.length} Done
+                                    </span>
+                                    <span class="text-[9px] font-black uppercase tracking-widest text-slate-400 bg-slate-50 dark:bg-slate-800 px-1.5 py-0.5 rounded border border-slate-100 dark:border-slate-700" title="Not Attempted">
+                                        ${Math.max(0, (window.allTasks ? window.allTasks.length : 0) - uSubs.length)} Pending
+                                    </span>
+                                </div>
+                             </div>
                         </td>
                         <td class="px-6 py-4 text-center">
                             <div class="font-black text-slate-900 dark:text-slate-200 text-xs">${avg}%</div>
