@@ -2676,15 +2676,23 @@
 
                         <!-- Actions -->
                         <div class="flex items-center gap-2">
+                            <button onclick="toggleEditorPanel('css')" id="btn-toggle-css"
+                                class="px-3 py-2 bg-[#2c303a] hover:bg-[#5a5f73] text-white rounded-[4px] font-bold text-[10px] transition-colors border border-[#444857] active:bg-[#264de4]/20 opacity-50 grayscale"
+                                title="Toggle CSS">
+                                <span class="text-[#38bdf8]">CSS</span>
+                            </button>
+                            <button onclick="toggleEditorPanel('js')" id="btn-toggle-js"
+                                class="px-3 py-2 bg-[#2c303a] hover:bg-[#5a5f73] text-white rounded-[4px] font-bold text-[10px] transition-colors border border-[#444857] active:bg-[#f0db4f]/20 opacity-50 grayscale"
+                                title="Toggle JS">
+                                <span class="text-[#facc15]">JS</span>
+                            </button>
+                            <div class="h-4 w-px bg-[#444857] mx-1"></div>
                             <button onclick="clearCode()"
-                                class="px-4 py-2 bg-[#444857] hover:bg-[#5a5f73] text-white rounded-[4px] font-bold text-xs transition-colors flex items-center gap-2">
+                                class="px-4 py-2 bg-[#bd3434] hover:bg-[#ef4444] text-white rounded-[4px] font-bold text-xs transition-colors flex items-center gap-2 shadow-sm shadow-red-500/10">
                                 <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
                                 Clear
                             </button>
-                            <button onclick="switchTab('dashboard')"
-                                class="w-9 h-9 flex items-center justify-center bg-[#444857] hover:bg-[#5a5f73] text-white rounded-[4px] transition-colors ml-2">
-                                <i data-lucide="x" class="w-4 h-4"></i>
-                            </button>
+
                         </div>
                     </div>
 
@@ -2696,8 +2704,8 @@
                             class="flex-1 flex flex-col lg:flex-row min-h-[50%] lg:min-h-[40%] bg-[#131417] overflow-y-auto lg:overflow-visible">
 
                             <!-- HTML Panel -->
-                            <div
-                                class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-[#2c303a] min-h-0">
+                            <div id="panel-html"
+                                class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-[#2c303a] min-h-0 transition-all duration-300">
                                 <div
                                     class="bg-[#1e1f26] border-b border-[#2c303a] py-2 px-3 flex items-center justify-between select-none h-9">
                                     <span
@@ -2717,8 +2725,8 @@
                             </div>
 
                             <!-- CSS Panel -->
-                            <div
-                                class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-[#2c303a] min-h-0">
+                            <div id="panel-css"
+                                class="flex-1 flex flex-col border-b lg:border-b-0 lg:border-r border-[#2c303a] min-h-0 transition-all duration-300 hidden">
                                 <div
                                     class="bg-[#1e1f26] border-b border-[#2c303a] py-2 px-3 flex items-center justify-between select-none h-9">
                                     <span
@@ -2732,7 +2740,7 @@
                             </div>
 
                             <!-- JS Panel -->
-                            <div class="flex-1 flex flex-col min-h-0">
+                            <div id="panel-js" class="flex-1 flex flex-col min-h-0 transition-all duration-300 hidden">
                                 <div
                                     class="bg-[#1e1f26] border-b border-[#2c303a] py-2 px-3 flex items-center justify-between select-none h-9">
                                     <span
@@ -7772,11 +7780,22 @@
         };
 
         window.clearCode = () => {
-            if (confirm("Are you sure you want to clear all code?")) {
-                $('#code-html').val('');
-                $('#code-css').val('');
-                $('#code-js').val('');
-                runCode(); // Clear preview too
+            $('#code-html').val('');
+            $('#code-css').val('');
+            $('#code-js').val('');
+            runCode(); // Clear preview too
+        };
+
+        window.toggleEditorPanel = (type) => {
+            const panel = $(`#panel-${type}`);
+            const btn = $(`#btn-toggle-${type}`);
+
+            if (panel.hasClass('hidden')) {
+                panel.removeClass('hidden');
+                btn.removeClass('opacity-50 grayscale');
+            } else {
+                panel.addClass('hidden');
+                btn.addClass('opacity-50 grayscale');
             }
         };
 
