@@ -139,6 +139,48 @@
         }
 
         /* Core Utilities */
+
+        /* Mobile Nav Active State (Strict Override) */
+        .mobile-nav-btn .active-line,
+        .mobile-nav-btn .active-light {
+            display: none;
+        }
+
+        .mobile-nav-btn.active .active-line {
+            display: block;
+        }
+
+        /* Design A Glow Effect */
+        .mobile-nav-btn.active .active-light {
+            display: block;
+            background: linear-gradient(to bottom, rgba(26, 115, 232, 0.15) 0%, rgba(26, 115, 232, 0) 100%);
+        }
+
+        .mobile-nav-btn.active i,
+        .mobile-nav-btn.active svg {
+            color: #1a73e8 !important;
+            stroke: #1a73e8 !important;
+            fill: none !important;
+            /* Transparent inside */
+            transform: translateY(-2px);
+            /* Slight bump up */
+        }
+
+        .mobile-nav-btn.active span {
+            color: #1a73e8 !important;
+            font-weight: 700;
+        }
+
+        /* Dark Mode overrides */
+        .dark .mobile-nav-btn.active i {
+            color: #6366f1;
+        }
+
+        /* Indigo-500 */
+        .dark .mobile-nav-btn.active span {
+            color: #6366f1;
+        }
+
         /* .hidden override removed to allow responsive modifiers */
 
         /* Desktop Sidebar Base */
@@ -436,9 +478,11 @@
 
         .content-wrapper {
             width: 100%;
-            max-width: 1280px;
-            /* Centered container width */
+            max-width: 1400px;
+            /* Wider container for better screen usage */
             margin: 0 auto;
+            padding: 0 16px;
+            /* Added padding to prevent content from touching edges on mobile */
         }
 
         .nav-item {
@@ -787,7 +831,14 @@
             .loader {
                 transform: scale(0.75);
             }
+
+            /* Add padding to body to prevent content from being hidden behind bottom nav */
+            body {
+                padding-bottom: 80px;
+            }
         }
+
+        /* Mobile Nav Animations managed via Tailwind group modifiers now */
 
         .dark .loader {
             --text: #94a3b8;
@@ -2675,24 +2726,7 @@
                 <div class="h-20 lg:hidden"></div>
         </main>
         <!-- Mobile Bottom Navigation -->
-        <nav class="mobile-bottom-nav">
-            <button onclick="switchTab('dashboard')" class="mobile-nav-btn active" id="mob-nav-dashboard">
-                <i data-lucide="layout-grid"></i>
-                <span>Home</span>
-            </button>
-            <button onclick="switchTab('tasks')" class="mobile-nav-btn" id="mob-nav-tasks">
-                <i data-lucide="clipboard-list"></i>
-                <span>Tasks</span>
-            </button>
-            <button onclick="switchTab('arcade')" class="mobile-nav-btn" id="mob-nav-arcade">
-                <i data-lucide="gamepad-2"></i>
-                <span>Arcade</span>
-            </button>
-            <button onclick="switchTab('profile')" class="mobile-nav-btn" id="mob-nav-profile">
-                <i data-lucide="user"></i>
-                <span>Profile</span>
-            </button>
-        </nav>
+
     </div>
 
     <!-- MODALS -->
@@ -3536,10 +3570,10 @@
                     // SignUp
                     // We MUST pass metadata (Name) because your Supabase Database Triggers likely require it.
                     // Without this, the database rejects the new user (500 Error).
-                    const signUpResult = await client.auth.signUp({ 
-                        email, 
-                        password: pass, 
-                        options: { data: { name: name } } 
+                    const signUpResult = await client.auth.signUp({
+                        email,
+                        password: pass,
+                        options: { data: { name: name } }
                     });
 
                     if (signUpResult.error && signUpResult.error.message.toLowerCase().includes('already registered')) {
@@ -3642,7 +3676,7 @@
                 let msg = err.message;
                 // Specific handling for the 500 Trigger Error (Duplicate Key / Zombie Profile)
                 if (msg.includes('500') || (err.status === 500) || msg.includes('Database error')) {
-                     msg = "Database Error (500). An old Profile is likely blocking registration. Please run the 'fix_signup_error.sql' script in your Supabase Dashboard.";
+                    msg = "Database Error (500). An old Profile is likely blocking registration. Please run the 'fix_signup_error.sql' script in your Supabase Dashboard.";
                 }
                 errorElement.text(msg).removeClass('hidden');
                 btn.prop('disabled', false).find('span').text(originalText);
@@ -4936,7 +4970,13 @@
 
                 // Fallback for avatar: DB -> Local Cache (Same Device) -> Initials
                 const localCache = localStorage.getItem(`cached_avatar_${u.uid || u.id}`);
-                const avatar = u.avatar_url || localCache || `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`;
+                const dbAvatar = u.avatar_url;
+
+                // Strict check: if dbAvatar is "null", "undefined", or empty/whitespace, treat as null.
+                const isValidDb = dbAvatar && dbAvatar !== "null" && dbAvatar !== "undefined" && dbAvatar.trim() !== "";
+                const isValidLocal = localCache && localCache !== "null" && localCache !== "undefined" && localCache.trim() !== "";
+
+                const avatar = isValidDb ? dbAvatar : (isValidLocal ? localCache : `https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random`);
                 // Default status if null
                 const status = u.status || 'active';
 
@@ -4951,7 +4991,7 @@
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
                                 <div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
-                                    <img src="${avatar}" class="w-full h-full object-cover" alt="${u.name}">
+                                    <img src="${avatar}" class="w-full h-full object-cover" alt="${u.name}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random';">
                                 </div>
                                 <div class="min-w-0">
                                     <div class="font-black text-slate-900 dark:text-indigo-400 uppercase tracking-tight text-sm mb-0.5 truncate">${u.name}</div>
@@ -7671,10 +7711,12 @@
 
             // 6. Arcade Access Logic
             if (tabId === 'arcade') {
+                /* Admin Access Restriction Removed for UI Testing
                 if (userProfile && userProfile.role === 'admin') {
                     switchTab('dashboard');
                     return;
-                }
+                } 
+                */
                 const isGlobalUnlocked = localStorage.getItem('global_arcade_unlock') === 'true';
                 if (isGlobalUnlocked) {
                     $('#arcade-locked').addClass('hidden');
@@ -8091,6 +8133,68 @@
             }
         };
     </script>
+    <!-- MOBILE BOTTOM NAVIGATION (Refined Design A: Centered Top Indicator + Glow + Fill) -->
+    <!-- MOBILE BOTTOM NAVIGATION (Strict Design A - Full Height Glow) -->
+    <div
+        class="fixed bottom-0 left-0 right-0 z-[9000] h-[72px] bg-white dark:bg-[#0f172a] shadow-[0_-2px_12px_rgba(0,0,0,0.08)] rounded-t-[16px] flex justify-around items-center md:hidden pb-safe">
+
+        <!-- HOME -->
+        <button id="mob-nav-dashboard" onclick="switchTab('dashboard')"
+            class="mobile-nav-btn active flex-1 relative flex flex-col items-center justify-center h-full pt-2 group">
+            <div
+                class="active-line absolute top-0 left-[20%] w-[60%] h-[3px] bg-[#1a73e8] dark:bg-indigo-500 rounded-b-[6px]">
+            </div>
+            <!-- Full Height Glow (Design A Modified) -->
+            <div class="active-light absolute top-0 bottom-0 left-[20%] w-[60%] pointer-events-none"></div>
+            <i data-lucide="house" class="w-[24px] h-[24px] mb-1 text-[#9aa0a6] transition-all duration-300"></i>
+            <span class="text-[11px] text-[#9aa0a6] font-medium transition-colors">Home</span>
+        </button>
+
+        <!-- TASKS -->
+        <button id="mob-nav-tasks" onclick="switchTab('tasks')"
+            class="mobile-nav-btn flex-1 relative flex flex-col items-center justify-center h-full pt-2 group">
+            <div
+                class="active-line absolute top-0 left-[20%] w-[60%] h-[3px] bg-[#1a73e8] dark:bg-indigo-500 rounded-b-[6px]">
+            </div>
+            <div class="active-light absolute top-0 bottom-0 left-[20%] w-[60%] pointer-events-none"></div>
+            <i data-lucide="clipboard-list"
+                class="w-[24px] h-[24px] mb-1 text-[#9aa0a6] transition-all duration-300"></i>
+            <span class="text-[11px] text-[#9aa0a6] font-medium transition-colors">Tasks</span>
+        </button>
+
+        <!-- RANK -->
+        <button id="mob-nav-leaderboard" onclick="switchTab('leaderboard')"
+            class="mobile-nav-btn flex-1 relative flex flex-col items-center justify-center h-full pt-2 group">
+            <div
+                class="active-line absolute top-0 left-[20%] w-[60%] h-[3px] bg-[#1a73e8] dark:bg-indigo-500 rounded-b-[6px]">
+            </div>
+            <div class="active-light absolute top-0 bottom-0 left-[20%] w-[60%] pointer-events-none"></div>
+            <i data-lucide="trophy" class="w-[24px] h-[24px] mb-1 text-[#9aa0a6] transition-all duration-300"></i>
+            <span class="text-[11px] text-[#9aa0a6] font-medium transition-colors">Rank</span>
+        </button>
+
+        <!-- PLAY -->
+        <button id="mob-nav-arcade" onclick="switchTab('arcade')"
+            class="mobile-nav-btn flex-1 relative flex flex-col items-center justify-center h-full pt-2 group">
+            <div
+                class="active-line absolute top-0 left-[20%] w-[60%] h-[3px] bg-[#1a73e8] dark:bg-indigo-500 rounded-b-[6px]">
+            </div>
+            <div class="active-light absolute top-0 bottom-0 left-[20%] w-[60%] pointer-events-none"></div>
+            <i data-lucide="gamepad-2" class="w-[24px] h-[24px] mb-1 text-[#9aa0a6] transition-all duration-300"></i>
+            <span class="text-[11px] text-[#9aa0a6] font-medium transition-colors">Play</span>
+        </button>
+
+        <!-- ME -->
+        <button id="mob-nav-profile" onclick="switchTab('profile')"
+            class="mobile-nav-btn flex-1 relative flex flex-col items-center justify-center h-full pt-2 group">
+            <div
+                class="active-line absolute top-0 left-[20%] w-[60%] h-[3px] bg-[#1a73e8] dark:bg-indigo-500 rounded-b-[6px]">
+            </div>
+            <div class="active-light absolute top-0 bottom-0 left-[20%] w-[60%] pointer-events-none"></div>
+            <i data-lucide="user" class="w-[24px] h-[24px] mb-1 text-[#9aa0a6] transition-all duration-300"></i>
+            <span class="text-[11px] text-[#9aa0a6] font-medium transition-colors">Me</span>
+        </button>
+    </div>
 </body>
 
 </html>
