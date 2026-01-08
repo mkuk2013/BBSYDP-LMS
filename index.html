@@ -1708,10 +1708,60 @@
                 </div>
             </nav>
 
-            <div id="profile-card-container"
-                class="mt-auto px-6 pb-6 pt-4 border-t border-slate-100 dark:border-slate-800 hidden">
-                <!-- Profile Controls moved to Header as requested -->
+            <!-- Mobile Only Profile & Logout (Sidebar Bottom) -->
+            <!-- Mobile Only Profile & Logout (Sidebar Bottom) -->
+            <div
+                class="mt-auto px-4 pb-6 pt-4 border-t border-slate-100 dark:border-slate-800 md:hidden animate-in fade-in slide-in-from-bottom-4 duration-500 mobile-profile-section">
+                <style>
+                    /* Custom Collapse Logic for Mobile Footer */
+                    .sidebar.collapsed .hide-on-collapse {
+                        display: none !important;
+                    }
+
+                    .sidebar.collapsed .mobile-profile-section {
+                        padding-left: 0;
+                        padding-right: 0;
+                    }
+                </style>
+                <div class="flex flex-col items-center gap-4">
+                    <!-- Profile Section -->
+                    <div class="flex flex-col items-center gap-2 cursor-pointer group w-full"
+                        onclick="switchTab('profile')">
+                        <div class="relative">
+                            <div
+                                class="w-12 h-12 rounded-full bg-gradient-to-br from-indigo-500 to-violet-600 text-white flex items-center justify-center font-black overflow-hidden border-2 border-white dark:border-slate-700 shadow-lg group-hover:scale-105 transition-transform">
+                                <span class="mobile-avatar-initial text-sm">U</span>
+                                <img id="mobile-sidebar-avatar" src="" class="w-full h-full object-cover hidden">
+                            </div>
+                            <div
+                                class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-[#0b1120] rounded-full">
+                            </div>
+                        </div>
+
+                        <!-- Text Info: Hidden when Collapsed -->
+                        <div class="text-center hide-on-collapse min-w-0 w-full transition-all duration-300 origin-top">
+                            <h4
+                                class="text-xs font-black text-slate-900 dark:text-slate-200 leading-tight mobile-user-name truncate group-hover:text-indigo-500 transition-colors">
+                                User</h4>
+                            <p class="text-[9px] font-bold text-slate-400 uppercase tracking-widest mt-0.5 truncate">
+                                Account Settings</p>
+                        </div>
+                    </div>
+
+                    <!-- Logout Button -->
+                    <div class="shrink-0 pt-2">
+                        <button onclick="handleLogout()" class="Btn" title="Logout">
+                            <div class="sign"><svg viewBox="0 0 512 512">
+                                    <path
+                                        d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
+                                    </path>
+                                </svg></div>
+                            <div class="text">Logout</div>
+                        </button>
+                    </div>
+                </div>
             </div>
+
         </aside>
 
         <main class="content-main">
@@ -1851,7 +1901,7 @@
                             class="flex items-center gap-3 pl-2 sm:pl-4 sm:border-l border-slate-200 dark:border-slate-800">
                             <!-- Profile Info & Avatar (Click to go to profile) -->
                             <div class="flex items-center gap-3 group cursor-pointer" onclick="switchTab('profile')">
-                                <div class="text-right hidden md:block">
+                                <div class="text-right hidden sm:block">
                                     <p
                                         class="text-[8px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">
                                         Welcome Back</p>
@@ -4257,6 +4307,16 @@
                 $('#live-clock').text(now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true }));
                 $('#live-date').text(now.toLocaleDateString('en-US', { weekday: 'long', day: 'numeric', month: 'short' }));
                 $('#dynamic-greeting-text').text(`${greeting}, ${userProfile.name.split(' ')[0]}`);
+
+                // SYNC MOBILE SIDEBAR PROFILE
+                $('.mobile-user-name').text(userProfile.name);
+                if (userProfile.avatar_url) {
+                    $('#mobile-sidebar-avatar').attr('src', userProfile.avatar_url).removeClass('hidden');
+                    $('.mobile-avatar-initial').addClass('hidden');
+                } else {
+                    $('.mobile-avatar-initial').text(userProfile.name.charAt(0)).removeClass('hidden');
+                    $('#mobile-sidebar-avatar').addClass('hidden');
+                }
             };
             updateClock();
             setInterval(updateClock, 1000);
@@ -5894,9 +5954,10 @@
 
                 if (userProfile.role === 'admin') return true; // Admin sees all
 
-                // Student: See OWN messages OR Admin messages targeted at them
+                // Student: See OWN messages OR Admin messages targeted at them OR General Admin Broadcasts
                 if (c.user_id === currentUser.id) return true; // My sent items
                 if (contentObj.sid === currentUser.id) return true; // Targeted at me
+                if (c.role === 'admin' && !contentObj.sid) return true; // General Admin Message (Broadcast)
 
                 return false;
             });
@@ -6416,7 +6477,15 @@
                 });
             }
         };
-        window.downloadReport = () => { const doc = new jsPDF(); doc.text(`Grade Report: ${currentTask.title}`, 20, 20); doc.text(`Student: ${userProfile.name}`, 20, 30); doc.text(`Score: ${currentSub.grade}/100`, 20, 40); doc.text(`Feedback: ${currentSub.feedback}`, 20, 50); doc.save(`REPORT_${userProfile.name}.pdf`); };
+        window.downloadReport = () => {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            doc.text(`Grade Report: ${currentTask.title}`, 20, 20);
+            doc.text(`Student: ${userProfile.name}`, 20, 30);
+            doc.text(`Score: ${currentSub.grade}/100`, 20, 40);
+            doc.text(`Feedback: ${currentSub.feedback}`, 20, 50);
+            doc.save(`REPORT_${userProfile.name}.pdf`);
+        };
 
         function initChart() {
             const canvas = document.getElementById('performanceChart');
