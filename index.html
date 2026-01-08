@@ -1709,56 +1709,8 @@
             </nav>
 
             <div id="profile-card-container"
-                class="mt-auto px-6 pb-6 pt-4 border-t border-slate-100 dark:border-slate-800">
-                <div class="flex flex-col items-center text-center">
-                    <!-- Avatar Circle -->
-                    <div class="relative mb-3 group cursor-pointer" onclick="switchTab('profile')">
-                        <div id="sidebar-mini-avatar"
-                            class="w-16 h-16 rounded-full bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-slate-500 font-bold text-xl overflow-hidden border-4 border-white dark:border-slate-900 shadow-lg group-hover:scale-105 transition-transform duration-300">
-                            ?
-                        </div>
-                        <div
-                            class="absolute bottom-0 right-0 w-4 h-4 bg-emerald-500 border-[3px] border-white dark:border-slate-900 rounded-full z-10">
-                        </div>
-                    </div>
-
-                    <!-- Collapsed ONLY Logout Button -->
-                    <!-- Collapsed ONLY Logout Button -->
-                    <button onclick="handleLogout()" id="collapsed-logout-btn-new" class="Btn hidden mx-auto"
-                        title="Logout">
-                        <div class="sign"><svg viewBox="0 0 512 512">
-                                <path
-                                    d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
-                                </path>
-                            </svg></div>
-                        <div class="text">Logout</div>
-                    </button>
-
-                    <!-- User Info -->
-                    <div class="hide-on-collapse w-full">
-                        <h4 id="sidebar-mini-name"
-                            class="text-sm font-black text-slate-900 dark:text-white mb-0.5 w-full truncate">Loading...
-                        </h4>
-                        <p id="sidebar-mini-role"
-                            class="text-[10px] font-bold text-slate-400 uppercase tracking-widest mb-4">Student</p>
-
-                        <!-- Action Buttons -->
-                        <div class="flex items-center justify-center gap-2 w-full">
-                            <button onclick="switchTab('profile')"
-                                class="flex-1 py-2 rounded-xl bg-slate-50 dark:bg-slate-800 text-[10px] font-bold uppercase tracking-wider text-slate-500 hover:bg-indigo-50 hover:text-indigo-600 transition-colors">
-                                Profile
-                            </button>
-                            <button onclick="handleLogout()" id="sidebar-logout-btn" class="Btn" title="Logout">
-                                <div class="sign"><svg viewBox="0 0 512 512">
-                                        <path
-                                            d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
-                                        </path>
-                                    </svg></div>
-                                <div class="text">Logout</div>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+                class="mt-auto px-6 pb-6 pt-4 border-t border-slate-100 dark:border-slate-800 hidden">
+                <!-- Profile Controls moved to Header as requested -->
             </div>
         </aside>
 
@@ -1894,25 +1846,38 @@
                                 Task</span>
                         </button>
 
-                        <!-- Profile Corner -->
-                        <div class="flex items-center gap-3 pl-2 sm:pl-4 sm:border-l border-slate-200 dark:border-slate-800 group cursor-pointer"
-                            onclick="switchTab('profile')">
-                            <div class="text-right hidden md:block">
-                                <p
-                                    class="text-[8px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">
-                                    Welcome Back</p>
-                                <h4 class="text-xs font-black text-slate-900 dark:text-slate-200 leading-none tracking-tight"
-                                    id="header-user-name">User</h4>
-                            </div>
-                            <div class="relative">
-                                <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black overflow-hidden border-2 border-white dark:border-slate-700 shadow-md ring-2 ring-transparent group-hover:ring-indigo-500/30 transition-all"
-                                    id="header-avatar-container">
-                                    <span id="header-initial">U</span>
+                        <!-- Profile & Logout Group -->
+                        <div
+                            class="flex items-center gap-3 pl-2 sm:pl-4 sm:border-l border-slate-200 dark:border-slate-800">
+                            <!-- Profile Info & Avatar (Click to go to profile) -->
+                            <div class="flex items-center gap-3 group cursor-pointer" onclick="switchTab('profile')">
+                                <div class="text-right hidden md:block">
+                                    <p
+                                        class="text-[8px] font-black uppercase text-slate-400 tracking-widest leading-none mb-1">
+                                        Welcome Back</p>
+                                    <h4 class="text-xs font-black text-slate-900 dark:text-slate-200 leading-none tracking-tight"
+                                        id="header-user-name">User</h4>
                                 </div>
-                                <div
-                                    class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-[#0b1120] rounded-full">
+                                <div class="relative">
+                                    <div class="w-10 h-10 rounded-full bg-indigo-600 text-white flex items-center justify-center font-black overflow-hidden border-2 border-white dark:border-slate-700 shadow-md ring-2 ring-transparent group-hover:ring-indigo-500/30 transition-all"
+                                        id="header-avatar-container">
+                                        <span id="header-initial">U</span>
+                                    </div>
+                                    <div
+                                        class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-emerald-500 border-2 border-white dark:border-[#0b1120] rounded-full">
+                                    </div>
                                 </div>
                             </div>
+
+                            <!-- UIverse Logout Button -->
+                            <button onclick="handleLogout()" class="Btn ml-2" title="Logout">
+                                <div class="sign"><svg viewBox="0 0 512 512">
+                                        <path
+                                            d="M377.9 105.9L500.7 228.7c7.2 7.2 11.3 17.1 11.3 27.3s-4.1 20.1-11.3 27.3L377.9 406.1c-6.4 6.4-15 9.9-24 9.9c-18.7 0-33.9-15.2-33.9-33.9l0-62.1-128 0c-17.7 0-32-14.3-32-32l0-64c0-17.7 14.3-32 32-32l128 0 0-62.1c0-18.7 15.2-33.9 33.9-33.9c9 0 17.6 3.6 24 9.9zM160 96L96 96c-17.7 0-32 14.3-32 32l0 256c0 17.7 14.3 32 32 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32l-64 0c-53 0-96-43-96-96L0 128C0 75 43 32 96 32l64 0c17.7 0 32 14.3 32 32s-14.3 32-32 32z">
+                                        </path>
+                                    </svg></div>
+                                <div class="text">Logout</div>
+                            </button>
                         </div>
                     </div>
                 </header>
@@ -3157,8 +3122,11 @@
                             Task Detail</h5>
                         <p class="text-sm text-slate-500 font-medium mt-2 flex items-center gap-2">
                             <i data-lucide="timer" class="w-4 h-4 text-indigo-500"></i> Time Remaining: <span
-                                id="detail-timer" class="text-slate-900 dark:text-slate-100 font-bold">--</span>
+                                id="detail-time-container"
+                                class="text-slate-900 dark:text-slate-100 font-bold">--</span>
                         </p>
+                        <!-- Tags Container -->
+                        <div id="detail-tags" class="flex flex-wrap gap-2 mt-3"></div>
                     </div>
                 </div>
                 <div class="modal-body p-8 pt-6">
@@ -3464,8 +3432,21 @@
                         return; // EXIT FUNCTION IMMEDIATELY -> Promises resolves -> Loader unlocks
                     }
 
-                    // If NOT cached, we MUST wait for the fetch
-                    const { data: profile, error } = await fetchProfilePromise;
+                    // If NOT cached, we MUST wait for the fetch, but with a TIMEOUT to prevent hanging
+                    // Create a timeout promise that rejects after 5 seconds
+                    const timeoutPromise = new Promise((_, reject) =>
+                        setTimeout(() => reject(new Error("Profile fetch timed out")), 5000)
+                    );
+
+                    let profileData;
+                    try {
+                        profileData = await Promise.race([fetchProfilePromise, timeoutPromise]);
+                    } catch (timeoutErr) {
+                        console.warn("[Session] Profile sync timed out. Proceeding with limited access or error.");
+                        throw timeoutErr; // Let the catch block handle it (logout/error message)
+                    }
+
+                    const { data: profile, error } = profileData;
 
                     if (error) throw error;
 
@@ -4482,8 +4463,10 @@
 
                 const pendingCount = tasks.filter(t => {
                     const isSubmitted = mySubs.some(s => s.task_id === t.id);
+                    // Also check if it's graded - if so, it's definitely not pending
+                    const isGraded = mySubs.some(s => s.task_id === t.id && s.status === 'graded');
                     const isExpired = t.deadline && new Date().getTime() > new Date(t.deadline).getTime();
-                    return !isSubmitted && !isExpired;
+                    return !isGraded && !isSubmitted && !isExpired;
                 }).length;
                 $('#stat-label-1').text("Pending Tasks"); $('#stat-active').text(pendingCount);
                 $('#stat-label-2').text("Completed"); $('#stat-completed').text(completed);
@@ -4586,8 +4569,11 @@
 
                 // Recent Activity
                 const list = $('#recent-activity-list').empty();
-                if (!mySubs.length) list.html('<div class="text-center py-10 text-slate-400 font-black uppercase tracking-widest text-[9px] italic border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">No recent activity found</div>');
-                mySubs.slice(0, 4).forEach(s => {
+                const cutoff = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+                const recentSubs = mySubs.filter(s => new Date(s.submitted_at) > cutoff).slice(0, 4);
+
+                if (!recentSubs.length) list.html('<div class="text-center py-10 text-slate-400 font-black uppercase tracking-widest text-[9px] italic border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">No recent activity (24h)</div>');
+                recentSubs.forEach(s => {
                     const isGraded = s.status === 'graded';
                     list.append(`
                         <div class="flex items-center gap-4 p-4 rounded-xl bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 hover:border-indigo-500/50 transition-all group">
@@ -4604,25 +4590,61 @@
                 });
             } else {
                 // ADMIN DASHBOARD LOGIC
+
+                // DEDUPLICATION LOGIC:
+                // We must group by (student_id + task_id) and keep only the LATEST submission.
+                const uniqueSubsMap = new Map();
+                subs.forEach(s => {
+                    const key = `${s.student_id}_${s.task_id}`;
+                    const existing = uniqueSubsMap.get(key);
+                    // If no entry exists, or this one is newer, update it
+                    if (!existing || new Date(s.submitted_at) > new Date(existing.submitted_at)) {
+                        uniqueSubsMap.set(key, s);
+                    }
+                });
+                const uniqueSubs = Array.from(uniqueSubsMap.values());
+
                 $('#stat-label-1').text("Active Tasks"); $('#stat-active').text(tasks.length);
-                $('#stat-label-2').text("Total Submissions"); $('#stat-completed').text(subs.length);
-                const pending = subs.filter(s => s.status === 'submitted').length;
+
+                // Stat 2: Total unique verified submissions (Graded or Pending)
+                $('#stat-label-2').text("Total Submissions");
+                $('#stat-completed').text(uniqueSubs.length);
+
+                // Stat 3: Pending Review (Only if latest status is 'submitted')
+                const pending = uniqueSubs.filter(s => s.status === 'submitted').length;
+
                 $('#stat-label-3').text("Pending Review"); $('#stat-score').text(pending);
                 $('#student-alerts').addClass('hidden');
 
+                // Intelligent Notification Logic:
+                const lastCount = parseInt(localStorage.getItem('last_pending_count') || '0');
+                if (pending > lastCount) {
+                    localStorage.setItem('notifications_cleared', 'false');
+                }
+                localStorage.setItem('last_pending_count', pending);
+
                 // Update Notification Badge
                 const badge = $('#notif-badge');
-                if (pending > 0) {
+                const isCleared = localStorage.getItem('notifications_cleared') === 'true';
+
+                if (pending > 0 && !isCleared) {
                     badge.removeClass('hidden').addClass('flex items-center justify-center');
                     badge.text(pending > 9 ? '9+' : pending);
                 } else {
                     badge.addClass('hidden').removeClass('flex');
                 }
 
-                // Global Recent Activity for Admins
+                // Global Recent Activity for Admins (Deduplicated)
                 const list = $('#recent-activity-list').empty();
-                const latest = subs.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at)).slice(0, 4);
-                if (!latest.length) list.html('<div class="text-center py-10 text-slate-400 font-black uppercase tracking-widest text-[9px] italic border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">No student activity found</div>');
+                const cutoff = new Date(new Date().getTime() - 24 * 60 * 60 * 1000);
+
+                // Sort unique subs by date desc AND filter last 24h
+                const latest = uniqueSubs
+                    .filter(s => new Date(s.submitted_at) > cutoff)
+                    .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
+                    .slice(0, 4);
+
+                if (!latest.length) list.html('<div class="text-center py-10 text-slate-400 font-black uppercase tracking-widest text-[9px] italic border-2 border-dashed border-slate-100 dark:border-slate-800 rounded-3xl">No student activity (24h)</div>');
                 latest.forEach(s => {
                     const isGraded = s.status === 'graded';
                     list.append(`
@@ -4689,7 +4711,7 @@
             // 2. Search Filter
             const query = $('#task-search').val()?.toLowerCase() || '';
             if (query) {
-                filteredTasks = filteredTasks.filter(t => t.title.toLowerCase().includes(query) || t.description.toLowerCase().includes(query));
+                filteredTasks = filteredTasks.filter(t => t && t.title && (t.title.toLowerCase().includes(query) || (t.description && t.description.toLowerCase().includes(query))));
             }
 
             // 3. Empty State
@@ -4708,16 +4730,27 @@
             }
 
             filteredTasks.forEach(t => {
+                if (!t) return;
                 let taskCardContent = '';
                 const isExpired = t.deadline ? (new Date().getTime() > new Date(t.deadline).getTime()) : false;
 
                 if (userProfile.role === 'admin') {
                     // --- ADMIN VIEW ---
-                    // Calculate stats for this task
-                    const taskSubs = subs.filter(s => s.task_id === t.id);
-                    const submissionCount = taskSubs.filter(s => s.status === 'submitted' || s.status === 'graded').length;
-                    const gradedCount = taskSubs.filter(s => s.status === 'graded').length;
-                    const avgScore = gradedCount ? Math.round(taskSubs.filter(s => s.status === 'graded').reduce((a, b) => a + b.grade, 0) / gradedCount) : 0;
+                    // Calculate stats for this task (DEDUPLICATED)
+                    // We must count unique students who submitted this task
+                    const uniqueTaskSubsMap = new Map();
+                    subs.filter(s => s.task_id === t.id).forEach(s => {
+                        const existing = uniqueTaskSubsMap.get(s.student_id);
+                        // Keep NEWER submission for this student
+                        if (!existing || new Date(s.submitted_at) > new Date(existing.submitted_at)) {
+                            uniqueTaskSubsMap.set(s.student_id, s);
+                        }
+                    });
+                    const uniqueTaskSubs = Array.from(uniqueTaskSubsMap.values());
+
+                    const submissionCount = uniqueTaskSubs.filter(s => s.status === 'submitted' || s.status === 'graded').length;
+                    const gradedCount = uniqueTaskSubs.filter(s => s.status === 'graded').length;
+                    const avgScore = gradedCount ? Math.round(uniqueTaskSubs.filter(s => s.status === 'graded').reduce((a, b) => a + b.grade, 0) / gradedCount) : 0;
 
                     taskCardContent = `
                         <div class="v-card p-5 group transition-transform hover:-translate-y-1 bg-white dark:bg-[#1e293b] animate-in fade-in slide-in-from-bottom-4 border dark:border-slate-800 relative overflow-hidden">
@@ -4778,7 +4811,7 @@
                                 </div>
                             </div>
                             <h4 class="font-black text-lg text-slate-900 dark:text-indigo-400 mb-2 group-hover:text-indigo-500 transition-colors uppercase tracking-tighter leading-none break-words">${t.title}</h4>
-                            <p class="text-[9px] text-slate-500 dark:text-slate-400 mb-4 font-medium leading-relaxed tracking-tight whitespace-pre-line break-words w-full">${(t.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                            <p class="text-[9px] text-slate-500 dark:text-slate-400 mb-4 font-medium leading-relaxed tracking-tight whitespace-pre-line break-words w-full">${(t.description || '').split('<br><strong>Reference Asset:')[0].replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                             
                             <!-- Tags Rendering -->
                             <div class="flex flex-wrap gap-1 mb-4">
@@ -4816,10 +4849,25 @@
 
             const students = Array.from(new Set(subs.map(s => s.student_id)));
             const rankings = students.map(sid => {
-                // Count ALL submissions (Pending + Graded) for progress
-                const allStudentSubs = subs.filter(s => s.student_id === sid && (s.status === 'submitted' || s.status === 'graded'));
-                // Calculate Average only from GRADED submissions
-                const gradedSubs = allStudentSubs.filter(s => s.status === 'graded');
+                // User Request: Only count GRADED tasks for Leaderboard visibility & ranking
+                // User Request: Count unique tasks only (ignore resubmissions)
+
+                const myGradedSubs = subs.filter(s => s.student_id === sid && s.status === 'graded');
+
+                // Deduplicate by task_id: Keep the one with the HIGHEST grade
+                const uniqueTasksMap = new Map();
+                myGradedSubs.forEach(s => {
+                    const existing = uniqueTasksMap.get(s.task_id);
+                    if (!existing || s.grade > existing.grade) {
+                        uniqueTasksMap.set(s.task_id, s);
+                    }
+                });
+
+                const uniqueGradedSubs = Array.from(uniqueTasksMap.values());
+                const count = uniqueGradedSubs.length;
+
+                // If count is 0, this student won't show up (filtered later)
+                const avg = count > 0 ? Math.round(uniqueGradedSubs.reduce((a, b) => a + b.grade, 0) / count) : 0;
 
                 // Robust name finding
                 const studentSub = subs.find(s => s.student_id === sid);
@@ -4827,10 +4875,12 @@
 
                 return {
                     name: sName,
-                    count: allStudentSubs.length,
-                    avg: gradedSubs.length ? Math.round(gradedSubs.reduce((a, b) => a + b.grade, 0) / gradedSubs.length) : 0
+                    count: count,
+                    avg: avg
                 };
-            }).sort((a, b) => b.count - a.count || b.avg - a.avg); // Sort by Participation first, then Grade
+            })
+                .filter(r => r.count > 0) // Hide students with NO graded tasks
+                .sort((a, b) => b.avg - a.avg || b.count - a.count); // Rank by Marks (Avg) FIRST, then Quantity
 
             const totalTasks = window.allTasks ? window.allTasks.length : 0;
 
@@ -4883,21 +4933,125 @@
         }
 
         // --- TASK DETAIL MODAL LOGIC (FIXED) ---
-        window.openDetail = (tid) => {
-            // Find task using string/number comparison to be safe
-            const t = window.allTasks.find(x => x.id == tid);
+        window.openDetail = async (tid) => {
+            if (!tid) return;
+            const taskIdStr = String(tid);
+
+            // Find task using string comparison
+            const t = window.allTasks.find(x => String(x.id) === taskIdStr);
             if (!t) {
                 console.error("Task not found for ID:", tid);
                 return;
             }
             window.currentTask = t;
+            console.log("Opening details for:", t.id, t.title);
 
             $('#detail-title').text(t.title);
-            // Safe basic markdown parsing
-            $('#detail-desc').html(t.description ? t.description.replace(/\n/g, '<br>') : 'No description provided.');
+            // Render Description: Handle Mixed Content (User Text + System HTML)
+            const descEl = $('#detail-desc');
+            let rawDesc = t.description || 'No description provided.';
+            const refMarker = '<br><strong>Reference Asset:</strong>';
+
+            // Helper to unescape ONLY if double-escaped (e.g. from DB)
+            const decodeHtml = (html) => {
+                const txt = document.createElement("textarea");
+                txt.innerHTML = html;
+                return txt.value;
+            };
+
+            // Check if content is escaped in DB (contains &lt;)
+            const isEscaped = rawDesc.includes('&lt;');
+            // If escaped, we assume the whole string is escaped including the refMarker.
+            // But refMarker might be encoded as &lt;br&gt; or <br> depending on save method.
+
+            if (rawDesc.includes(refMarker) || (isEscaped && rawDesc.includes('&lt;br&gt;&lt;strong&gt;Reference Asset:'))) {
+                // Determine split point
+                const marker = rawDesc.includes(refMarker) ? refMarker : '&lt;br&gt;&lt;strong&gt;Reference Asset:';
+                const parts = rawDesc.split(marker);
+
+                let userPart = parts[0];
+                let sysPart = marker + parts.slice(1).join(marker); // Reconstruct system part
+
+                // If DB was escaped, we need to unescape the User Part so .text() doesn't double-escape it
+                if (isEscaped) userPart = decodeHtml(userPart);
+
+                // System Part is HTML. If it was escaped, we MUST unescape it to make it clickable.
+                if (isEscaped) sysPart = decodeHtml(sysPart);
+
+                descEl.empty().text(userPart).append(sysPart);
+            } else {
+                // No reference asset. Just render as text to preserve code tags.
+                // If DB is escaping it, we unescape first.
+                if (isEscaped) rawDesc = decodeHtml(rawDesc);
+                descEl.text(rawDesc);
+            }
+
+            // Render Tags
+            const tags = (t.tags && (Array.isArray(t.tags) ? t.tags : (typeof t.tags === 'string' ? t.tags.split(',') : []))) || [];
+            if (tags.length > 0) {
+                const tagsHtml = tags.map(tag =>
+                    `<span class="px-2.5 py-1 rounded-md bg-indigo-50 dark:bg-indigo-900/30 text-[10px] font-black uppercase tracking-widest text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-800">${tag.trim()}</span>`
+                ).join('');
+                $('#detail-tags').html(tagsHtml).removeClass('hidden');
+            } else {
+                $('#detail-tags').empty().addClass('hidden');
+            }
             $('#detail-hints').html((t.hints || "No Teacher Hints Provided.").replace(/\n/g, '<br>'));
 
-            const sub = window.allSubmissions.find(s => s.student_id === currentUser?.id && s.task_id == tid);
+            // SHOW LOADER IN FOOTER
+            // This prevents the "New Form" from flashing or appearing falsely while we check the DataBase
+            const footer = $('#submission-section');
+            footer.html(`
+                <div class="py-10 text-center flex flex-col items-center justify-center animate-in fade-in">
+                    <i data-lucide="loader-2" class="w-6 h-6 text-indigo-500 animate-spin mb-3"></i>
+                    <p class="text-[9px] font-black uppercase tracking-[0.2em] text-indigo-400">Verifying Submission...</p>
+                </div>
+            `).removeClass('hidden');
+            lucide.createIcons();
+
+            // ROBUST SUBMISSION FINDER (Async)
+            const findSub = async () => {
+                // 1. Try Local Cache First (Fastest)
+                if (window.allSubmissions) {
+                    const cached = window.allSubmissions.find(s =>
+                        s.student_id === currentUser?.id &&
+                        String(s.task_id) === taskIdStr
+                    );
+                    if (cached) return cached;
+                }
+
+                // 2. Direct DB Fetch (Fallback)
+                // This guarantees we find it if it exists in Supabase
+                if (currentUser) {
+                    try {
+                        // Create a timeout promise for this specific check
+                        const timeoutCheck = new Promise((_, reject) =>
+                            setTimeout(() => reject(new Error("Sub check timeout")), 5000)
+                        );
+
+                        const { data, error } = await Promise.race([
+                            client.from('submissions')
+                                .select('*')
+                                .eq('task_id', taskIdStr)
+                                .eq('student_id', currentUser.id)
+                                .maybeSingle(),
+                            timeoutCheck
+                        ]);
+
+                        if (error) console.warn("Submission Check Error:", error);
+                        if (data) {
+                            // Sync to cache so we don't fetch again next time
+                            if (window.allSubmissions) window.allSubmissions.push(data);
+                            return data;
+                        }
+                    } catch (err) {
+                        console.error("Network Error during submission check:", err);
+                    }
+                }
+                return null;
+            };
+
+            const sub = await findSub();
             window.currentSub = sub; // Store for global access
 
             if (t.hints) $('#detail-guidance').removeClass('hidden'); else $('#detail-guidance').addClass('hidden');
@@ -4910,19 +5064,19 @@
                     const now = new Date().getTime();
                     const dist = deadline - now;
                     if (dist < 0) {
-                        $('#detail-timer').text("EXPIRED").addClass('text-rose-500');
+                        $('#detail-time-container').text("EXPIRED").addClass('text-rose-500');
                     } else {
                         const days = Math.floor(dist / (1000 * 60 * 60 * 24));
                         const hours = Math.floor((dist % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
                         const mins = Math.floor((dist % (1000 * 60 * 60)) / (1000 * 60));
-                        $('#detail-timer').text(`${days}d ${hours}h ${mins}m`).removeClass('text-rose-500');
+                        $('#detail-time-container').text(`${days}d ${hours}h ${mins}m`).removeClass('text-rose-500');
                     }
                 }, 1000);
             } else {
-                $('#detail-timer').text("No Deadline");
+                $('#detail-time-container').text("No Deadline");
             }
 
-            const footer = $('#submission-section');
+
 
             // ADMIN VIEW IN MODAL
             if (userProfile.role === 'admin') {
@@ -4935,62 +5089,37 @@
             }
             // STUDENT VIEW IN MODAL
             else if (sub) {
-                // Already Submitted View
-                const statusColor = sub.status === 'graded' ? 'emerald' : 'amber';
-                const statusText = sub.status === 'graded' ? 'GRADED' : 'PENDING REVIEW';
-
-                let feedbackHtml = '';
+                // Already Submitted View -> Use the Helper Function
                 if (sub.status === 'graded') {
-                    feedbackHtml = `
+                    // Graded View (Keep separate as it has feedback/score)
+                    const feedbackHtml = `
                         <div class="mt-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-100 dark:border-emerald-800">
                             <h6 class="font-black text-emerald-700 dark:text-emerald-400 uppercase tracking-widest text-[9px] mb-1">Teacher Feedback</h6>
                             <p class="text-xs text-emerald-900 dark:text-emerald-100 italic">"${sub.feedback}"</p>
                             <div class="mt-2 font-black text-2xl text-emerald-600">${sub.grade}/100</div>
                             <button onclick="downloadReport()" class="mt-1 px-2 py-0.5 bg-white dark:bg-emerald-950/30 border border-emerald-200 dark:border-emerald-800/50 rounded text-[7px] font-black uppercase tracking-widest text-indigo-500 hover:bg-emerald-50 transition-colors flex items-center gap-1 shadow-sm w-fit"><i data-lucide="download" class="w-2.5 h-2.5"></i> PDF Report</button>
                         </div>`;
-                }
 
-                footer.html(`
+                    footer.html(`
                     <div class="text-center py-6">
-                        <div class="w-12 h-12 mx-auto bg-${statusColor}-100 dark:bg-${statusColor}-900/30 text-${statusColor}-500 rounded-full flex items-center justify-center mb-3">
+                        <div class="w-12 h-12 mx-auto bg-emerald-100 dark:bg-emerald-900/30 text-emerald-500 rounded-full flex items-center justify-center mb-3">
                             <i data-lucide="check-circle" class="w-6 h-6"></i>
                         </div>
-                        <h4 class="font-black text-slate-900 dark:text-slate-200 uppercase tracking-tight">Assignment Submitted</h4>
-                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">Status: <span class="text-${statusColor}-500">${statusText}</span></p>
+                        <h4 class="font-black text-slate-900 dark:text-slate-200 uppercase tracking-tight">Assignment Graded</h4>
+                        <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mb-4">Status: <span class="text-emerald-500">GRADED</span></p>
                         ${feedbackHtml}
-                    </div>
-                    `);
+                    </div>`);
+                } else {
+                    // Pending Result - Show Status Card which has the "Resubmit" button
+                    footer.html(window.renderStatusCard(sub));
+                }
             } else {
-                // Submission Form for Student
-                footer.html(`
-                        <div id="student-submit-container">
-                             <div class="p-4 bg-slate-50 dark:bg-[#0b1120] rounded-xl border border-dashed border-slate-200 dark:border-slate-800 mb-4">
-                                <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 mb-2 block">Project File (Zip/PDF) - Optional</label>
-                                <input type="file" id="sub-file" class="w-full text-xs font-bold text-slate-500 file:mr-4 file:py-2 file:px-4 file:rounded-lg file:border-0 file:text-[9px] file:font-black file:bg-indigo-50 file:text-indigo-600 hover:file:bg-indigo-100">
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-4">
-                                <div>
-                                    <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1 mb-1 block">GitHub Repository</label>
-                                    <div class="relative">
-                                        <i data-lucide="github" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
-                                        <input type="url" id="sub-github" class="w-full pl-10 p-3 bg-slate-50 dark:bg-[#0b1120] border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://github.com/...">
-                                    </div>
-                                </div>
-                                <div>
-                                    <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1 mb-1 block">Live Demo URL</label>
-                                    <div class="relative">
-                                        <i data-lucide="globe" class="absolute left-3 top-3 w-4 h-4 text-slate-400"></i>
-                                        <input type="url" id="sub-live" class="w-full pl-10 p-3 bg-slate-50 dark:bg-[#0b1120] border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none" placeholder="https://my-app.vercel.app">
-                                    </div>
-                                </div>
-                            </div>
-                            
-                            <button type="button" onclick="submitWork('${tid}')" id="btn-submit-work" class="w-full py-4 rounded-xl bg-indigo-600 text-white font-black uppercase tracking-[0.2em] text-xs shadow-xl shadow-indigo-500/30 hover:bg-indigo-700 hover:shadow-indigo-500/40 transition-all flex items-center justify-center gap-2">
-                                <i data-lucide="send" class="w-4 h-4"></i> Submit Assignment
-                            </button>
-                        </div>
-                    `);
+                // Submission Form for Student (Not Submitted Yet OR Resubmitting via toggle)
+                if (typeof window.renderSubmitForm === 'function') {
+                    window.renderSubmitForm(tid);
+                } else {
+                    footer.html('<div class="p-4 text-center text-rose-500">Error loading form.</div>');
+                }
             }
 
             new bootstrap.Modal(document.getElementById('taskDetailModal')).show();
@@ -5033,8 +5162,20 @@
             const students = Object.values(studentsDict).sort((a, b) => a.name.localeCompare(b.name));
 
             students.forEach(student => {
-                const pendingCount = student.submissions.filter(s => s.status === 'submitted').length;
-                const gradedCount = student.submissions.filter(s => s.status === 'graded').length;
+                // Calculate Deduplicated Pending Count (Latest per unique task)
+                const pendingSet = new Set();
+                student.submissions
+                    .filter(s => s.status === 'submitted')
+                    .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
+                    .forEach(s => pendingSet.add(s.task_id));
+                const pendingCount = pendingSet.size;
+
+                // Calculate Deduplicated Graded Count
+                const gradedSet = new Set();
+                student.submissions
+                    .filter(s => s.status === 'graded')
+                    .forEach(s => gradedSet.add(s.task_id));
+                const gradedCount = gradedSet.size;
                 const accordionId = `grading-${student.id}`;
 
                 // Check if this card was previously open
@@ -5070,65 +5211,81 @@
                 const $list = $card.find(`#${accordionId}`);
 
                 // Add Submissions to the list
-                // Sort: Pending first, then by date desc
-                const sortedSubs = student.submissions.sort((a, b) => {
-                    if (a.status === 'submitted' && b.status !== 'submitted') return -1;
-                    if (a.status !== 'submitted' && b.status === 'submitted') return 1;
-                    return new Date(b.submitted_at) - new Date(a.submitted_at);
+                // Filter: Only show PENDING (Submitted but not graded)
+                // The user specifically asked to hide graded data from this section for cleanliness
+                // Filter: Only show PENDING (Submitted but not graded)
+                // The user specifically asked to hide graded data from this section for cleanliness
+                // AND to only show the LATEST submission if duplicates exist ("baki khatam ho jaye")
+                const rawPending = student.submissions
+                    .filter(s => s.status !== 'graded')
+                    .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
+
+                const sortedSubs = [];
+                const seenTasks = new Set();
+                rawPending.forEach(s => {
+                    if (!seenTasks.has(s.task_id)) {
+                        seenTasks.add(s.task_id);
+                        sortedSubs.push(s);
+                    }
                 });
 
-                sortedSubs.forEach(s => {
-                    const isGraded = s.status === 'graded';
-                    const subHtml = `
-                         <div class="p-6 flex flex-col lg:flex-row gap-6 items-start ${isGraded ? 'opacity-70 hover:opacity-100 bg-slate-50 dark:bg-slate-900/20' : 'bg-white dark:bg-[#1e293b]'} transition-all">
-                            <div class="flex-1 w-full">
-                                <div class="flex items-center justify-between mb-3">
-                                    <p class="text-[8px] ${isGraded ? 'text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-900/40' : 'text-amber-600 bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-900/40'} border px-2 py-1 rounded inline-flex items-center gap-1.5 font-black uppercase tracking-[0.15em]">
-                                        <i data-lucide="${isGraded ? 'check-circle' : 'clock'}" class="w-3 h-3"></i> ${isGraded ? 'GRADED' : 'PENDING REVIEW'}
-                                    </p>
-                                    <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
-                                        <i data-lucide="calendar" class="w-3 h-3"></i> ${new Date(s.submitted_at).toLocaleDateString()}
+                // If all submissions for a student are graded, we might show a empty state for that student or hide the card.
+                // For now, let's proceed. If sortedSubs is empty after filtering, we can check below.
+
+                // Add valid submissions
+                if (sortedSubs.length > 0) {
+                    sortedSubs.forEach(s => {
+                        const isGraded = s.status === 'graded';
+                        const subHtml = `
+                             <div class="p-6 flex flex-col lg:flex-row gap-6 items-start ${isGraded ? 'opacity-70 hover:opacity-100 bg-slate-50 dark:bg-slate-900/20' : 'bg-white dark:bg-[#1e293b]'} transition-all">
+                                <div class="flex-1 w-full">
+                                    <div class="flex items-center justify-between mb-3">
+                                        <p class="text-[8px] ${isGraded ? 'text-emerald-500 bg-emerald-100 dark:bg-emerald-900/30 border-emerald-200 dark:border-emerald-900/40' : 'text-amber-600 bg-amber-100 dark:bg-amber-900/30 border-amber-200 dark:border-amber-900/40'} border px-2 py-1 rounded inline-flex items-center gap-1.5 font-black uppercase tracking-[0.15em]">
+                                            <i data-lucide="${isGraded ? 'check-circle' : 'clock'}" class="w-3 h-3"></i> ${isGraded ? 'GRADED' : 'PENDING REVIEW'}
+                                        </p>
+                                        <div class="text-[9px] text-slate-400 font-bold uppercase tracking-widest flex items-center gap-1.5">
+                                            <i data-lucide="calendar" class="w-3 h-3"></i> ${new Date(s.submitted_at).toLocaleDateString()}
+                                        </div>
+                                    </div>
+                                    
+                                    <h6 class="font-black text-slate-900 dark:text-slate-200 text-base uppercase tracking-tight mb-2 leading-none">${s.task_title}</h6>
+                                    
+                                    <div class="flex flex-wrap gap-2 mb-4 mt-3">
+                                         ${(() => {
+                                const data = parseSubmission(s.content);
+                                let html = '';
+                                if (data.file) html += `<a href="${formatDownloadUrl(data.file)}" target="_blank" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:border-indigo-500 hover:text-indigo-500 transition-all text-slate-600 dark:text-slate-400"><i data-lucide="file" class="w-3.5 h-3.5"></i> Download File</a>`;
+                                if (data.github) html += `<a href="${data.github}" target="_blank" class="px-4 py-2 rounded-xl bg-slate-900 text-white border-2 border-slate-900 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-all"><i data-lucide="github" class="w-3.5 h-3.5"></i> View Code</a>`;
+                                if (data.live) html += `<a href="${data.live}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-500 text-white border-2 border-emerald-500 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 transition-all"><i data-lucide="globe" class="w-3.5 h-3.5"></i> Live Demo</a>`;
+                                return html || '<span class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-500 border border-rose-100 text-[8px] font-black uppercase tracking-widest">No Assets</span>';
+                            })()}
                                     </div>
                                 </div>
                                 
-                                <h6 class="font-black text-slate-900 dark:text-slate-200 text-base uppercase tracking-tight mb-2 leading-none">${s.task_title}</h6>
-                                
-                                <div class="flex flex-wrap gap-2 mb-4 mt-3">
-                                     ${(() => {
-                            const data = parseSubmission(s.content);
-                            let html = '';
-                            if (data.file) html += `<a href="${formatDownloadUrl(data.file)}" target="_blank" class="px-4 py-2 rounded-xl bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:border-indigo-500 hover:text-indigo-500 transition-all text-slate-600 dark:text-slate-400"><i data-lucide="file" class="w-3.5 h-3.5"></i> Download File</a>`;
-                            if (data.github) html += `<a href="${data.github}" target="_blank" class="px-4 py-2 rounded-xl bg-slate-900 text-white border-2 border-slate-900 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-slate-800 transition-all"><i data-lucide="github" class="w-3.5 h-3.5"></i> View Code</a>`;
-                            if (data.live) html += `<a href="${data.live}" target="_blank" class="px-4 py-2 rounded-xl bg-emerald-500 text-white border-2 border-emerald-500 text-[9px] font-black uppercase tracking-widest flex items-center gap-2 hover:bg-emerald-600 transition-all"><i data-lucide="globe" class="w-3.5 h-3.5"></i> Live Demo</a>`;
-                            return html || '<span class="px-3 py-1.5 rounded-lg bg-rose-50 text-rose-500 border border-rose-100 text-[8px] font-black uppercase tracking-widest">No Assets</span>';
-                        })()}
-                                </div>
-                            </div>
-                            
-                            <div class="w-full lg:w-auto flex flex-col gap-3 min-w-[240px]">
-                                ${!isGraded ? `
-                                <div class="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/20">
-                                    <div class="flex gap-2 mb-2">
-                                        <input type="number" id="grade-${s.id}" class="w-20 p-2 text-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 placeholder:font-normal" placeholder="0-100">
-                                        <button onclick="window.submitGrade('${s.id}')" class="flex-1 btn-command px-4 py-2 rounded-lg text-[9px] shadow-none">Submit Grade</button>
+                                <div class="w-full lg:w-auto flex flex-col gap-3 min-w-[240px]">
+                                    ${!isGraded ? `
+                                    <div class="bg-indigo-50 dark:bg-indigo-900/10 p-4 rounded-xl border border-indigo-100 dark:border-indigo-900/20">
+                                        <div class="flex gap-2 mb-2">
+                                            <input type="number" id="grade-${s.id}" class="w-20 p-2 text-center bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-sm font-black outline-none focus:ring-2 focus:ring-indigo-500 dark:text-slate-200 placeholder:font-normal" placeholder="0-100">
+                                            <button onclick="window.submitGrade('${s.id}')" class="flex-1 btn-command px-4 py-2 rounded-lg text-[9px] shadow-none">Submit Grade</button>
+                                        </div>
+                                        <textarea id="feedback-${s.id}" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none focus:ring-2 focus:ring-indigo-500 resize-none dark:text-slate-200" placeholder="Write feedback for student..." rows="2"></textarea>
                                     </div>
-                                    <textarea id="feedback-${s.id}" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none focus:ring-2 focus:ring-indigo-500 resize-none dark:text-slate-200" placeholder="Write feedback for student..." rows="2"></textarea>
+                                    ` : `
+                                    <!-- Graded UI Hidden by Logic Above -->
+                                    <div class="hidden"></div> 
+                                    `}
                                 </div>
-                                ` : `
-                                <div class="p-5 bg-white dark:bg-[#0b1120] rounded-xl border border-slate-100 dark:border-slate-800 shadow-sm text-center relative overflow-hidden">
-                                    <div class="absolute top-0 left-0 w-full h-1 bg-emerald-500"></div>
-                                    <div class="text-3xl font-black text-emerald-500 tracking-tighter mb-1">${s.grade}</div>
-                                    <div class="text-[7px] font-black uppercase tracking-[0.2em] text-slate-400 mb-3">Score Assigned</div>
-                                    <div class="text-[10px] font-medium text-slate-600 dark:text-slate-300 italic px-2">"${s.feedback || 'Good work'}"</div>
-                                </div>
-                                `}
-                            </div>
-                         </div>
-                         `;
-                    $list.append(subHtml);
-                });
+                             </div>
+                             `;
+                        $list.append(subHtml);
+                    });
 
-                container.append($card);
+                    container.append($card);
+                } else {
+                    // Option 1: Don't show card if no pending work
+                    // Option 2: Show "All Clear" - User preferred cleanliness so we SKIP
+                }
             });
             lucide.createIcons();
         };
@@ -5148,9 +5305,20 @@
             const query = $('#user-search').val().toLowerCase();
 
             users.filter(u => u.role === 'student' && (u.name.toLowerCase().includes(query) || (u.email && u.email.toLowerCase().includes(query)))).forEach(u => {
-                const uSubs = window.allSubmissions.filter(s => s.student_id === u.uid);
+                const uSubsRaw = window.allSubmissions.filter(s => s.student_id === u.uid);
+
+                // DEDUPLICATE: Map task_id -> latest submission
+                const uniqueSubsMap = new Map();
+                uSubsRaw.forEach(s => {
+                    const existing = uniqueSubsMap.get(s.task_id);
+                    if (!existing || new Date(s.submitted_at) > new Date(existing.submitted_at)) {
+                        uniqueSubsMap.set(s.task_id, s);
+                    }
+                });
+                const uSubs = Array.from(uniqueSubsMap.values());
+
                 const gradedSubs = uSubs.filter(s => s.status === 'graded');
-                const avg = uSubs.length ? Math.round(gradedSubs.reduce((a, b) => a + b.grade, 0) / (gradedSubs.length || 1)) : 0;
+                const avg = gradedSubs.length ? Math.round(gradedSubs.reduce((a, b) => a + b.grade, 0) / gradedSubs.length) : 0;
 
                 // Get Arcade Progress (Try matching by both potential ID fields)
                 // Some profiles might index by 'id' internally if fetched differently
@@ -5597,123 +5765,33 @@
             }
         });
 
-        window.openDetail = async (taskId) => {
-            // Updated to maybeSingle() to avoid 406 errors when no data exists
-            const { data: task, error: tErr } = await client.from('tasks').select('*').eq('id', taskId).maybeSingle();
-            const { data: sub, error: sErr } = await client.from('submissions').select('*').eq('task_id', taskId).eq('student_id', currentUser?.id).maybeSingle();
+        window.renderSubmitForm = (taskId) => {
+            // Check if this is an UPDATE (Resubmission)
+            const isUpdate = window.currentSub && (window.currentSub.task_id == taskId || window.currentSub.task_id === String(taskId));
 
-            if (tErr || !task) {
-                console.error("Task Error:", tErr);
-                showToast("Error loading mission details.");
-                return;
+            // Pre-fill data if updating
+            let existingGithub = '';
+            let existingLive = '';
+            if (isUpdate && window.currentSub.content) {
+                try {
+                    const parsed = JSON.parse(window.currentSub.content);
+                    existingGithub = parsed.github || '';
+                    existingLive = parsed.live || '';
+                } catch (e) { }
             }
 
-            currentTask = task; currentSub = sub;
+            const heading = isUpdate ? 'Replace / Update Submission' : 'Upload Submission';
+            const btnText = isUpdate ? 'Update Task' : 'Submit Task';
+            const fileLabel = isUpdate ? 'Upload New File (Replaces Old)' : 'Upload File';
 
-            $('#detail-title').text(task.title);
-            // Intelligent Rendering: Escape user text to show tags like <hr> literally, but render the appended Reference Link as HTML.
-            const rawDesc = task.description || 'No description provided.';
-            const refMarker = '<br><strong>Reference Asset:</strong>';
-            const splitIdx = rawDesc.lastIndexOf(refMarker);
-
-            let safeContent = '';
-            if (splitIdx !== -1) {
-                const userText = rawDesc.substring(0, splitIdx);
-                const refLinkHtml = rawDesc.substring(splitIdx);
-                // 1. Escape HTML special chars in user text
-                // 2. Convert newlines to <br>
-                const safeUserText = userText
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/\n/g, '<br>');
-                safeContent = safeUserText + refLinkHtml;
-            } else {
-                safeContent = rawDesc
-                    .replace(/&/g, "&amp;")
-                    .replace(/</g, "&lt;")
-                    .replace(/>/g, "&gt;")
-                    .replace(/\n/g, '<br>');
-            }
-            $('#detail-desc').html(safeContent);
-            $('#submit-id').val(taskId);
-
-            // Operational Guidance & Assets
-            if (task.hints || task.reference_asset) {
-                $('#detail-guidance').removeClass('hidden');
-                if (task.hints) { $('#detail-hints').text(task.hints).parent().removeClass('hidden'); }
-                else { $('#detail-hints').parent().addClass('hidden'); }
-
-                if (task.reference_asset) {
-                    $('#detail-ref-link').attr('href', task.reference_asset);
-                    $('#detail-ref-container').removeClass('hidden');
-                } else {
-                    $('#detail-ref-container').addClass('hidden');
-                }
-            } else {
-                $('#detail-guidance').addClass('hidden');
-            }
-
-            if (window.taskTimerInterval) clearInterval(window.taskTimerInterval);
-            if (sub) {
-                const statusText = sub.status === 'graded' ? "TASK GRADED" : "TASK SUBMITTED";
-                $('#detail-timer').text(statusText).parent().removeClass('text-rose-500').addClass('text-emerald-500');
-            } else if (!task.deadline) {
-                $('#detail-timer').text("NO DEADLINE SET").parent().removeClass('text-rose-500 text-emerald-500');
-            } else {
-                window.taskTimerInterval = setInterval(() => {
-                    const now = new Date(); const dl = new Date(task.deadline);
-                    const diff = dl - now;
-                    if (diff < 0) {
-                        $('#detail-timer').text("TASK EXPIRED").parent().addClass('text-rose-500').removeClass('text-emerald-500');
-                        clearInterval(window.taskTimerInterval);
-                    } else {
-                        const h = Math.floor(diff / (1000 * 60 * 60));
-                        const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-                        const s = Math.floor((diff % (1000 * 60)) / 1000);
-                        $('#detail-timer').text(`${h}h ${m}m ${s}s Remaining`).parent().removeClass('text-rose-500 text-emerald-500');
-                    }
-                }, 1000);
-            }
-
-            $('#submission-section, #result-section, #admin-view-msg').addClass('hidden');
-
-            if (userProfile.role === 'admin') $('#admin-view-msg').removeClass('hidden');
-            else if (sub) {
-                if (sub.status === 'graded') {
-                    $('#result-grade').text(sub.grade);
-                    $('#result-feedback').text(sub.feedback);
-
-                    $('#result-section').removeClass('hidden');
-                }
-                else {
-                    $('#submission-section').html(`
-            <div class="p-10 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-3xl text-center font-black uppercase tracking-[0.2em] text-[10px] border border-indigo-100 dark:border-indigo-900/50 flex flex-col items-center gap-4">
-                            <i data-lucide="check-circle-2" class="w-8 h-8 animate-in zoom-in duration-300"></i> 
-                            <div>
-                                <p class="text-[8px] opacity-70 mb-1">SUBMISSION STATUS</p>
-                                <p class="text-xs">RECEIVED: ${sub.task_title}</p>
-                            </div>
-                            <p class="text-[8px] bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 rounded-full mt-2">Result Pending</p>
-                            <div class="flex gap-2 justify-center mt-3">
-                                ${(() => {
-                            const data = parseSubmission(sub.content);
-                            let html = '';
-                            if (data.file) html += `<a href="${formatDownloadUrl(data.file)}" target="_blank" class="text-[8px] font-black uppercase text-indigo-500 hover:underline flex items-center gap-1"><i data-lucide="file" class="w-2.5 h-2.5"></i> File</a>`;
-                            if (data.github) html += `<a href="${data.github}" target="_blank" class="text-[8px] font-black uppercase text-slate-500 hover:text-indigo-500 flex items-center gap-1"><i data-lucide="github" class="w-2.5 h-2.5"></i> Code</a>`;
-                            if (data.live) html += `<a href="${data.live}" target="_blank" class="text-[8px] font-black uppercase text-emerald-500 hover:underline flex items-center gap-1"><i data-lucide="globe" class="w-2.5 h-2.5"></i> Live</a>`;
-                            return html;
-                        })()}
-                            </div>
-                        </div>`).removeClass('hidden');
-                }
-            } else {
-                const isExpired = new Date().getTime() > new Date(task.deadline).getTime();
-                if (isExpired) $('#submission-section').html('<div class="p-10 bg-rose-50 dark:bg-rose-900/20 text-rose-600 dark:text-rose-400 rounded-3xl text-center font-black uppercase tracking-[0.2em] text-[10px] border border-rose-100 dark:border-rose-900/50">Task Deadline Expired</div>').removeClass('hidden');
-                else {
-                    $('#submission-section').html(`
+            $('#submission-section').html(`
             <form id="submit-form" class="space-y-6">
                 <input type="hidden" id="submit-id" value="${taskId}">
+                    
+                    <div class="mb-2 text-center">
+                         <span class="text-[9px] font-black uppercase tracking-widest ${isUpdate ? 'text-amber-500' : 'text-slate-400'}">${heading}</span>
+                    </div>
+
                     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
                         <div class="space-y-4">
                             <div class="group relative bg-slate-50 dark:bg-slate-800/30 border-2 border-dashed border-slate-200 dark:border-slate-700 rounded-3xl p-6 text-center hover:border-indigo-500 transition-all cursor-pointer overflow-hidden h-full flex flex-col items-center justify-center">
@@ -5721,9 +5799,9 @@
                                 <input type="file" id="submit-file" class="absolute inset-0 opacity-0 cursor-pointer z-10" onchange="$('#file-name').text(this.files[0].name)">
                                     <div class="relative z-0">
                                         <div class="w-12 h-12 bg-white dark:bg-slate-800 shadow-xl rounded-2xl flex items-center justify-center text-indigo-600 mx-auto mb-2 group-hover:scale-110 transition-transform">
-                                            <i data-lucide="upload-cloud" class="w-6 h-6"></i>
+                                            <i data-lucide="${isUpdate ? 'refresh-cw' : 'upload-cloud'}" class="w-6 h-6"></i>
                                         </div>
-                                        <p class="font-black text-slate-900 dark:text-slate-200 uppercase tracking-tight text-[10px]">Upload File</p>
+                                        <p class="font-black text-slate-900 dark:text-slate-200 uppercase tracking-tight text-[10px]">${fileLabel}</p>
                                         <p class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1" id="file-name">Optional</p>
                                     </div>
                             </div>
@@ -5731,53 +5809,31 @@
                         <div class="space-y-3">
                             <div>
                                 <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 block">GitHub Repository URL</label>
-                                <input type="url" id="submit-github" placeholder="https://github.com/username/project" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 dark:text-slate-200 transition-colors">
+                                <input type="url" id="submit-github" value="${existingGithub}" placeholder="https://github.com/username/project" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-indigo-500 dark:text-slate-200 transition-colors">
                             </div>
                             <div>
                                 <label class="text-[8px] font-black text-slate-400 uppercase tracking-widest mb-1 block">Live Demo Link</label>
-                                <input type="url" id="submit-live" placeholder="https://my-project.vercel.app" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 dark:text-slate-200 transition-colors">
+                                <input type="url" id="submit-live" value="${existingLive}" placeholder="https://my-project.vercel.app" class="w-full p-3 bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl text-xs font-bold outline-none focus:border-emerald-500 dark:text-slate-200 transition-colors">
                             </div>
                         </div>
                     </div>
-                    <button type="submit" class="w-full btn-command">Submit Task</button>
+                    <button type="submit" class="w-full btn-command">${btnText}</button>
                 </form>`).removeClass('hidden');
-                }
-            }
             lucide.createIcons();
-
-            fetchComments(taskId);
-            new bootstrap.Modal('#taskDetailModal').show();
         };
 
-        window.openEditFromDetail = () => {
-            if (!currentTask) return;
-            editingTaskId = currentTask.id;
-
-            $('#new-task-title').val(currentTask.title);
-            // Attempt to strip auto-appended reference link for cleaner editing if possible, 
-            // but for now keeping raw description to ensure no data loss.
-            // A smarter way would be to regex replace the appended HTML if it matches known pattern, but unsafe.
-            $('#new-task-desc').val(currentTask.description);
-            $('#new-task-hints').val(currentTask.hints);
-
-            if (currentTask.deadline) {
-                try {
-                    const d = new Date(currentTask.deadline);
-                    // Adjust to local ISO string for input[type="datetime-local"]
-                    const offset = d.getTimezoneOffset() * 60000;
-                    const localISOTime = (new Date(d - offset)).toISOString().slice(0, 16);
-                    $('#new-task-date').val(localISOTime);
-                } catch (e) { console.warn("Date parse error", e); }
-            } else {
-                $('#new-task-date').val('');
+        window.enableResubmission = () => {
+            const taskId = currentTask.id;
+            window.renderSubmitForm(taskId);
+            if (currentSub) {
+                const data = parseSubmission(currentSub.content);
+                if (data.github) $('#submit-github').val(data.github);
+                if (data.live) $('#submit-live').val(data.live);
+                $('#submit-form button').text('Update Submission');
             }
-
-            $('#createTaskModal .modal-title').text('Edit Task');
-            $('#task-submit-btn').text('Update Task');
-
-            bootstrap.Modal.getInstance('#taskDetailModal').hide();
-            new bootstrap.Modal('#createTaskModal').show();
         };
+
+
 
         // Reset for Create Mode
         $('#create-task-btn').on('click', () => {
@@ -5787,25 +5843,101 @@
             $('#task-submit-btn').text('Create Task');
         });
 
+        window.renderStatusCard = (sub) => {
+            return `
+            <div class="p-10 bg-indigo-50 dark:bg-indigo-900/20 text-indigo-600 dark:text-indigo-400 rounded-3xl text-center font-black uppercase tracking-[0.2em] text-[10px] border border-indigo-100 dark:border-indigo-900/50 flex flex-col items-center gap-4">
+                <i data-lucide="check-circle-2" class="w-8 h-8 animate-in zoom-in duration-300"></i> 
+                <div>
+                    <p class="text-[8px] opacity-70 mb-1">SUBMISSION STATUS</p>
+                    <p class="text-xs">RECEIVED: ${(sub.task_title || 'Task Submitted')}</p>
+                </div>
+                <p class="text-[8px] bg-indigo-100 dark:bg-indigo-500/20 px-4 py-2 rounded-full mt-2">Result Pending</p>
+                <div class="flex gap-2 justify-center mt-3">
+                    ${(() => {
+                    const data = parseSubmission(sub.content);
+                    let html = '';
+                    if (data.file) html += `<a href="${formatDownloadUrl(data.file)}" target="_blank" class="text-[8px] font-black uppercase text-indigo-500 hover:underline flex items-center gap-1"><i data-lucide="file" class="w-2.5 h-2.5"></i> File</a>`;
+                    if (data.github) html += `<a href="${data.github}" target="_blank" class="text-[8px] font-black uppercase text-slate-500 hover:text-indigo-500 flex items-center gap-1"><i data-lucide="github" class="w-2.5 h-2.5"></i> Code</a>`;
+                    if (data.live) html += `<a href="${data.live}" target="_blank" class="text-[8px] font-black uppercase text-emerald-500 hover:underline flex items-center gap-1"><i data-lucide="globe" class="w-2.5 h-2.5"></i> Live</a>`;
+                    return html;
+                })()}
+                </div>
+                <button onclick="enableResubmission()" class="mt-4 px-6 py-2 bg-white dark:bg-indigo-950 text-indigo-500 border border-indigo-200 dark:border-indigo-800 rounded-xl text-[9px] font-black uppercase tracking-widest hover:bg-indigo-50 dark:hover:bg-indigo-900/40 transition-all shadow-sm">
+                    Resubmit / Replace
+                </button>
+            </div>`;
+        };
+
+        // Global variable to track who Admin is replying to
+        window.replyTargetStub = null; // { id: 'uuid', name: 'Student Name' }
+
         window.fetchComments = async (taskId) => {
+            // Fetch ALL comments for the task (Client-side filtering for context)
             const { data: comments } = await client.from('task_comments').select('*').eq('task_id', taskId).order('created_at', { ascending: true });
-            renderComments(comments || []);
+
+            if (!comments) { renderComments([]); return; }
+
+            // Filter Logic
+            const filtered = comments.filter(c => {
+                let contentObj;
+                try {
+                    contentObj = JSON.parse(c.content);
+                    // Check if it has our protocol structure
+                    if (!contentObj.sid && !contentObj.txt) throw new Error("Legacy");
+                } catch (e) {
+                    // Legacy or Plain Text
+                    contentObj = { txt: c.content, sid: c.user_id }; // Assume legacy std msg belongs to sender
+                }
+
+                // Attach parsed obj to comment for render
+                c._parsed = contentObj;
+
+                if (userProfile.role === 'admin') return true; // Admin sees all
+
+                // Student: See OWN messages OR Admin messages targeted at them
+                if (c.user_id === currentUser.id) return true; // My sent items
+                if (contentObj.sid === currentUser.id) return true; // Targeted at me
+
+                return false;
+            });
+
+            renderComments(filtered);
         };
 
         function renderComments(comments) {
             const container = $('#comments-container').empty();
+
+            // Clear reply stub if re-rendering (optional, but cleaner)
+            // if (window.replyTargetStub) cancelReply(); 
+
             if (!comments.length) {
-                container.html('<div class="text-center py-8 text-slate-400 text-[9px] font-bold uppercase tracking-widest italic opacity-50">No messages yet. Start the conversation!</div>');
+                container.html('<div class="text-center py-8 text-slate-400 text-[9px] font-bold uppercase tracking-widest italic opacity-50">No messages found.</div>');
                 return;
             }
+
             comments.forEach(c => {
                 const isAdmin = c.role === 'admin';
                 const isMe = c.user_id === currentUser.id;
+
+                // Use pre-parsed content or safe parse
+                const data = c._parsed || (() => { try { return JSON.parse(c.content) } catch (e) { return { txt: c.content, sid: c.user_id } } })();
+                const text = data.txt || c.content; // Fallback
+
+                // For Admin: Show who the message belongs to contextually if likely mixed
+                // If I am admin, and this msg is from a student, show "Reply" action
+                let actions = '';
+                if (userProfile.role === 'admin' && !isMe) {
+                    actions = `<button onclick="setReplyContext('${c.user_id}', '${c.user_name}')" class="ml-2 text-[8px] text-indigo-400 hover:text-indigo-600 font-bold uppercase tracking-wider opacity-0 group-hover:opacity-100 transition-opacity flex items-center gap-1"><i data-lucide="reply" class="w-2.5 h-2.5"></i> Reply</button>`;
+                }
+
                 container.append(`
-            <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 mb-4">
-                        <span class="text-[9px] font-black uppercase mb-1 px-1 ${isAdmin ? 'text-rose-500' : 'text-indigo-500'}">${c.user_name}</span>
-                        <div class="max-w-[85%] p-3 rounded-2xl text-[10px] font-medium shadow-sm border border-slate-100 dark:border-slate-800 ${isMe ? 'bg-indigo-600 text-white border-transparent rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-none'}">
-                            ${c.content}
+            <div class="flex flex-col ${isMe ? 'items-end' : 'items-start'} animate-in fade-in slide-in-from-bottom-2 mb-4 group w-full">
+                        <div class="flex items-center gap-2 mb-1">
+                             <span class="text-[9px] font-black uppercase px-1 ${isAdmin ? 'text-rose-500' : 'text-indigo-500'}">${c.user_name}</span>
+                             ${actions}
+                        </div>
+                        <div class="max-w-[85%] p-3 rounded-2xl text-[10px] font-medium shadow-sm border border-slate-100 dark:border-slate-800 ${isMe ? 'bg-indigo-600 text-white border-transparent rounded-tr-none' : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-tl-none'} break-words whitespace-pre-wrap">
+                            ${text}
                         </div>
                         <span class="text-[6px] text-slate-400 font-bold mt-1 opacity-100 transition-opacity">${new Date(c.created_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
                     </div>
@@ -5815,18 +5947,48 @@
             lucide.createIcons();
         }
 
+        window.setReplyContext = (sid, name) => {
+            window.replyTargetStub = { id: sid, name: name };
+            const input = $('#comment-input');
+            input.focus();
+
+            // Show Reply UI Indicator
+            if ($('#reply-indicator').length === 0) {
+                $('<div id="reply-indicator" class="flex items-center justify-between px-4 py-2 bg-indigo-50 dark:bg-indigo-900/20 border-t border-indigo-100 dark:border-indigo-800 text-[9px] font-bold text-indigo-600 mx-4 mt-2 rounded-t-lg"></div>').insertBefore('#comment-input-area');
+            }
+            $('#reply-indicator').html(`<span>Replying to: ${name}</span> <button onclick="cancelReply()" class="text-rose-500 hover:underline">Cancel</button>`).removeClass('hidden');
+        };
+
+        window.cancelReply = () => {
+            window.replyTargetStub = null;
+            $('#reply-indicator').addClass('hidden');
+        };
+
         window.postComment = async () => {
             const content = $('#comment-input').val().trim();
             if (!content) return;
             const taskId = currentTask.id;
+
+            // Determine Target Thread
+            // Student: Always their own thread (sid = currentUser.id)
+            // Admin: Thread ID of the student they are replying to. If no reply context, it's a "General" message (sid = null)
+            let sid = (userProfile.role === 'student') ? currentUser.id : (window.replyTargetStub ? window.replyTargetStub.id : null);
+
+            // Payload Structure: { txt: "Message", sid: "StudentUUID" }
+            const payload = JSON.stringify({
+                txt: content,
+                sid: sid
+            });
+
             $('#comment-input').val('');
+            if (window.cancelReply) window.cancelReply(); // Reset reply state
 
             const { error } = await client.from('task_comments').insert([{
                 task_id: taskId,
                 user_id: currentUser.id,
                 user_name: userProfile.name,
                 role: userProfile.role,
-                content: content
+                content: payload
             }]);
 
             if (!error) fetchComments(taskId);
@@ -5871,22 +6033,57 @@
                     timestamp: new Date().toISOString() // Metadata
                 };
 
-                const { error: dbErr } = await client.from('submissions').insert([{
-                    task_id: taskId,
-                    task_title: currentTask.title,
-                    student_id: currentUser.id,
-                    student_name: userProfile.name,
-                    content: JSON.stringify(submissionData),
-                    status: 'submitted',
-                    submitted_at: new Date().toISOString()
-                }]);
+                // Resolve Task Title safely
+                const activeTask = window.currentTask || (window.allTasks ? window.allTasks.find(t => String(t.id) === String(taskId)) : null);
+                const safeTitle = activeTask ? activeTask.title : 'Task Submission';
+
+                let dbOp;
+                // If we have a current submission for this task, UPDATE it
+                if (window.currentSub && window.currentSub.task_id == taskId) {
+                    if (window.currentSub.status === 'graded') {
+                        throw new Error("Cannot resubmit a graded task.");
+                    }
+                    console.log("Updating existing submission:", window.currentSub.id);
+                    dbOp = client.from('submissions').update({
+                        content: JSON.stringify(submissionData),
+                        status: 'submitted', // Ensure status is submitted (in case we add other statuses later)
+                        submitted_at: new Date().toISOString()
+                    }).eq('id', window.currentSub.id);
+                } else {
+                    // Create NEW submission
+                    dbOp = client.from('submissions').insert([{
+                        task_id: taskId,
+                        task_title: safeTitle,
+                        student_id: currentUser.id,
+                        student_name: userProfile.name,
+                        content: JSON.stringify(submissionData),
+                        status: 'submitted',
+                        submitted_at: new Date().toISOString()
+                    }]);
+                }
+
+                const { error: dbErr } = await dbOp;
 
                 if (dbErr) throw dbErr;
 
-                bootstrap.Modal.getInstance('#taskDetailModal').hide();
-                fetchData();
+                // REFRESH DATA & UI
+                // Update global state immediately for the status card to work if re-opened
+                const fakeSub = {
+                    ...submissionData,
+                    task_title: safeTitle,
+                    content: JSON.stringify(submissionData),
+                    status: 'submitted'
+                };
+
+                // Force UI update manually to guarantee the form disappears
+                $('#submission-section').html(window.renderStatusCard(fakeSub));
+                lucide.createIcons();
+
+                await fetchData(); // Refresh background data
                 showToast("Work Submitted Successfully!");
                 confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+
+                // openDetail(taskId); // No longer needed, manual update handles it cleaner
 
             } catch (err) {
                 console.error("Submission Error:", err);
@@ -5897,6 +6094,14 @@
         });
 
 
+
+        // Global function to toggle manual resubmission
+        window.enableResubmission = () => {
+            // Simply render the form for the current task
+            if (window.currentTask) {
+                window.renderSubmitForm(window.currentTask.id);
+            }
+        };
 
         // --- PROFILE AVATAR CROP & UPLOAD ---
         let cropper;
@@ -6253,10 +6458,20 @@
 
             if (userProfile.role === 'admin') {
                 // --- ADMIN VIEW ---
-                // Visualize: Global Graded vs Global Pending
-                const allSubs = window.allSubmissions;
-                const graded = allSubs.filter(s => s.status === 'graded').length;
-                const pending = allSubs.filter(s => s.status === 'submitted').length;
+                // Visualize: Global Graded vs Global Pending (DEDUPLICATED)
+                const uniqueSubsMap = new Map();
+                (window.allSubmissions || []).forEach(s => {
+                    const key = `${s.student_id}_${s.task_id}`;
+                    const existing = uniqueSubsMap.get(key);
+                    // Keep the NEWER one
+                    if (!existing || new Date(s.submitted_at) > new Date(existing.submitted_at)) {
+                        uniqueSubsMap.set(key, s);
+                    }
+                });
+
+                const uniqueSubs = Array.from(uniqueSubsMap.values());
+                const graded = uniqueSubs.filter(s => s.status === 'graded').length;
+                const pending = uniqueSubs.filter(s => s.status === 'submitted').length;
 
                 if (performanceChart) {
                     performanceChart.data.labels = ['Graded', 'Pending Review', ''];
@@ -6510,8 +6725,37 @@
 
         window.renderNotifications = () => {
             const list = $('#notification-list').empty();
+
+            // CHECK CLEARED STATE
+            // User wants previously "Marked Read" items to stay hidden even after refresh
+            if (localStorage.getItem('notifications_cleared') === 'true') {
+                list.html(`
+                        <div class="h-32 flex flex-col items-center justify-center text-slate-400">
+                             <div class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-800 flex items-center justify-center mb-2">
+                                <i data-lucide="bell-off" class="w-4 h-4 opacity-50"></i>
+                             </div>
+                             <p class="text-[9px] font-black uppercase tracking-widest opacity-50">No new notifications</p>
+                        </div>
+                    `);
+                lucide.createIcons();
+                return;
+            }
+
             // Filter pending submissions
-            const pending = (window.allSubmissions || []).filter(s => s.status === 'submitted');
+            // DEDUPLICATION: Only count latest submission per task
+            const uniquePendingMap = new Map();
+            (window.allSubmissions || []).forEach(s => {
+                const key = `${s.student_id}_${s.task_id}`;
+                const existing = uniquePendingMap.get(key);
+                // Keep the NEWER one
+                if (!existing || new Date(s.submitted_at) > new Date(existing.submitted_at)) {
+                    uniquePendingMap.set(key, s);
+                }
+            });
+
+            // Only keeping those whose LATEST status is 'submitted' (not graded)
+            const pending = Array.from(uniquePendingMap.values())
+                .filter(s => s.status === 'submitted');
 
             // Sort by date desc
             pending.sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
@@ -6558,10 +6802,20 @@
         };
 
         window.markAllRead = () => {
-            // Just close for now, as real "read" status requires DB schema change
-            // But specifically requested behavior is handled: if updates exist, show them.
-            $('#notification-dropdown').addClass('hidden');
-            showToast("Notifications marked as checked.");
+            // User requested: "jitne mb hn woh empty hojayen"
+            // Visual clear only since we don't have a read_status column yet
+            $('#notification-list').empty().html('<div class="text-center py-4 text-[10px] text-slate-400 font-bold uppercase tracking-widest italic">All caught up!</div>');
+            $('#notif-badge').addClass('hidden').removeClass('flex').text('');
+
+            // Persist the cleared state so it doesn't come back on refresh
+            localStorage.setItem('notifications_cleared', 'true');
+
+            // Close dropdown after short delay
+            setTimeout(() => {
+                $('#notification-dropdown').addClass('hidden');
+            }, 500);
+
+            showToast("Notifications cleared.");
         };
 
         // --- ARCADE GAME ENGINE ---
