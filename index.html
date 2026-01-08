@@ -6478,13 +6478,122 @@
             }
         };
         window.downloadReport = () => {
-            const { jsPDF } = window.jspdf;
-            const doc = new jsPDF();
-            doc.text(`Grade Report: ${currentTask.title}`, 20, 20);
-            doc.text(`Student: ${userProfile.name}`, 20, 30);
-            doc.text(`Score: ${currentSub.grade}/100`, 20, 40);
-            doc.text(`Feedback: ${currentSub.feedback}`, 20, 50);
-            doc.save(`REPORT_${userProfile.name}.pdf`);
+            try {
+                if (!window.jspdf) throw new Error("PDF Library loading...");
+                const { jsPDF } = window.jspdf;
+                const doc = new jsPDF();
+
+                // DATA
+                const title = (window.currentTask && window.currentTask.title) || "Unknown Task";
+                const name = (window.userProfile && window.userProfile.name) || "Student";
+                const grade = (window.currentSub && window.currentSub.grade) || 0;
+                const feedback = (window.currentSub && window.currentSub.feedback) || "No additional feedback provided.";
+                const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
+
+                // COLORS
+                const colPrimary = [79, 70, 229]; // Indigo 600
+                const colText = [30, 41, 59]; // Slate 800
+                const colLight = [241, 245, 249]; // Slate 100
+
+                // 1. HEADER BANNER
+                doc.setFillColor(...colPrimary);
+                doc.rect(0, 0, 210, 40, 'F');
+
+                doc.setFont("helvetica", "bold");
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(22);
+                doc.text("OFFICIAL GRADE REPORT", 105, 20, { align: "center" });
+
+                doc.setFontSize(10);
+                doc.setFont("helvetica", "normal");
+                doc.text("Generated on " + date, 105, 30, { align: "center" });
+
+                // 2. STUDENT & TASK INFO
+                let y = 60;
+                doc.setTextColor(...colText);
+
+                // Student Name
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text("STUDENT NAME", 20, y);
+                doc.setFontSize(14);
+                doc.setTextColor(...colText);
+                doc.setFont("helvetica", "bold");
+                doc.text(name.toUpperCase(), 20, y + 7);
+
+                // Task Title
+                doc.setFontSize(10);
+                doc.setTextColor(100);
+                doc.text("ASSIGNMENT / TASK", 120, y);
+                doc.setFontSize(14);
+                doc.setTextColor(...colText);
+                doc.setFont("helvetica", "bold");
+
+                // Handle long titles
+                const splitTitle = doc.splitTextToSize(title, 80);
+                doc.text(splitTitle, 120, y + 7);
+
+                y += 20 + (splitTitle.length * 5); // Adjust Y based on title length
+
+                // 3. GRADE INDICATOR (Circle/Box)
+                doc.setDrawColor(...colPrimary);
+                doc.setLineWidth(1);
+                doc.setFillColor(255, 255, 255);
+                doc.roundedRect(20, y, 170, 40, 3, 3, 'FD');
+
+                doc.setFontSize(30);
+                doc.setTextColor(...colPrimary);
+                doc.setFont("helvetica", "bold");
+                doc.text(`${grade}`, 40, y + 28);
+
+                doc.setFontSize(12);
+                doc.setTextColor(100);
+                doc.text("/ 100 POINTS", 75, y + 28);
+
+                // Status Pill
+                const isPass = grade >= 50;
+                if (isPass) {
+                    doc.setFillColor(16, 185, 129); // Emerald
+                } else {
+                    doc.setFillColor(239, 68, 68); // Rose
+                }
+                doc.roundedRect(140, y + 12, 40, 16, 8, 8, 'F');
+                doc.setTextColor(255, 255, 255);
+                doc.setFontSize(10);
+                doc.text(isPass ? "PASSED" : "REVIEW", 160, y + 23, { align: "center" });
+
+                y += 60;
+
+                // 4. TEACHER FEEDBACK SECTION
+                doc.setFillColor(...colLight);
+                doc.rect(20, y, 170, 100, 'F'); // Background box
+
+                doc.setFontSize(11);
+                doc.setTextColor(...colPrimary);
+                doc.setFont("helvetica", "bold");
+                doc.text("TEACHER FEEDBACK", 30, y + 15);
+
+                doc.setDrawColor(200);
+                doc.line(30, y + 20, 180, y + 20);
+
+                doc.setFontSize(11);
+                doc.setTextColor(50);
+                doc.setFont("helvetica", "italic");
+
+                const splitFeedback = doc.splitTextToSize('"' + feedback + '"', 150);
+                doc.text(splitFeedback, 30, y + 30);
+
+                // 5. FOOTER
+                doc.setFontSize(8);
+                doc.setTextColor(150);
+                doc.text("This document is a computer-generated report from the BBSYDP Learning Management System.", 105, 280, { align: "center" });
+                doc.text("BBSYDP v2.0 Enterprise Portal", 105, 285, { align: "center" });
+
+                doc.save(`GRADE_REPORT_${name.replace(/\s+/g, '_')}.pdf`);
+            } catch (err) {
+                console.error("PDF Error:", err);
+                showToast("Could not generate PDF. Please try again.");
+            }
         };
 
         function initChart() {
