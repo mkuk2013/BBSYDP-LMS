@@ -2504,15 +2504,20 @@
                                 <input type="text" id="user-search" placeholder="Search..."
                                     class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
                             </div>
-                            <div class="flex gap-2">
-                                <button onclick="window.approveAllUsers()"
-                                    class="px-4 py-2.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
-                                    <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approve All
-                                </button>
-                                <button onclick="downloadAllReports()"
-                                    class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
-                                    <i data-lucide="download" class="w-3 h-3"></i> Export All
-                                </button>
+                            <div class="flex items-center gap-4">
+                                <span id="total-student-count"
+                                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 hidden sm:block">0
+                                    Records</span>
+                                <div class="flex gap-2">
+                                    <button onclick="window.approveAllUsers()"
+                                        class="px-4 py-2.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
+                                        <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approve All
+                                    </button>
+                                    <button onclick="downloadAllReports()"
+                                        class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
+                                        <i data-lucide="download" class="w-3 h-3"></i> Export All
+                                    </button>
+                                </div>
                             </div>
                         </div>
                         <div class="overflow-x-auto">
@@ -5949,15 +5954,22 @@
             if (!comments) { renderComments([]); return; }
 
             // Filter Logic
+            // Filter Logic
             const filtered = comments.filter(c => {
                 let contentObj;
                 try {
                     contentObj = JSON.parse(c.content);
-                    // Check if it has our protocol structure
-                    if (!contentObj.sid && !contentObj.txt) throw new Error("Legacy");
+                    // Check if it has our protocol structure - if neither exists, it's legacy
+                    if (contentObj.sid === undefined && contentObj.txt === undefined) throw new Error("Legacy");
                 } catch (e) {
                     // Legacy or Plain Text
-                    contentObj = { txt: c.content, sid: c.user_id }; // Assume legacy std msg belongs to sender
+                    // If Admin sent it legacy, assume Broadcast (sid: null)
+                    // If Student sent it legacy, assume it belongs to them (sid: c.user_id)
+                    const isAdm = c.role === 'admin';
+                    contentObj = {
+                        txt: c.content,
+                        sid: isAdm ? null : c.user_id
+                    };
                 }
 
                 // Attach parsed obj to comment for render
@@ -5967,8 +5979,12 @@
 
                 // Student: See OWN messages OR Admin messages targeted at them OR General Admin Broadcasts
                 if (c.user_id === currentUser.id) return true; // My sent items
-                if (contentObj.sid === currentUser.id) return true; // Targeted at me
-                if (c.role === 'admin' && !contentObj.sid) return true; // General Admin Message (Broadcast)
+
+                // Targeted at me (Robust check)
+                if (contentObj.sid && String(contentObj.sid) === String(currentUser.id)) return true;
+
+                // General Admin Message (Broadcast) - i.e., no specific target
+                if (c.role === 'admin' && !contentObj.sid) return true;
 
                 return false;
             });
@@ -6717,7 +6733,7 @@
         };
 
         window.downloadAllReports = () => { showToast("Initiating batch export..."); /* Implement batch if needed */ };
-        $('#user-search').on('input', () => fetchUsers());
+        $('#user-search').on('input', () => { renderSkeleton('user-table-body', 8, 'list'); fetchUsers(); });
 
         // --- ADVANCED FEATURES: LEARNING LIBRARY ---
         window.learningResources = []; // Removed dummy data
@@ -8789,6 +8805,71 @@
                     if (hamburgerBtn) hamburgerBtn.classList.remove('opacity-0', 'pointer-events-none');
                 }
             }
+        };
+        // --- STUDENT COUNT LOGIC ---
+        const initStudentCounter = () => {
+            const countNode = document.getElementById('total-student-count');
+            const target = document.getElementById('user-table-body');
+
+            if (target && countNode) {
+                const observer = new MutationObserver(() => {
+                    const count = target.children.length;
+                    countNode.innerText = `${count} Records`;
+                });
+                observer.observe(target, { childList: true });
+                // Initial set
+                countNode.innerText = `${target.children.length} Records`;
+            }
+        };
+        $(document).ready(initStudentCounter);
+
+        // --- SKELETON UI SYSTEM ---
+        window.renderSkeleton = (containerId, count = 5, type = 'list') => {
+            const container = $(`#${containerId}`);
+            if (!container.length) return;
+
+            let html = '';
+            if (type === 'list') {
+                for (let i = 0; i < count; i++) {
+                    html += `
+                        <tr class="animate-pulse border-b border-slate-50 dark:border-slate-800">
+                            <td class="px-5 py-4"><div class="h-4 bg-slate-100 dark:bg-slate-700 rounded w-32"></div></td>
+                            <td class="px-5 py-4 hidden sm:table-cell"><div class="h-4 bg-slate-100 dark:bg-slate-700 rounded w-20 mx-auto"></div></td>
+                            <td class="px-5 py-4"><div class="h-4 bg-slate-100 dark:bg-slate-700 rounded w-24 mx-auto"></div></td>
+                            <td class="px-5 py-4"><div class="h-4 bg-slate-100 dark:bg-slate-700 rounded w-16 mx-auto"></div></td>
+                            <td class="px-5 py-4"><div class="h-5 bg-slate-100 dark:bg-slate-700 rounded-full w-20 mx-auto"></div></td>
+                            <td class="px-5 py-4"><div class="h-6 bg-slate-100 dark:bg-slate-700 rounded w-8 ml-auto"></div></td>
+                        </tr>`;
+                }
+            } else if (type === 'card') {
+                for (let i = 0; i < count; i++) {
+                    html += `
+                        <div class="p-5 rounded-xl border border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 animate-pulse">
+                            <div class="flex justify-between items-start mb-4">
+                                <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800"></div>
+                                <div class="w-16 h-5 rounded bg-slate-100 dark:bg-slate-800"></div>
+                            </div>
+                            <div class="h-4 w-3/4 mb-2 rounded bg-slate-100 dark:bg-slate-800"></div>
+                            <div class="h-3 w-1/2 mb-4 rounded bg-slate-100 dark:bg-slate-800"></div>
+                            <div class="h-8 w-full rounded-lg bg-slate-100 dark:bg-slate-800"></div>
+                        </div>`;
+                }
+            }
+            container.html(html);
+        };
+        // --- SKELETON INTERCEPTOR ---
+        const originalSwitchTab = window.switchTab;
+        window.switchTab = (tabName) => {
+            // Only show skeleton if we don't have data yet to ensure instant feel for cached/loaded data
+            if (tabName === 'tasks' && (!window.allTasks || window.allTasks.length === 0)) {
+                renderSkeleton('task-grid', 6, 'card');
+            }
+
+            if (tabName === 'users' && (!window.allUsersCache || window.allUsersCache.length === 0)) {
+                renderSkeleton('user-table-body', 8, 'list');
+            }
+
+            if (originalSwitchTab) originalSwitchTab(tabName);
         };
     </script>
     <!-- MOBILE BOTTOM NAVIGATION (Refined Design A: Centered Top Indicator + Glow + Fill) -->
