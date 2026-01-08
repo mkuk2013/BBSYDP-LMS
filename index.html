@@ -4676,12 +4676,23 @@
                 $('#stat-label-3').text("Pending Review"); $('#stat-score').text(pending);
                 $('#student-alerts').addClass('hidden');
 
-                // Intelligent Notification Logic:
-                const lastCount = parseInt(localStorage.getItem('last_pending_count') || '0');
-                if (pending > lastCount) {
+                // Intelligent Notification Logic (Watermark System):
+                const watermark = parseInt(localStorage.getItem('notification_watermark') || '0');
+                window.lastPendingCountVal = pending; // Store for markAllRead
+
+                // 1. Trigger: Only un-clear if we have MORE items than our watermark (suppressed count)
+                if (pending > watermark) {
                     localStorage.setItem('notifications_cleared', 'false');
                 }
-                localStorage.setItem('last_pending_count', pending);
+
+                // 2. Adaptation: If items are removed (graded), lower the watermark 
+                // so that incoming new items (even if total count is same as old watermark) trigger a notif.
+                if (pending < watermark) {
+                    localStorage.setItem('notification_watermark', pending);
+                }
+
+                // Legacy support cleanup
+                localStorage.removeItem('last_pending_count');
 
                 // Update Notification Badge
                 const badge = $('#notif-badge');
@@ -6987,6 +6998,10 @@
 
             // Persist the cleared state so it doesn't come back on refresh
             localStorage.setItem('notifications_cleared', 'true');
+
+            // Update Watermark to suppress current items
+            const currentCount = window.lastPendingCountVal || 0;
+            localStorage.setItem('notification_watermark', currentCount);
 
             // Close dropdown after short delay
             setTimeout(() => {
