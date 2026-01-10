@@ -5238,20 +5238,22 @@
             const students = Object.values(studentsDict).sort((a, b) => a.name.localeCompare(b.name));
 
             students.forEach(student => {
-                // Calculate Deduplicated Pending Count (Latest per unique task)
-                const pendingSet = new Set();
-                student.submissions
-                    .filter(s => s.status === 'submitted')
-                    .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
-                    .forEach(s => pendingSet.add(s.task_id));
-                const pendingCount = pendingSet.size;
-
-                // Calculate Deduplicated Graded Count
+                // 1. Identify Graded Tasks First
                 const gradedSet = new Set();
                 student.submissions
                     .filter(s => s.status === 'graded')
                     .forEach(s => gradedSet.add(s.task_id));
                 const gradedCount = gradedSet.size;
+
+                // 2. Calculate Pending (Excluding tasks that are already graded)
+                const pendingSet = new Set();
+                student.submissions
+                    .filter(s => s.status === 'submitted') // Only pending
+                    .filter(s => !gradedSet.has(s.task_id)) // CRITICAL: If graded, don't count as pending
+                    .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at))
+                    .forEach(s => pendingSet.add(s.task_id));
+
+                const pendingCount = pendingSet.size;
                 const accordionId = `grading-${student.id}`;
 
                 // Check if this card was previously open
@@ -5287,13 +5289,9 @@
                 const $list = $card.find(`#${accordionId}`);
 
                 // Add Submissions to the list
-                // Filter: Only show PENDING (Submitted but not graded)
-                // The user specifically asked to hide graded data from this section for cleanliness
-                // Filter: Only show PENDING (Submitted but not graded)
-                // The user specifically asked to hide graded data from this section for cleanliness
-                // AND to only show the LATEST submission if duplicates exist ("baki khatam ho jaye")
                 const rawPending = student.submissions
                     .filter(s => s.status !== 'graded')
+                    .filter(s => !gradedSet.has(s.task_id)) // Hide if already graded
                     .sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
 
                 const sortedSubs = [];
@@ -5305,13 +5303,10 @@
                     }
                 });
 
-                // If all submissions for a student are graded, we might show a empty state for that student or hide the card.
-                // For now, let's proceed. If sortedSubs is empty after filtering, we can check below.
-
                 // Add valid submissions
                 if (sortedSubs.length > 0) {
                     sortedSubs.forEach(s => {
-                        const isGraded = s.status === 'graded';
+                        const isGraded = s.status === 'graded'; // Should be false here due to filters, but kept for robustness
                         const subHtml = `
                              <div class="p-6 flex flex-col lg:flex-row gap-6 items-start ${isGraded ? 'opacity-70 hover:opacity-100 bg-slate-50 dark:bg-slate-900/20' : 'bg-white dark:bg-[#1e293b]'} transition-all">
                                 <div class="flex-1 w-full">
@@ -5347,10 +5342,7 @@
                                         </div>
                                         <textarea id="feedback-${s.id}" class="w-full p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-lg text-[10px] font-bold outline-none focus:ring-2 focus:ring-indigo-500 resize-none dark:text-slate-200" placeholder="Write feedback for student..." rows="2"></textarea>
                                     </div>
-                                    ` : `
-                                    <!-- Graded UI Hidden by Logic Above -->
-                                    <div class="hidden"></div> 
-                                    `}
+                                    ` : ''}
                                 </div>
                              </div>
                              `;
@@ -5358,9 +5350,6 @@
                     });
 
                     container.append($card);
-                } else {
-                    // Option 1: Don't show card if no pending work
-                    // Option 2: Show "All Clear" - User preferred cleanliness so we SKIP
                 }
             });
             lucide.createIcons();
@@ -6492,16 +6481,77 @@
         window.submitGrade = async (sid) => {
             const g = $(`#grade-${sid}`).val();
             const f = $(`#feedback-${sid}`).val();
-            if (g) {
-                if (!client) { showToast("Offline: Cannot submit grade."); return; }
-                const { data: { session } } = await client.auth.getSession();
-                $.ajax({
-                    url: `${SUPABASE_URL}/rest/v1/submissions?id=eq.${sid}`,
-                    type: 'PATCH',
-                    headers: { 'apikey': SUPABASE_KEY, 'Authorization': `Bearer ${session.access_token}`, 'Content-Type': 'application/json' },
-                    data: JSON.stringify({ grade: parseInt(g), feedback: f, status: 'graded' }),
-                    success: () => { fetchData(); showToast("Grade saved successfully."); }
-                });
+
+            if (!g) {
+                showToast("Please enter a grade (0-100).");
+                return;
+            }
+
+            if (!client) {
+                showToast("Offline: Cannot submit grade.");
+                return;
+            }
+
+            try {
+                // 1. Get the submission details first to identify Student & Task
+                const { data: currentSub, error: fetchError } = await client
+                    .from('submissions')
+                    .select('student_id, task_id')
+                    .eq('id', sid)
+                    .single();
+
+                if (fetchError) throw new Error("Could not find submission details.");
+
+                // 2. Submit the Grade for THIS submission
+                const { error: updateError } = await client
+                    .from('submissions')
+                    .update({
+                        grade: parseInt(g),
+                        feedback: f,
+                        status: 'graded'
+                    })
+                    .eq('id', sid);
+
+                if (updateError) throw updateError;
+
+                // 3. NUCLEAR CLEANUP: Delete ALL other submissions for this task & student
+                const { error: deleteError } = await client
+                    .from('submissions')
+                    .delete()
+                    .eq('student_id', currentSub.student_id)
+                    .eq('task_id', currentSub.task_id)
+                    .neq('id', sid);
+
+                if (deleteError) console.warn("Cleanup warning:", deleteError);
+
+                // 4. INSTANT LOCAL UPDATE
+                // We manually prune the pending/duplicate items from the local cache immediately.
+                if (window.allSubmissions) {
+                    window.allSubmissions = window.allSubmissions.filter(s => {
+                        // Keep if ID matches current (graded)
+                        if (String(s.id) === String(sid)) {
+                            s.status = 'graded';
+                            s.grade = parseInt(g);
+                            s.feedback = f;
+                            return true;
+                        }
+                        // Discard if same user+task but different ID
+                        if (s.student_id === currentSub.student_id && String(s.task_id) === String(currentSub.task_id)) {
+                            return false;
+                        }
+                        // Keep everything else
+                        return true;
+                    });
+                    // Refresh view immediately with clean data
+                    window.renderGrading(window.allSubmissions);
+                }
+
+                showToast("Grade saved. Previous versions discarded.");
+                fetchData(); // Background sync
+
+            } catch (err) {
+                console.error("Grading Error:", err);
+                showToast("Error: " + err.message);
             }
         };
         window.downloadReport = () => {
