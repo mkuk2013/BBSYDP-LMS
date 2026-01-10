@@ -4811,13 +4811,11 @@
                 const isExpired = t.deadline ? (new Date().getTime() > new Date(t.deadline).getTime()) : false;
 
                 if (userProfile.role === 'admin') {
-                    // --- ADMIN VIEW ---
+                    // --- ADMIN VIEW (Simplified) ---
                     // Calculate stats for this task (DEDUPLICATED)
-                    // We must count unique students who submitted this task
                     const uniqueTaskSubsMap = new Map();
                     subs.filter(s => s.task_id === t.id).forEach(s => {
                         const existing = uniqueTaskSubsMap.get(s.student_id);
-                        // Keep NEWER submission for this student
                         if (!existing || new Date(s.submitted_at) > new Date(existing.submitted_at)) {
                             uniqueTaskSubsMap.set(s.student_id, s);
                         }
@@ -4841,8 +4839,8 @@
                                 </div>
                             </div>
                             
-                            <h4 class="font-black text-lg text-slate-900 dark:text-slate-200 mb-2 uppercase tracking-tighter leading-none relative z-10 pr-8">${t.title}</h4>
-                            <p class="text-[9px] text-slate-500 dark:text-slate-400 line-clamp-2 mb-6 font-medium leading-relaxed tracking-tight uppercase relative z-10">${t.description}</p>
+                            <h4 class="font-black text-lg text-slate-900 dark:text-slate-200 mb-2 uppercase tracking-tighter leading-none relative z-10 pr-8 line-clamp-1">${(t.title || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</h4>
+                            <p class="text-[9px] text-slate-500 dark:text-slate-400 line-clamp-1 mb-4 font-medium leading-relaxed tracking-tight uppercase relative z-10">${(t.description || '').replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                             
                             <!-- Admin Stats Grid -->
                             <div class="grid grid-cols-3 gap-2 mb-6 relative z-10">
@@ -4873,7 +4871,7 @@
                             </div>
                         </div>`;
                 } else {
-                    // --- STUDENT VIEW (Original Logic) ---
+                    // --- STUDENT VIEW (Simplified for "Details Kam Dikhao") ---
                     const sub = subs.find(s => s.student_id === currentUser?.id && s.task_id === t.id);
                     let badgeClass = sub ? (sub.status === 'graded' ? 'bg-emerald-500 text-white shadow-emerald-500/20' : 'bg-cyan-500 text-white shadow-cyan-500/20') : (isExpired ? 'bg-rose-500 text-white shadow-rose-500/20' : 'bg-indigo-600 text-white shadow-indigo-500/20');
                     let badgeText = sub ? (sub.status === 'graded' ? `SCORE: ${sub.grade}%` : 'SUBMITTED') : (isExpired ? 'EXPIRED' : 'ACTIVE');
@@ -4886,20 +4884,12 @@
                                     <i data-lucide="calendar" class="w-2.5 h-2.5 text-indigo-500"></i> ${t.deadline ? new Date(t.deadline).toLocaleDateString() : 'No Deadline'}
                                 </div>
                             </div>
-                            <h4 class="font-black text-lg text-slate-900 dark:text-indigo-400 mb-2 group-hover:text-indigo-500 transition-colors uppercase tracking-tighter leading-none break-words">${t.title}</h4>
-                            <p class="text-[9px] text-slate-500 dark:text-slate-400 mb-4 font-medium leading-relaxed tracking-tight whitespace-pre-line break-words w-full">${(t.description || '').split('<br><strong>Reference Asset:')[0].replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
+                            <h4 class="font-black text-lg text-slate-900 dark:text-indigo-400 mb-2 group-hover:text-indigo-500 transition-colors uppercase tracking-tighter leading-none break-words line-clamp-1">${t.title}</h4>
+                            <p class="text-[9px] text-slate-500 dark:text-slate-400 mb-4 font-medium leading-relaxed tracking-tight line-clamp-2 w-full h-8 overflow-hidden">${(t.description || '').split('<br><strong>Reference Asset:')[0].replace(/</g, '&lt;').replace(/>/g, '&gt;')}</p>
                             
-                            <!-- Tags Rendering -->
-                            <div class="flex flex-wrap gap-1 mb-4">
-                                ${((t.tags && (Array.isArray(t.tags) ? t.tags : (typeof t.tags === 'string' ? t.tags.split(',') : []))) || []).map(tag =>
-                        `<span class="px-2 py-1 rounded-md bg-slate-100 dark:bg-slate-800 text-[8px] font-black text-slate-500 dark:text-slate-400 uppercase tracking-widest border border-slate-200 dark:border-slate-700">${tag.trim()}</span>`
-                    ).join('')}
-                            </div>
+                            <!-- Simplified: Tags & Reference Indicator Hidden in List View for cleaner Look -->
 
-                            <!-- Reference Asset Indicator -->
-                            ${(t.reference_url || t.reference_file) ? `<p class="text-[8px] font-black uppercase tracking-widest text-slate-400 mb-4">Reference Asset: <span class="text-indigo-500">View Attachment</span></p>` : ''}
-
-                            <div class="w-full h-1.5 bg-slate-100 dark:bg-[#0b1120] rounded-full overflow-hidden shadow-inner flex items-center px-0.5">
+                            <div class="w-full h-1.5 bg-slate-100 dark:bg-[#0b1120] rounded-full overflow-hidden shadow-inner flex items-center px-0.5 mt-auto">
                                 <div class="h-1 bg-gradient-to-r from-indigo-500 to-cyan-400 rounded-full transition-all duration-[1.5s]" style="width: ${sub ? '100%' : '30%'}"></div>
                             </div>
                         </div>`;
