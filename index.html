@@ -6552,7 +6552,7 @@
 
                 // DATA
                 const title = (window.currentTask && window.currentTask.title) || "Unknown Task";
-                const name = (window.userProfile && window.userProfile.name) || "Student";
+                const name = (window.currentSub && window.currentSub.student_name) || (window.userProfile && window.userProfile.name) || "Student";
                 const grade = (window.currentSub && window.currentSub.grade) || 0;
                 const feedback = (window.currentSub && window.currentSub.feedback) || "No additional feedback provided.";
                 const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
