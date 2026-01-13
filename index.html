@@ -4217,6 +4217,57 @@
             }
         };
 
+        window.checkAndShowEncouragement = () => {
+            const tasks = window.allTasks || [];
+            const subs = window.allSubmissions || [];
+            if (!tasks.length) return;
+
+            // Only for students
+            if (!userProfile || userProfile.role !== 'student') return;
+
+            const mySubs = subs.filter(s => s.student_id === currentUser.id);
+            const total = tasks.length;
+            const completed = mySubs.filter(s => s.status === 'graded').length;
+            const progressPct = total ? Math.round((completed / total) * 100) : 0;
+            const gradedSubs = mySubs.filter(s => s.status === 'graded');
+            const avgScore = gradedSubs.length ? gradedSubs.reduce((a, b) => a + (parseInt(b.grade) || 0), 0) / gradedSubs.length : 0;
+
+            // Session check to avoid spam
+            if (sessionStorage.getItem('encouragementShown')) return;
+
+            let msg = "";
+            let type = "success";
+
+            // Progressive encouragement logic
+            if (progressPct >= 80) {
+                msg = `Outstanding! You've completed ${progressPct}% of the course. You are unstoppable!`;
+            } else if (progressPct >= 50) {
+                msg = `Halfway There! You've completed ${progressPct}% of your tasks. Great momentum!`;
+            } else if (avgScore >= 90) {
+                msg = `High Performer Alert! Your average score is ${Math.round(avgScore)}%. Excellent work!`;
+            } else if (completed >= 3) {
+                msg = "Good Start! You're making steady progress. Keep going!";
+                type = "info";
+            }
+
+            if (msg) {
+                // Show a nice toast notification
+                // Using existing showToast function
+                if (typeof showToast === 'function') {
+                    showToast(msg, type);
+                } else {
+                    console.log("Encouragement:", msg);
+                }
+
+                // If it's a big achievement, throw confetti
+                if ((progressPct >= 80 || avgScore >= 90) && typeof confetti === 'function') {
+                    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+                }
+
+                sessionStorage.setItem('encouragementShown', 'true');
+            }
+        };
+
         function initDashboard() {
             // OPTIMIZATION: Render "shell" and cached content IMMEDIATELY before hiding loader
 
@@ -4400,6 +4451,13 @@
                     `);
                 });
                 lucide.createIcons();
+            }
+
+            // Check and show encouragement notification for students
+            if (userProfile && userProfile.role === 'student') {
+                setTimeout(() => {
+                    checkAndShowEncouragement();
+                }, 1500); // Show after dashboard loads
             }
         }
 
@@ -6775,6 +6833,103 @@
         window.downloadAllReports = () => { showToast("Initiating batch export..."); /* Implement batch if needed */ };
         $('#user-search').on('input', () => { renderSkeleton('user-table-body', 8, 'list'); fetchUsers(); });
 
+        // --- STUDENT PROGRESS ENCOURAGEMENT SYSTEM ---
+        window.checkAndShowEncouragement = async () => {
+            // Only for students, not admins
+            if (!currentUser || !userProfile || userProfile.role !== 'student') return;
+
+            // Check if already shown today
+            const today = new Date().toDateString();
+            const lastShown = localStorage.getItem('encouragement_shown_date');
+            if (lastShown === today) return; // Already shown today
+
+            // Calculate student progress
+            const submissions = (window.allSubmissions || []).filter(s => s.student_id === currentUser.id);
+            const gradedSubmissions = submissions.filter(s => s.status === 'graded');
+            const totalTasks = window.allTasks ? window.allTasks.length : 0;
+            const completionRate = totalTasks > 0 ? (gradedSubmissions.length / totalTasks) * 100 : 0;
+
+            // Calculate average grade
+            const avgGrade = gradedSubmissions.length > 0
+                ? (gradedSubmissions.reduce((sum, s) => sum + (s.grade || 0), 0) / gradedSubmissions.length)
+                : 0;
+
+            // Store progress for dashboard display
+            window.studentProgress = {
+                completionRate: Math.round(completionRate),
+                avgGrade: Math.round(avgGrade * 10) / 10,
+                submissionsCount: gradedSubmissions.length,
+                totalTasks: totalTasks
+            };
+
+            // Determine encouragement level and message
+            let message = '';
+            let icon = '🎉';
+            let level = 'good';
+
+            // Determine encouragement based on metrics
+            if (avgGrade >= 85 && completionRate >= 80) {
+                message = `🌟 Excellent Progress! You're crushing it! Average Grade: ${avgGrade.toFixed(1)}% | Completed: ${gradedSubmissions.length}/${totalTasks}`;
+                level = 'excellent';
+            } else if (avgGrade >= 75 && completionRate >= 60) {
+                message = `🚀 Great Work! You're doing amazing! Keep it up! Average Grade: ${avgGrade.toFixed(1)}% | ${gradedSubmissions.length} tasks completed`;
+                level = 'great';
+            } else if (avgGrade >= 60 || completionRate >= 40) {
+                message = `💪 Good Progress! You're on the right track. Keep pushing! ${Math.round(completionRate)}% tasks completed`;
+                level = 'good';
+            } else if (gradedSubmissions.length > 0) {
+                message = `📚 Get Started! Complete more tasks to see your progress grow!`;
+                level = 'start';
+            } else {
+                return; // No progress yet, no encouragement needed
+            }
+
+            // Mark as shown today
+            localStorage.setItem('encouragement_shown_date', today);
+
+            // Show encouragement notification
+            setTimeout(() => {
+                showEncouragementNotification(message, level);
+            }, 1000);
+        };
+
+        window.showEncouragementNotification = (message, level = 'good') => {
+            // Create notification element
+            const notifId = 'encouragement-' + Date.now();
+            const bgColor = level === 'excellent' ? 'bg-gradient-to-r from-amber-400 to-orange-400' :
+                level === 'great' ? 'bg-gradient-to-r from-green-400 to-emerald-400' :
+                    level === 'start' ? 'bg-gradient-to-r from-blue-400 to-cyan-400' :
+                        'bg-gradient-to-r from-indigo-400 to-purple-400';
+
+            const textColor = level === 'excellent' || level === 'great' ? 'text-white' : 'text-white';
+
+            // Notification container
+            let container = $('#encouragement-container');
+            if (container.length === 0) {
+                container = $('<div id="encouragement-container" class="fixed top-6 right-6 z-[8000] space-y-3"></div>');
+                $('body').append(container);
+            }
+
+            const $notif = $(`
+                <div id="${notifId}" class="${bgColor} ${textColor} rounded-lg shadow-xl px-6 py-4 animate-in slide-in-from-right-5 fade-in duration-300 flex items-center gap-3 max-w-md">
+                    <div class="flex-1 font-semibold text-sm md:text-base">${message}</div>
+                    <button onclick="$('#${notifId}').fadeOut(300, function() { $(this).remove(); })" class="text-white hover:opacity-80">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <line x1="18" y1="6" x2="6" y2="18"></line>
+                            <line x1="6" y1="6" x2="18" y2="18"></line>
+                        </svg>
+                    </button>
+                </div>
+            `);
+
+            container.append($notif);
+
+            // Auto-remove after 6 seconds
+            setTimeout(() => {
+                $notif.fadeOut(300, function () { $(this).remove(); });
+            }, 6000);
+        };
+
         // --- ADVANCED FEATURES: LEARNING LIBRARY ---
         window.learningResources = []; // Removed dummy data
 
@@ -8465,6 +8620,13 @@
             }
 
             // 8. Specific Initializations
+
+            if (tabId === 'dashboard' && userProfile && userProfile.role === 'student') {
+                // Show encouragement when opening dashboard
+                setTimeout(() => {
+                    checkAndShowEncouragement();
+                }, 500);
+            }
 
             if (tabId === 'resources') {
                 if (window.fetchResources) window.fetchResources();
