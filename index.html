@@ -4500,32 +4500,30 @@
             lucide.createIcons();
 
             try {
-                // Force sign out with a timeout race to prevent hanging
-                await Promise.race([
-                    client.auth.signOut(),
-                    new Promise(resolve => setTimeout(resolve, 1500))
-                ]);
+                // No race condition - await completion
+                await client.auth.signOut();
             } catch (err) {
-                console.warn("Logout network warning:", err);
-            }
-            finally {
-                // SELECTIVE CLEAR: Don't wipe 'global_arcade_unlock' or preferences
+                console.warn("Logout error:", err);
+            } finally {
+                // Explicitly clear Supabase tokens
+                Object.keys(localStorage).forEach(key => {
+                    if (key.startsWith('sb-') && key.endsWith('-auth-token')) {
+                        localStorage.removeItem(key);
+                    }
+                });
+
+                // Clear app-specific caches
                 localStorage.removeItem('supabase_profile_cache');
                 localStorage.removeItem('cached_tasks');
                 localStorage.removeItem('cached_subs');
 
-                // Clear Supabase tokens specifically if possible, but signOut does most of it.
-                // We Avoid localStorage.clear() to keep 'global_arcade_unlock' and 'last_auth_tab' intact.
-
-                // Nuclear option to ensure no auth tokens remain
+                // Clear cookies
                 document.cookie.split(";").forEach((c) => {
                     document.cookie = c.replace(/^ +/, "").replace(/=.*/, "=;expires=" + new Date().toUTCString() + ";path=/");
                 });
 
-                // Small delay to let the animation be seen if it was super fast
-                setTimeout(() => {
-                    window.location.reload();
-                }, 800);
+                // Immediate reload without arbitrary delay
+                window.location.reload();
             }
         };
 
