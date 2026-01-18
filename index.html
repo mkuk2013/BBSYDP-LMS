@@ -48,6 +48,7 @@
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="signature.js"></script>
 
     <style>
@@ -6640,6 +6641,24 @@
                 showToast("Error: " + err.message);
             }
         };
+        // Helper to remove emojis and clean text
+        window.stripEmojis = (str) => {
+            if (!str) return "";
+            try {
+                // Decode HTML entities (e.g. &amp;, &nbsp;)
+                const txt = document.createElement("textarea");
+                txt.innerHTML = str;
+                str = txt.value;
+            } catch (e) { /* ignore DOM errors */ }
+
+            // 1. Remove HTML tags (if any)
+            str = str.replace(/<[^>]*>/g, ' ');
+            // 2. Remove Emojis (Ranges: Surrogate pairs, dingbats, transport, enclosed, etc.)
+            return str.replace(/([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/g, '')
+                .replace(/\uFE0F/g, '') // Remove variation selectors
+                .trim();
+        };
+
         window.downloadReport = () => {
             try {
                 if (!window.jspdf) throw new Error("PDF Library loading...");
@@ -6650,7 +6669,11 @@
                 const title = (window.currentTask && window.currentTask.title) || "Unknown Task";
                 const name = (window.currentSub && window.currentSub.student_name) || (window.userProfile && window.userProfile.name) || "Student";
                 const grade = (window.currentSub && window.currentSub.grade) || 0;
-                const feedback = (window.currentSub && window.currentSub.feedback) || "No additional feedback provided.";
+                let feedback = (window.currentSub && window.currentSub.feedback) || "No additional feedback provided.";
+
+                // 1. STRIP EMOJIS to prevent garbage text
+                feedback = window.stripEmojis(feedback);
+
                 const date = new Date().toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' });
                 const logoUrl = "assets/bbsydp_logo.png"; // Ensure this path is correct or base64
 
@@ -6757,7 +6780,7 @@
                 doc.text(`${grade}%`, 170, y + 10, { align: "right" });
 
 
-                // 4. FEEDBACK SECTION
+                // 4. FEEDBACK SECTION WITH PAGINATION
                 y += 35;
                 doc.setFontSize(11);
                 doc.setTextColor(30, 41, 59);
@@ -6771,17 +6794,57 @@
                 doc.setFontSize(10);
                 doc.setTextColor(71, 85, 105); // Slate 600
                 doc.setFont("helvetica", "italic");
+
+                // SPLIT TEXT
                 const splitText = doc.splitTextToSize(feedback, 170);
-                doc.text(splitText, 20, y);
 
-
-                // 5. FOOTER & STAMP
+                // RENDER LOOP
                 const pageHeight = doc.internal.pageSize.height;
+                const footerHeight = 60; // Space needed for footer
+
+                for (let i = 0; i < splitText.length; i++) {
+                    // Check bounds (leaving space for footer)
+                    if (y > pageHeight - footerHeight - 10) {
+                        doc.addPage();
+                        y = 40; // Reset Y to top margin
+                        // Add Header to new page (Optional, minimalist)
+                        doc.setFontSize(8);
+                        doc.setTextColor(150);
+                        doc.text(`Official Transcript - ${name} - Page ${doc.internal.getNumberOfPages()}`, 20, 20);
+
+                        // Restore Font for body
+                        doc.setFont("helvetica", "italic");
+                        doc.setFontSize(10);
+                        doc.setTextColor(71, 85, 105);
+                    }
+
+                    doc.text(splitText[i], 20, y);
+                    y += 5; // Line spacing
+                }
+
+
+                // 5. FOOTER & STAMP (Ensure it's on bottom)
+
+                // If Current Y overlaps footer area, add page
+                if (y > pageHeight - footerHeight) {
+                    doc.addPage();
+                }
 
                 // Certification Stamp Area
                 doc.setDrawColor(203, 213, 225);
                 doc.setLineWidth(1);
                 doc.rect(140, pageHeight - 60, 50, 25);
+
+                // --- ADDED SIGNATURE LOGIC ---
+                if (window.adminSignature) {
+                    try {
+                        doc.addImage(window.adminSignature, "PNG", 145, pageHeight - 58, 40, 20);
+                    } catch (e) {
+                        console.warn("Signature add failed", e);
+                    }
+                }
+                // -----------------------------
+
                 doc.setFontSize(8);
                 doc.setTextColor(148, 163, 184);
                 doc.text("Authorized Signature", 165, pageHeight - 40, { align: "center" });
@@ -6792,7 +6855,8 @@
                 doc.text("This document is valid without a physical signature.", 105, pageHeight - 15, { align: "center" });
                 doc.text("Generated via BBSYDP LMS v2.0", 105, pageHeight - 10, { align: "center" });
 
-                doc.save(`Transcript_${name.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+                doc.save(`BBSYDP_Report_${name.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+
             } catch (err) {
                 console.error("PDF Error:", err);
                 showToast("Could not generate PDF. Please try again.");
@@ -6888,8 +6952,9 @@
             setTimeout(() => toast.fadeOut(() => toast.remove()), 3000);
         }
 
-        window.generateResult = (uid, name, count, avg) => {
+        window.generateResult = async (uid, name, count, avg) => {
             const doc = new jsPDF();
+            showToast("Generating PDF with Emojis... Please wait.");
 
             // --- CONSTANTS & CONFIG ---
             const primaryColor = [79, 70, 229]; // Indigo 600
@@ -6977,13 +7042,83 @@
             doc.setFont("helvetica", "normal");
             doc.text(name, margin + 25, y);
 
-            // Prepare Table Data (moved here to share scope)
-            const data = studentSubs.map(s => [
-                (s.task_title || "Unknown Task").replace(/[^\x20-\x7E]/g, "").trim(),
-                new Date(s.submitted_at).toLocaleDateString(),
-                `${s.grade}%`,
-                s.feedback || "No feedback provided"
-            ]);
+            // HELPER TO RENDER TEXT TO IMAGE
+            const textToImage = async (text) => {
+                const div = document.createElement('div');
+                div.style.position = 'absolute';
+                div.style.left = '-9999px';
+                div.style.top = '0';
+                // 70mm PDF column ~= 265px. Using 260px for fit.
+                div.style.left = '-9999px';
+                div.style.top = '0';
+                // 70mm PDF column ~= 265px. Using 260px for fit.
+                div.style.width = '260px'; // Increased width for larger column
+                div.style.fontSize = '13px'; // Match PDF font size (10pt ~= 13.33px)
+                div.style.fontFamily = 'helvetica, sans-serif';
+                div.style.fontStyle = 'italic'; // Match autoTable style
+                // Add padding to ensure descenders (g,y,j) and tall emojis aren't cut off
+                div.style.padding = '4px';
+                div.style.paddingBottom = '10px'; // Extra bottom padding for safety
+                div.style.color = '#64748b'; // Slate 500 (Matches [100, 116, 139])
+                div.style.backgroundColor = 'transparent';
+                div.style.lineHeight = '1.2'; // Tighter line height for table
+                div.style.wordWrap = 'break-word';
+                div.style.whiteSpace = 'pre-wrap'; // Preserve newlines and ensure wrapping
+                div.textContent = text; // Safer than innerHTML, handles special chars
+                document.body.appendChild(div);
+
+                try {
+                    // Get natural height before rendering
+                    const height = div.offsetHeight;
+                    const width = div.offsetWidth;
+
+                    // Scale 4 for High DPI
+                    const canvas = await html2canvas(div, { scale: 4, backgroundColor: null });
+                    document.body.removeChild(div);
+                    return {
+                        dataUrl: canvas.toDataURL('image/png'),
+                        width: width,
+                        height: height,
+                        aspectRatio: width / height
+                    };
+                } catch (e) {
+                    console.error("Canvas Error", e);
+                    document.body.removeChild(div);
+                    return null;
+                }
+            };
+
+            // PREPARE DATA - Process Emojis Asynchronously
+            const data = [];
+            const emojiRegex = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/;
+
+            for (const s of studentSubs) {
+                let feedback = s.feedback || "No feedback provided";
+                let feedbackData = null;
+                let isImage = false;
+
+                // Check for Emojis
+                if (emojiRegex.test(feedback)) {
+                    console.log("Rendering emoji feedback for:", s.task_title);
+                    const result = await textToImage(feedback);
+                    if (result) {
+                        feedbackData = result;
+                        isImage = true;
+                    }
+                }
+
+                data.push([
+                    (s.task_title || "Unknown Task").replace(/[^\x20-\x7E]/g, "").trim(),
+                    new Date(s.submitted_at).toLocaleDateString(),
+                    `${s.grade}%`,
+                    {
+                        content: isImage ? "" : feedback,
+                        isImage: isImage,
+                        imageData: feedbackData
+                    }
+                ]);
+            }
+
 
             doc.setFont("helvetica", "bold");
             doc.text("Student ID:", pageWidth / 2, y);
@@ -7019,11 +7154,58 @@
             y += 40;
 
 
+            // RE-MAPPING DATA FOR AUTOTABLE COMPATIBILITY
+            const cellBody = data.map(row => {
+                const meta = row[3];
+
+                // Calculate Required Height in PDF Units (mm)
+                // Column width is 60mm.
+                let customStyles = {};
+                if (meta.isImage && meta.imageData) {
+                    // Aspect Ratio = w / h
+                    // PDF Height = PDF Width / Aspect Ratio
+                    const pdfColWidth = 70; // Updated to 70mm
+                    // Add buffer for padding
+                    // NOTE: Drawing area is width - 4mm (padding). Use that for height calc.
+                    const effectiveWidth = pdfColWidth - 4;
+                    const pdfImgHeight = (effectiveWidth / meta.imageData.aspectRatio);
+
+                    // Set minCellHeight slightly larger than image to allow vertical centering buffer
+                    customStyles = { minCellHeight: pdfImgHeight + 6 };
+                }
+
+                return [
+                    row[0], // Title
+                    row[1], // Date
+                    row[2], // Grade
+                    {
+                        content: meta.content,
+                        styles: customStyles,
+                        custom: meta // Store full metadata
+                    }
+                ];
+            });
+
+            // FOOTER HELPERS
+            const addFooter = () => {
+                doc.setFontSize(8);
+                doc.setTextColor(180);
+                doc.setFont("helvetica", "normal");
+                // Footer always at bottom of the page
+                doc.text("This report is digitally signed and officially verified by Program Instructor.", pageWidth / 2, pageHeight - 15, { align: "center" });
+                doc.text("BBSYDP Learning Management System v2.0", pageWidth / 2, pageHeight - 10, { align: "center" });
+            };
+
+            // Re-run autoTable with correct body
             doc.autoTable({
                 startY: y,
                 head: [['Task Title', 'Submission Date', 'Grade', 'Instructor Feedback']],
-                body: data,
+                body: cellBody,
                 theme: 'grid',
+                // Explicitly align table with document margins (20mm) and ensure bottom space for footer
+                margin: { left: 20, bottom: 30 },
+                // Prevent rows from splitting across pages - move whole row to next page if needed
+                rowPageBreak: 'avoid',
                 headStyles: {
                     fillColor: primaryColor,
                     textColor: [255, 255, 255],
@@ -7034,26 +7216,55 @@
                 bodyStyles: {
                     textColor: [51, 65, 85],
                     fontSize: 10,
-                    cellPadding: 5
+                    cellPadding: 5,
+                    valign: 'middle',
                 },
                 alternateRowStyles: {
                     fillColor: [241, 245, 249]
                 },
                 columnStyles: {
-                    0: { cellWidth: 60, fontStyle: 'bold' },
-                    2: { halign: 'center', fontStyle: 'bold', textColor: [79, 70, 229] }, // Grade column
-                    3: { fontStyle: 'italic', textColor: [100, 116, 139] }
+                    0: { cellWidth: 50, fontStyle: 'bold' },
+                    1: { cellWidth: 30 },
+                    2: { cellWidth: 20, halign: 'center', fontStyle: 'bold', textColor: [79, 70, 229] },
+                    3: { cellWidth: 70, fontStyle: 'italic', textColor: [100, 116, 139] }
                 },
                 didParseCell: function (data) {
                     if (data.section === 'body' && data.column.index === 2) {
                         const grade = parseInt(data.cell.raw);
-                        if (grade < 50) data.cell.styles.textColor = [225, 29, 72]; // Red fail
+                        if (grade < 50) data.cell.styles.textColor = [225, 29, 72];
                     }
+                },
+                didDrawCell: function (data) {
+                    if (data.section === 'body' && data.column.index === 3) {
+                        const cell = data.cell;
+                        const raw = cell.raw;
+                        if (raw && raw.custom && raw.custom.isImage) {
+                            const imgMeta = raw.custom.imageData;
+                            const pad = 2;
+                            const availWidth = cell.width - (pad * 2);
+                            const drawHeight = availWidth / imgMeta.aspectRatio;
+                            const yPos = cell.y + (cell.height - drawHeight) / 2;
+                            doc.addImage(imgMeta.dataUrl, 'PNG', cell.x + pad, yPos, availWidth, drawHeight);
+                        }
+                    }
+                },
+                // Add Footer to every table page
+                didDrawPage: function (data) {
+                    addFooter();
                 }
             });
 
-            // --- FOOTER ---
-            const finalY = doc.previousAutoTable.finalY + 20;
+
+            // --- FOOTER PROTECTION ---
+            let finalY = doc.previousAutoTable.finalY + 20;
+            const signatureHeight = 40;
+
+            // Check if footer fits
+            if (finalY + signatureHeight > pageHeight - 10) {
+                doc.addPage();
+                addFooter(); // Add footer to the new page
+                finalY = 40; // Reset to top
+            }
 
             // Signature Line
             doc.setDrawColor(150);
@@ -7064,11 +7275,8 @@
             doc.setTextColor(150);
 
             if (window.adminSignature) {
-                // Adjust Y to place signature ON/ABOVE the line
-                // The image provided is likely a signature, we position it nicely.
                 try {
                     doc.addImage(window.adminSignature, "PNG", pageWidth - margin - 45, finalY - 5, 40, 20);
-                    // Add text below line
                     doc.text("Authorized Signature", pageWidth - margin - 25, finalY + 20, { align: "center" });
                 } catch (e) {
                     console.error("Sig Error", e);
@@ -7078,13 +7286,7 @@
                 doc.text("Authorized Signature", pageWidth - margin - 25, finalY + 20, { align: "center" });
             }
 
-            // Disclaimer
-            doc.setFontSize(8);
-            doc.setTextColor(180);
-            doc.text("This report is digitally signed and officially verified by Program Instructor.", pageWidth / 2, pageHeight - 15, { align: "center" });
-            doc.text("BBSYDP Learning Management System v2.0", pageWidth / 2, pageHeight - 10, { align: "center" });
-
-            doc.save(`Performance_Report_${name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save(`BBSYDP_Performance_Report_${name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
         };
 
         window.downloadAllReports = () => { showToast("Initiating batch export..."); /* Implement batch if needed */ };
