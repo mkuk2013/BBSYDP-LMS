@@ -7043,18 +7043,15 @@
             doc.text(name, margin + 25, y);
 
             // HELPER TO RENDER TEXT TO IMAGE
-            const textToImage = async (text) => {
+            const textToImage = async (text, customWidth = '260px') => {
                 const div = document.createElement('div');
                 div.style.position = 'absolute';
                 div.style.left = '-9999px';
                 div.style.top = '0';
-                // 70mm PDF column ~= 265px. Using 260px for fit.
-                div.style.left = '-9999px';
-                div.style.top = '0';
-                // 70mm PDF column ~= 265px. Using 260px for fit.
-                div.style.width = '260px'; // Increased width for larger column
+                div.style.width = customWidth; // Dynamic width
                 div.style.fontSize = '13px'; // Match PDF font size (10pt ~= 13.33px)
-                div.style.fontFamily = 'helvetica, sans-serif';
+                // Ensure Emojis render correctly on Windows/Mac/Mobile
+                div.style.fontFamily = '"Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", "Segoe UI Symbol", "Android Emoji", "EmojiSymbols", helvetica, sans-serif';
                 div.style.fontStyle = 'italic'; // Match autoTable style
                 // Add padding to ensure descenders (g,y,j) and tall emojis aren't cut off
                 div.style.padding = '4px';
@@ -7090,7 +7087,11 @@
 
             // PREPARE DATA - Process Emojis Asynchronously
             const data = [];
-            const emojiRegex = /([\u2700-\u27BF]|[\uE000-\uF8FF]|\uD83C[\uDC00-\uDFFF]|\uD83D[\uDC00-\uDFFF]|[\u2011-\u26FF]|\uD83E[\uDD10-\uDDFF])/;
+            // Broader Regex for Emojis
+            const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/u;
+            // Also render standard text via Image if it contains symbols/emojis that jsPDF misses
+            // Or just ALWAYS render via image for consistency if it's the remark column?
+            // For now, keep conditional to save performance, but the Remarks section will force use it.
 
             for (const s of studentSubs) {
                 let feedback = s.feedback || "No feedback provided";
@@ -7100,7 +7101,7 @@
                 // Check for Emojis
                 if (emojiRegex.test(feedback)) {
                     console.log("Rendering emoji feedback for:", s.task_title);
-                    const result = await textToImage(feedback);
+                    const result = await textToImage(feedback); // Default width 260px
                     if (result) {
                         feedbackData = result;
                         isImage = true;
@@ -7255,8 +7256,72 @@
             });
 
 
+            // --- INSTRUCTOR REMARKS SECTION ---
+            const getMotivationalRemark = (average) => {
+                if (average >= 90) return "Outstanding Performance! 🌟 Your dedication and consistent hard work are truly commendable. You have demonstrated exceptional mastery of the concepts. Keep aiming for the stars!";
+                if (average >= 80) return "Excellent Work! 🚀 You are showing great consistency and understanding. Your effort is clearly visible in your results. Keep up the fantastic momentum!";
+                if (average >= 70) return "Good Progress! 👍 You have a solid grasp of the material. With a little more attention to detail, you can easily reach the next level. Keep pushing!";
+                if (average >= 60) return "Satisfactory Effort. 🙂 You are doing well, but there is room for growth. Reviewing the core concepts and practicing regularly will help you improve further.";
+                return "Needs Improvement. 💪 Don't be discouraged—every expert was once a beginner. Focus on the basics, ask questions, and practice daily. You have the potential to do great things!";
+            };
+
+            let finalY = doc.previousAutoTable.finalY + 15;
+            const remarkText = getMotivationalRemark(avg);
+
+            // Calculate Box Width and Approx Pixel Width for HTML Canvas
+            const boxWidth = pageWidth - (margin * 2);
+            const boxWidthPx = Math.round(boxWidth * 3.78) + 'px'; // 1mm ~= 3.78px
+
+            // Render Text as Image to preserve Emojis and Formatting
+            const remarkImg = await textToImage(remarkText, boxWidthPx);
+
+            // Calculate Required Height based on Image
+            let contentHeight = 10; // Default buffer
+            if (remarkImg) {
+                // mm height = mm width / aspect
+                contentHeight = (boxWidth - 10) / remarkImg.aspectRatio;
+            } else {
+                // Fallback text height
+                contentHeight = doc.splitTextToSize(remarkText, boxWidth - 10).length * 5;
+            }
+
+            const totalBoxHeight = contentHeight + 20; // + Header + Padding
+
+            // Check if footer fits
+            if (finalY + totalBoxHeight > pageHeight - 20) {
+                doc.addPage();
+                addFooter();
+                finalY = 40;
+            }
+
+            // Professional Remarks Box
+            doc.setFillColor(248, 250, 252); // Slate 50
+            doc.setDrawColor(203, 213, 225); // Slate 300
+            doc.roundedRect(margin, finalY, boxWidth, totalBoxHeight, 2, 2, 'FD');
+
+            doc.setFont("helvetica", "bold");
+            doc.setFontSize(11);
+            doc.setTextColor(79, 70, 229); // Indigo 600 (Primary Brand Color)
+            doc.text("Instructor Remarks", margin + 5, finalY + 8);
+
+            if (remarkImg) {
+                // Render as Image
+                doc.addImage(remarkImg.dataUrl, 'PNG', margin + 5, finalY + 12, boxWidth - 10, contentHeight);
+            } else {
+                // Fallback Text
+                doc.setFont("helvetica", "italic");
+                doc.setFontSize(10);
+                doc.setTextColor(51, 65, 85);
+                const splitRemark = doc.splitTextToSize(remarkText, boxWidth - 10);
+                doc.text(splitRemark, margin + 5, finalY + 16);
+            }
+
+            // Adjust finalY based on box height
+            finalY += totalBoxHeight + 10;
+
+
             // --- FOOTER PROTECTION ---
-            let finalY = doc.previousAutoTable.finalY + 20;
+            // let finalY = doc.previousAutoTable.finalY + 20; // Removed, using updated finalY
             const signatureHeight = 40;
 
             // Check if footer fits
