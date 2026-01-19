@@ -4,7 +4,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>BBSHRRD LMS v3.0 | Enterprise Learning System</title>
+    <title>BBSHRRDB LMS v3.0 | Enterprise Learning System</title>
     <link rel="icon" href="assets/bbsydp_logo.png" type="image/png">
 
     <!-- Core Libraries -->
@@ -584,10 +584,10 @@
         <div class="v-card w-full max-w-[380px] px-8 pb-8 pt-2 animate-in fade-in zoom-in duration-500">
             <div class="text-center mb-8">
                 <div class="inline-flex items-center justify-center w-32 h-32 mt-0 -mb-10">
-                    <img src="assets/bbsydp_logo.png" alt="BBSHRRD Logo" class="w-full h-full object-contain">
+                    <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-full h-full object-contain">
                 </div>
                 <h1 class="font-black text-2xl tracking-tighter uppercase leading-none text-slate-800 dark:text-white">
-                    BBSHRRD <span class="text-indigo-500">LMS</span> <sup
+                    BBSHRRDB <span class="text-indigo-500">LMS</span> <sup
                         class="text-[10px] text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800 ml-1">v3.0</sup>
                 </h1>
                 <p class="text-slate-500 dark:text-slate-400 mt-2 font-bold uppercase tracking-widest text-[8px]">
@@ -692,13 +692,13 @@
                 <!-- Left: Logo & Text -->
                 <div class="flex items-center gap-3">
                     <div class="logo-container w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <img src="assets/bbsydp_logo.png" alt="BBSHRRD Logo" class="w-full h-full object-contain">
+                        <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-full h-full object-contain">
                     </div>
                     <div
                         class="hide-on-collapse flex flex-col justify-center overflow-hidden transition-all duration-300">
                         <h1
                             class="font-black text-lg tracking-tighter uppercase leading-none flex items-center gap-1 text-slate-800 dark:text-white">
-                            BBSHRRD <span
+                            BBSHRRDB <span
                                 class="text-[8px] bg-indigo-600 text-white px-1 py-0.5 rounded ml-1 align-top">v3.0</span>
                         </h1>
                         <p
@@ -832,7 +832,7 @@
                     <!-- 2. Logo Container (Right of Button) -->
                     <div id="mobile-logo-container" class="flex items-center gap-3 transition-opacity duration-300">
                         <img src="assets/bbsydp_logo.png" class="w-10 h-10 object-contain">
-                        <span class="font-black text-slate-800 dark:text-white uppercase tracking-tighter">BBSHRRD
+                        <span class="font-black text-slate-800 dark:text-white uppercase tracking-tighter">BBSHRRDB
                             v2.0</span>
                     </div>
                 </div>
@@ -1743,7 +1743,7 @@
                             <div>
                                 <h3 class="text-white font-bold text-sm tracking-tight leading-none"></h3>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] text-slate-400 font-medium">BBSHRRD
+                                    <span class="text-[10px] text-slate-400 font-medium">BBSHRRDB
                                         Editor</span>
                                 </div>
                             </div>
@@ -1867,7 +1867,7 @@
                             </div>
                             <div class="flex flex-col">
                                 <span
-                                    class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-none mb-1">BBSHRRD
+                                    class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-none mb-1">BBSHRRDB
                                     LMS <span
                                         class="bg-indigo-600 text-white px-1.5 py-0.5 rounded text-[9px] ml-1">v3.0</span></span>
                                 <span
@@ -4710,7 +4710,7 @@
                 'profile': 'My Profile',
                 'playground': 'Live Editor'
             };
-            $('#page-title').text(titles[tabId] || 'BBSHRRD LMS');
+            $('#page-title').text(titles[tabId] || 'BBSHRRDB LMS');
 
             if (tabId === 'dashboard') {
                 $('#v2-banner').show().removeClass('hidden');
@@ -5878,9 +5878,9 @@
                 doc.setFontSize(8);
                 doc.setTextColor(100);
                 doc.text("This document is valid without a physical signature.", 105, pageHeight - 15, { align: "center" });
-                doc.text("Generated via BBSHRRD LMS v2.0", 105, pageHeight - 10, { align: "center" });
+                doc.text("Generated via BBSHRRDB LMS v2.0", 105, pageHeight - 10, { align: "center" });
 
-                doc.save(`BBSHRRD_Report_${name.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
+                doc.save(`BBSHRRDB_Report_${name.replace(/\s+/g, '_')}_${new Date().getTime()}.pdf`);
 
             } catch (err) {
                 console.error("PDF Error:", err);
@@ -6300,7 +6300,7 @@
                 doc.setFont("helvetica", "normal");
                 // Footer always at bottom of the page
                 doc.text("This report is digitally signed and officially verified by Program Instructor.", pageWidth / 2, pageHeight - 15, { align: "center" });
-                doc.text("BBSHRRD Learning Management System v2.0", pageWidth / 2, pageHeight - 10, { align: "center" });
+                doc.text("BBSHRRDB Learning Management System v2.0", pageWidth / 2, pageHeight - 10, { align: "center" });
             };
 
             // Re-run autoTable with correct body
@@ -6457,7 +6457,7 @@
                 doc.text("Authorized Signature", pageWidth - margin - 25, finalY + 20, { align: "center" });
             }
 
-            doc.save(`BBSHRRD_Performance_Report_${name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
+            doc.save(`BBSHRRDB_Performance_Report_${name.replace(/\s+/g, '_')}_${new Date().toISOString().split('T')[0]}.pdf`);
         };
 
         window.downloadAllReports = () => { showToast("Initiating batch export..."); /* Implement batch if needed */ };
