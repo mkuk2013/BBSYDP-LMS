@@ -8733,7 +8733,9 @@
                 { task: "Variable Definition", correct: "--main-color: red;", wrong: ["$main-color: red;", "var-main: red;", "@main: red;", "def-color: red;"], desc: "CSS Variable" },
                 { task: "Grid Columns", correct: "grid-template-columns: 1fr 1fr;", wrong: ["grid-cols: 2;", "columns: 2;", "layout: 50% 50%;", "division: 1fr;"], desc: "Two equal cols" },
                 { task: "Transform Rotate", correct: "transform: rotate(45deg);", wrong: ["rotate: 45deg;", "spin: 45deg;", "turn: 45deg;", "move: rotate(45);"], desc: "Rotate element" },
-                { task: "Calculate width", correct: "width: calc(100% - 20px);", wrong: ["width: 100% - 20px;", "calc: 100% - 20px;", "math: 100% - 20px;", "size: calc(100, 20);"], desc: "Dynamic calc" }
+                { task: "Calculate width", correct: "width: calc(100% - 20px);", wrong: ["width: 100% - 20px;", "calc: 100% - 20px;", "math: 100% - 20px;", "size: calc(100, 20);"], desc: "Dynamic calc" },
+                { task: "Style Invalid Input", correct: "border-color: red;", wrong: ["validate: false;", "input: error;", "check: false;", "status: invalid;"], desc: "Error feedback" },
+                { task: "Style Valid Input", correct: "border-color: green;", wrong: ["validate: true;", "input: correct;", "check: valid;", "status: valid;"], desc: "Success feedback" }
             ]
         };
 
