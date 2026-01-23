@@ -75,3 +75,16 @@ window.toggleMobileSidebar = function () {
         console.error("Sidebar or Overlay not found for mobile toggle");
     }
 };
+
+// GLOBAL YEAR UPDATE
+function updateYear() {
+    const yearElements = document.querySelectorAll('.dynamic-year');
+    const currentYear = new Date().getFullYear();
+    yearElements.forEach(el => {
+        el.textContent = currentYear;
+    });
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+    updateYear();
+});

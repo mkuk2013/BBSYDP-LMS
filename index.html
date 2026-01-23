@@ -1821,6 +1821,10 @@
                     <button onclick="switchTab('users')" class="nav-item w-full" data-tooltip="Students">
                         <i data-lucide="users" class="w-5 h-5"></i> <span class="hide-on-collapse">Students</span>
                     </button>
+                    <button onclick="switchTab('feedback')" class="nav-item w-full relative" data-tooltip="Feedback">
+                        <i data-lucide="message-square" class="w-5 h-5"></i> <span class="hide-on-collapse">Feedback</span>
+                        <span id="feedback-notification" class="hidden absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">0</span>
+                    </button>
                 </div>
             </nav>
 
@@ -2987,6 +2991,49 @@
                 <!-- Selected Private Chat (Hidden by default, will reuse global chat container if needed) -->
                 <!-- Removing the dedicated inbox view as requested -->
 
+                <!-- 7. Admin Feedback View -->
+                <div id="view-feedback" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                    <div class="v-card overflow-hidden">
+                        <div
+                            class="p-4 border-b border-slate-100 dark:border-slate-800/50 flex flex-col md:flex-row gap-3 items-center justify-between">
+                            <div>
+                                <h3 class="text-xl font-black uppercase tracking-tighter text-slate-900 dark:text-slate-200">
+                                    Student Feedback</h3>
+                                <p class="text-[10px] font-bold uppercase tracking-widest text-slate-400">Review student opinions</p>
+                            </div>
+                            <div class="flex items-center gap-4">
+                                <span id="total-feedback-count"
+                                    class="text-[10px] font-black uppercase tracking-widest text-slate-400 hidden sm:block">0
+                                    Records</span>
+                                <button onclick="renderFeedback()"
+                                    class="px-4 py-2.5 rounded-lg bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
+                                    <i data-lucide="refresh-cw" class="w-3 h-3"></i> Refresh
+                                </button>
+                            </div>
+                        </div>
+                        <div class="overflow-x-auto">
+                            <table class="w-full text-left font-bold">
+                                <thead
+                                    class="bg-slate-50 dark:bg-[#1e293b] text-[9px] font-black uppercase text-slate-400 dark:text-slate-500 tracking-widest border-b border-slate-100 dark:border-slate-800">
+                                    <tr>
+                                        <th class="px-5 py-3">Student Name</th>
+                                        <th class="px-5 py-3 text-center">Rating</th>
+                                        <th class="px-5 py-3 text-center">Quality</th>
+                                        <th class="px-5 py-3 text-center">Usability</th>
+                                        <th class="px-5 py-3">Comments</th>
+                                        <th class="px-5 py-3 text-right">Date</th>
+                                        <th class="px-5 py-3 text-right">Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="feedback-table-body"
+                                    class="divide-y divide-slate-100 dark:divide-slate-800/50 text-[11px]">
+                                    <!-- Row Injected -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
                 <!-- 8. Profile View -->
                 <div id="view-profile" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
                     <div class="max-w-2xl mx-auto">
@@ -3257,7 +3304,7 @@
                                     LMS <span class="text-indigo-500 text-[10px] ml-1">v2.0</span></span>
                                 <span
                                     class="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">©
-                                    2025 Super Sys-Tech Computers Umerkot</span>
+                                    <span class="dynamic-year">2025</span> Super Systech Computers Umerkot</span>
                             </div>
                         </div>
 
@@ -5027,6 +5074,9 @@
                     if (activeTab === 'grading') renderGrading(subs);
                     // fetchUsers is called separately when needed/tab switches, to save bandwidth
                     if (activeTab === 'users') fetchUsers();
+                    
+                    // Update feedback notification badge
+                    checkFeedbackCount();
                 }
             } catch (err) {
                 console.error("Data Sync Error:", err);
@@ -5987,6 +6037,208 @@
             lucide.createIcons();
         }
 
+        // --- FEEDBACK LOGIC ---
+        // NEW: Check for feedback count for admin notification
+        async function checkFeedbackCount() {
+            // Only admins need this
+            if (!userProfile || userProfile.role !== 'admin') return;
+            
+            try {
+                // Count only UNREAD feedback
+                const { count, error } = await client
+                    .from('feedback')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('is_read', false);
+                
+                if (!error) {
+                    const badge = document.getElementById('feedback-notification');
+                    if (badge) {
+                        if (count > 0) {
+                            badge.textContent = count;
+                            badge.classList.remove('hidden');
+                        } else {
+                            badge.classList.add('hidden');
+                        }
+                    }
+                }
+            } catch (e) {
+                console.warn("Feedback count check failed", e);
+            }
+        }
+
+        // Mark feedback as read when viewing details
+        window.viewFeedbackDetails = async (id) => {
+             // 1. Open Window Immediately (UX priority)
+             window.open(`feedback_details.html?id=${id}`, '_blank', 'width=800,height=900');
+             
+             // 2. Mark as Read in Background
+             try {
+                 const { error } = await client
+                    .from('feedback')
+                    .update({ is_read: true })
+                    .eq('id', id);
+
+                 if (!error) {
+                     // 3. Update Badge immediately
+                     checkFeedbackCount();
+                     
+                     // 4. Update row visual style immediately (Optimistic UI)
+                     const dot = document.getElementById(`dot-${id}`);
+                     if (dot) dot.remove();
+                     
+                     const row = document.getElementById(`row-${id}`);
+                     if (row) {
+                        row.classList.remove('bg-slate-50/50', 'dark:bg-slate-800/50', 'font-bold');
+                     }
+
+                 } else {
+                     console.error("Supabase Update Error:", error);
+                     // If permission error, alert user (useful for debugging)
+                     if (error.code === '42501') {
+                         alert("Permission Denied: Cannot mark feedback as read. Please run the Fix SQL.");
+                     }
+                 }
+             } catch (e) {
+                 console.error("Error marking feedback read:", e);
+             }
+        };
+
+        async function fetchFeedback() {
+             console.log("Fetching feedback...");
+             const { data: feedback, error } = await client.from('feedback')
+                 .select('*')
+                 .order('created_at', { ascending: false });
+ 
+             if (error) {
+                 console.error("fetchFeedback Error:", error);
+                 showToast("Failed to fetch feedback.");
+             } else {
+                 renderFeedbackTable(feedback || []);
+                 $('#total-feedback-count').text(`${feedback ? feedback.length : 0} Records`);
+             }
+        }
+        
+        window.renderFeedback = fetchFeedback;
+
+        function renderFeedbackTable(feedbackList) {
+            const container = $('#feedback-table-body').empty();
+            
+            if (!feedbackList || feedbackList.length === 0) {
+                 container.html('<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400 font-bold uppercase tracking-widest text-xs">No feedback received yet.</td></tr>');
+                 return;
+            }
+
+            feedbackList.forEach(item => {
+                const date = new Date(item.created_at).toLocaleDateString();
+                
+                let stars = '';
+                for(let i=1; i<=5; i++) {
+                    if (i <= item.rating) stars += '<i data-lucide="star" class="w-3 h-3 fill-amber-400 text-amber-400 inline"></i>';
+                    else stars += '<i data-lucide="star" class="w-3 h-3 text-slate-300 inline"></i>';
+                }
+
+                const badgeClass = "px-2 py-1 rounded text-[9px] font-black uppercase tracking-widest border";
+                let qBadge = `<span class="${badgeClass} bg-slate-100 text-slate-500 border-slate-200">${item.content_quality}</span>`;
+                if (item.content_quality === 'excellent') qBadge = `<span class="${badgeClass} bg-emerald-50 text-emerald-600 border-emerald-200">${item.content_quality}</span>`;
+                else if (item.content_quality === 'good') qBadge = `<span class="${badgeClass} bg-indigo-50 text-indigo-600 border-indigo-200">${item.content_quality}</span>`;
+                else if (item.content_quality === 'average') qBadge = `<span class="${badgeClass} bg-amber-50 text-amber-600 border-amber-200">${item.content_quality}</span>`;
+                else if (item.content_quality === 'poor') qBadge = `<span class="${badgeClass} bg-rose-50 text-rose-600 border-rose-200">${item.content_quality}</span>`;
+                
+                let uBadge = `<span class="${badgeClass} bg-slate-100 text-slate-500 border-slate-200">${item.usability}</span>`;
+                if (item.usability === 'yes') uBadge = `<span class="${badgeClass} bg-emerald-50 text-emerald-600 border-emerald-200">Easy</span>`;
+                else if (item.usability === 'somewhat') uBadge = `<span class="${badgeClass} bg-amber-50 text-amber-600 border-amber-200">Okay</span>`;
+                else if (item.usability === 'no') uBadge = `<span class="${badgeClass} bg-rose-50 text-rose-600 border-rose-200">Hard</span>`;
+
+                // Unread Indicator
+                const unreadDot = (!item.is_read) 
+                    ? `<span id="dot-${item.id}" class="absolute top-1/2 left-2 -translate-y-1/2 w-2 h-2 bg-rose-500 rounded-full animate-pulse shadow-sm"></span>` 
+                    : '';
+                const rowClass = (!item.is_read) ? "bg-slate-50/50 dark:bg-slate-800/50 font-bold" : "";
+
+                container.append(`
+                    <tr id="row-${item.id}" class="relative hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-50 dark:border-slate-800/50 text-xs ${rowClass}">
+                        <td class="px-6 py-4 relative pl-8">
+                            ${unreadDot}
+                            <div class="font-black text-slate-900 dark:text-slate-200 uppercase tracking-tight">${item.student_name || 'Anonymous'}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center">
+                            <div class="flex items-center justify-center gap-0.5">${stars}</div>
+                        </td>
+                        <td class="px-6 py-4 text-center">${qBadge}</td>
+                        <td class="px-6 py-4 text-center">${uBadge}</td>
+                        <td class="px-6 py-4 max-w-xs truncate" title="${item.comments || ''}">
+                            <span class="text-slate-600 dark:text-slate-400 font-medium italic">"${item.comments || 'No comments'}"</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                            <span class="text-[10px] font-bold text-slate-400 uppercase tracking-wider">${date}</span>
+                        </td>
+                        <td class="px-6 py-4 text-right">
+                             <div class="flex items-center justify-end gap-2">
+                                <button onclick="viewFeedbackDetails('${item.id}')" 
+                                    class="p-1.5 text-slate-400 hover:text-indigo-600 hover:bg-indigo-50 rounded-lg transition-colors" title="View Details">
+                                    <i data-lucide="eye" class="w-4 h-4"></i>
+                                </button>
+                                <button onclick="deleteFeedback('${item.id}')" 
+                                    class="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Delete Feedback">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                </button>
+                            </div>
+                        </td>
+                    </tr>
+                `);
+            });
+            lucide.createIcons();
+        }
+
+        window.deleteFeedback = async (id) => {
+            console.log("Delete requested for:", id);
+            
+            if (!confirm("Are you sure you want to delete this feedback? This action cannot be undone.")) return;
+            
+            try {
+                // 1. Attempt Delete
+                const { data, error } = await client
+                    .from('feedback')
+                    .delete()
+                    .eq('id', id)
+                    .select(); // IMPORTANT: Return the deleted data to verify RLS allowed it
+
+                // 2. Check for Supabase Error
+                if (error) {
+                    console.error("Supabase Delete Error:", error);
+                    if (error.code === '42501') {
+                        alert("Permission Denied: You do not have permission to delete this. (RLS Policy)");
+                    } else {
+                        throw error;
+                    }
+                    return;
+                }
+
+                // 3. Check for Silent Failure (RLS hidden filtering)
+                if (!data || data.length === 0) {
+                    console.warn("Delete succeeded but no rows returned. RLS likely hid the row.");
+                    alert("Delete Failed: The server ignored the request. This usually means the 'Delete Policy' is missing or you are not recognized as an Admin.");
+                    return;
+                }
+                
+                // 4. Success
+                showToast("Feedback deleted successfully");
+                
+                // Optimistic UI Update
+                const row = document.getElementById(`row-${id}`);
+                if (row) row.remove();
+                
+                checkFeedbackCount();
+                
+                // Refresh data to be sure
+                fetchFeedback(); 
+                
+            } catch (err) {
+                console.error("Error deleting feedback:", err);
+                alert("Error: " + (err.message || "Unknown error occurred"));
+            }
+        };
+
         window.toggleGlobalArcadeAccess = async () => {
             const isUnlocked = localStorage.getItem('global_arcade_unlock') === 'true';
             const newState = !isUnlocked;
@@ -6090,6 +6342,71 @@
             }
         };
 
+        // Feedback Popup Logic
+        window.showFeedbackPopup = async () => {
+             // 1. Check if user is logged in and is a student
+             if (!userProfile || userProfile.role !== 'student') return;
+
+             // 2. Check LocalStorage Cache first (fast check)
+             // We use 'uid' (UUID) to be consistent with feedback.html and auth.user.id
+             if (localStorage.getItem(`feedback_submitted_${userProfile.uid}`) === 'true') {
+                 console.log("Feedback already submitted (Cached).");
+                 return;
+             }
+
+             // 3. Check Supabase DB (Robust check)
+             try {
+                 const { data, error } = await client
+                     .from('feedback')
+                     .select('id')
+                     .eq('student_id', userProfile.uid) // Use UUID to match feedback table
+                     .maybeSingle(); // Returns null if not found, instead of error for 0 rows
+
+                 if (data) {
+                     // Feedback exists
+                     console.log("Feedback already found in DB. Skipping popup.");
+                     localStorage.setItem(`feedback_submitted_${userProfile.uid}`, 'true'); // Update cache
+                     return;
+                 }
+             } catch (err) {
+                 console.error("Error checking feedback status:", err);
+                 // If error (e.g. offline), maybe skip to avoid annoying user? 
+                 // Or show it? Let's skip to be safe.
+                 return;
+             }
+
+             const modal = document.getElementById('feedback-modal');
+             
+             if (modal && modal.classList.contains('hidden')) {
+                 modal.classList.remove('hidden');
+                 modal.classList.add('flex'); // Enable flexbox for centering
+                 setTimeout(() => {
+                     modal.classList.remove('opacity-0');
+                     const innerDiv = modal.querySelector('div');
+                     if(innerDiv) {
+                         innerDiv.classList.remove('scale-95');
+                         innerDiv.classList.add('scale-100');
+                     }
+                 }, 10);
+             }
+        };
+
+        window.closeFeedbackModal = () => {
+            const modal = document.getElementById('feedback-modal');
+            if (modal) {
+                modal.classList.add('opacity-0');
+                const innerDiv = modal.querySelector('div');
+                if(innerDiv) {
+                    innerDiv.classList.remove('scale-100');
+                    innerDiv.classList.add('scale-95');
+                }
+                setTimeout(() => {
+                    modal.classList.remove('flex'); // Disable flexbox
+                    modal.classList.add('hidden');
+                }, 300);
+            }
+        };
+
         window.switchTab = (tabId) => {
             console.log("Switching to:", tabId);
             activeTab = tabId;
@@ -6136,6 +6453,8 @@
             // Special Banner Handling
             if (tabId === 'dashboard') {
                 $('#v2-banner').show().removeClass('hidden');
+                // Show feedback popup for students (or everyone for now)
+                if (typeof showFeedbackPopup === 'function') showFeedbackPopup();
             } else {
                 $('#v2-banner').hide().addClass('hidden');
             }
@@ -6150,6 +6469,7 @@
                 'arcade': 'Arcade Arena',
                 'grading': 'Task Grading (Admin)',
                 'users': 'User Management',
+                'feedback': 'Student Feedback',
                 'profile': 'My Profile',
                 'playground': 'Live Code Editor',
                 'exam': 'Online Examination'
@@ -6191,6 +6511,11 @@
                  if (!window.allUsersCache || window.allUsersCache.length === 0) {
                     if (typeof renderSkeleton === 'function') renderSkeleton('user-table-body', 8, 'list');
                  }
+            }
+
+            // Feedback
+            if (tabId === 'feedback') {
+                 if (typeof renderFeedback === 'function') renderFeedback();
             }
 
             // Chat
@@ -8704,7 +9029,8 @@
                 { task: "Upper case", correct: "text-transform: uppercase;", wrong: ["text-style: uppercase;", "transform: upper;", "font: uppercase;", "caps: true;"], desc: "All caps" },
                 { task: "Remove bullet points", correct: "list-style: none;", wrong: ["list: none;", "ul: none;", "bullet: none;", "marker: none;"], desc: "No list markers" },
                 { task: "Set width", correct: "width: 100px;", wrong: ["broad: 100px;", "size: 100px;", "inline: 100px;", "w: 100px;"], desc: "Element width" },
-                { task: "Set height", correct: "height: 50vh;", wrong: ["tall: 50vh;", "h: 50vh;", "size: 50vh;", "vertical: 50vh;"], desc: "Element height" }
+                { task: "Set height", correct: "height: 50vh;", wrong: ["tall: 50vh;", "h: 50vh;", "size: 50vh;", "vertical: 50vh;"], desc: "Element height" },
+                { task: "Make input required", correct: "required", wrong: ["validate", "mandatory", "need", "check"], desc: "HTML Attribute" }
             ],
             moderate: [
                 { task: "Remove underline", correct: "text-decoration: none;", wrong: ["font-style: none;", "text-align: none;", "decoration: none;", "no-underline: true;"], desc: "No decoration" },
@@ -8735,7 +9061,8 @@
                 { task: "Transform Rotate", correct: "transform: rotate(45deg);", wrong: ["rotate: 45deg;", "spin: 45deg;", "turn: 45deg;", "move: rotate(45);"], desc: "Rotate element" },
                 { task: "Calculate width", correct: "width: calc(100% - 20px);", wrong: ["width: 100% - 20px;", "calc: 100% - 20px;", "math: 100% - 20px;", "size: calc(100, 20);"], desc: "Dynamic calc" },
                 { task: "Style Invalid Input", correct: "border-color: red;", wrong: ["validate: false;", "input: error;", "check: false;", "status: invalid;"], desc: "Error feedback" },
-                { task: "Style Valid Input", correct: "border-color: green;", wrong: ["validate: true;", "input: correct;", "check: valid;", "status: valid;"], desc: "Success feedback" }
+                { task: "Style Valid Input", correct: "border-color: green;", wrong: ["validate: true;", "input: correct;", "check: valid;", "status: valid;"], desc: "Success feedback" },
+                { task: "Make input required", correct: "required", wrong: ["validate", "mandatory", "need", "check"], desc: "HTML Attribute" }
             ]
         };
 
@@ -10817,264 +11144,8 @@
 
     <script src="assets/js/ui-helpers.js"></script>
 
-    <!-- Chat System Logic -->
-    <script>
-        let currentChatUser = null;
-        let activeConversationId = null;
-        let chatSubscription = null;
-        let globalChatSubscription = null;
-        let chatFile = null;
-        const CHAT_CLOUD_NAME = "dlm3iaqjn";
-        const CHAT_UPLOAD_PRESET = "lms_assignments";
+    <!-- Chat System Logic Removed -->
 
-        // Initialize Chat System
-        async function initChat() {
-            if (!currentUser) return;
-            renderChatUserList();
-            setupGlobalMessageSubscription();
-        }
-
-        // Global Subscription for Notifications
-        function setupGlobalMessageSubscription() {
-            if (globalChatSubscription || !window.client) return;
-
-            globalChatSubscription = window.client.channel('global-chat-notifications')
-                .on('postgres_changes', {
-                    event: 'INSERT',
-                    schema: 'public',
-                    table: 'messages'
-                }, payload => {
-                    const msg = payload.new;
-                    // Ignore own messages or messages in currently open active conversation
-                    if (msg.sender_id === currentUser.id) return;
-                    if (activeConversationId && msg.conversation_id === activeConversationId) return;
-
-                    updateUserListNotification(msg.sender_id);
-                })
-                .subscribe();
-        }
-
-        function updateUserListNotification(senderId) {
-            const userEl = document.querySelector(`#chat-users-list div[data-uid="${senderId}"]`);
-            if (userEl) {
-                // Update Badge
-                const badgeContainer = userEl.querySelector('.relative .w-10');
-                let badge = badgeContainer.querySelector('.notification-badge'); // Add class for easy finding
-                
-                let count = 1;
-                if (badge) {
-                    count = parseInt(badge.textContent) + 1;
-                    badge.textContent = count;
-                } else {
-                    const newBadge = document.createElement('div');
-                    newBadge.className = "notification-badge absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] flex items-center justify-center rounded-full border-2 border-white dark:border-[#1e293b]";
-                    newBadge.textContent = "1";
-                    badgeContainer.appendChild(newBadge);
-                }
-
-                // Update Status Dot
-                const statusDot = userEl.querySelector('.status-dot');
-                if (statusDot) {
-                    statusDot.className = "status-dot absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-[#1e293b] bg-rose-500 animate-pulse";
-                }
-
-                // Update Text
-                const nameEl = userEl.querySelector('h4');
-                if (nameEl) nameEl.classList.add('text-indigo-600', 'dark:text-indigo-400');
-                
-                const msgPreview = userEl.querySelector('p');
-                if (msgPreview) msgPreview.innerHTML = `<span class="text-rose-500 font-bold">${count} new messages</span>`;
-                
-                // Move to top
-                const listEl = document.getElementById('chat-users-list');
-                listEl.prepend(userEl);
-            }
-        }
-
-        // Render Users List (Students & Admins)
-        async function renderChatUserList() {
-            if (!window.client) {
-                console.log("Chat: Supabase client not ready.");
-                return;
-            }
-
-            const listEl = document.getElementById('chat-users-list');
-            // Only show loading if empty to prevent flickering on updates
-            if (listEl.children.length === 0) {
-                listEl.innerHTML = '<div class="text-center py-8 text-slate-400 text-[10px] font-bold uppercase tracking-widest animate-pulse">Loading...</div>';
-            }
-
-            try {
-                // 1. Fetch Profiles
-                const { data: profiles, error } = await window.client
-                    .from('profiles')
-                    .select('*')
-                    .neq('uid', currentUser.id)
-                    .order('last_active_at', { ascending: false });
-
-                if (error) throw error;
-
-                // 2. Fetch Unread Counts
-                const { data: unreadData } = await window.client
-                    .from('messages')
-                    .select('sender_id')
-                    .eq('is_seen', false)
-                    .neq('sender_id', currentUser.id);
-
-                const unreadCounts = {};
-                if (unreadData) {
-                    unreadData.forEach(m => {
-                        unreadCounts[m.sender_id] = (unreadCounts[m.sender_id] || 0) + 1;
-                    });
-                }
-
-                listEl.innerHTML = '';
-                if (profiles.length === 0) {
-                    listEl.innerHTML = '<div class="text-center py-8 text-slate-400 text-[10px] font-bold uppercase tracking-widest">No users found.</div>';
-                    return;
-                }
-
-                profiles.forEach(user => {
-                    const isOnline = user.status === 'online';
-                    const unreadCount = unreadCounts[user.uid] || 0;
-                    const lastActive = new Date(user.last_active_at).toLocaleDateString();
-
-                    // Status Logic: Red > Green > Gray
-                    let statusColor = 'bg-slate-400';
-                    let statusClass = '';
-
-                    if (unreadCount > 0) {
-                        statusColor = 'bg-rose-500';
-                        statusClass = 'animate-pulse';
-                    } else if (isOnline) {
-                        statusColor = 'bg-emerald-500';
-                    }
-
-                    const el = document.createElement('div');
-                    el.setAttribute('data-uid', user.uid);
-                    el.className = `p-3 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 cursor-pointer transition-colors group flex items-center gap-3 ${currentChatUser?.uid === user.uid ? 'bg-indigo-50 dark:bg-indigo-900/20 border border-indigo-200 dark:border-indigo-800' : 'border border-transparent'}`;
-                    el.onclick = () => selectChatUser(user);
-
-                    el.innerHTML = `
-                        <div class="relative">
-                            <div class="w-10 h-10 rounded-full bg-slate-200 dark:bg-slate-700 flex items-center justify-center text-slate-600 dark:text-slate-300 font-bold text-sm relative">
-                                ${user.name ? user.name.charAt(0).toUpperCase() : '?'}
-                                ${unreadCount > 0 ? `<div class="notification-badge absolute -top-1 -right-1 w-4 h-4 bg-rose-500 text-white text-[9px] flex items-center justify-center rounded-full border-2 border-white dark:border-[#1e293b]">${unreadCount}</div>` : ''}
-                            </div>
-                            <div class="status-dot absolute bottom-0 right-0 w-3 h-3 rounded-full border-2 border-white dark:border-[#1e293b] ${statusColor} ${statusClass}"></div>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-center mb-0.5">
-                                <h4 class="font-bold text-xs text-slate-900 dark:text-slate-200 truncate ${unreadCount > 0 ? 'text-indigo-600 dark:text-indigo-400' : ''}">${user.name || 'Unknown'}</h4>
-                                <span class="text-[9px] text-slate-400 font-bold uppercase">${user.role || 'User'}</span>
-                            </div>
-                            <p class="text-[10px] text-slate-500 truncate">${unreadCount > 0 ? `<span class="text-rose-500 font-bold">${unreadCount} new messages</span>` : `Last active: ${lastActive}`}</p>
-                        </div>
-                    `;
-                    listEl.appendChild(el);
-                });
-
-            } catch (e) {
-                console.error("Error loading chat users:", e);
-                listEl.innerHTML = `
-                    <div class="text-center py-8 text-rose-500 text-[10px] font-bold uppercase tracking-widest">
-                        Error loading users.
-                        <button onclick="initChat()" class="block mx-auto mt-2 text-indigo-500 hover:underline">Retry</button>
-                    </div>`;
-            }
-        }
-
-        // Select User & Start Conversation
-        async function selectChatUser(user) {
-            if (!window.client) return;
-            
-            currentChatUser = user;
-
-            // Mobile: Toggle Views
-            if (window.innerWidth < 768) {
-                const sidebar = document.getElementById('chat-sidebar');
-                const chatArea = document.getElementById('chat-area-main');
-                
-                if (sidebar) {
-                    sidebar.classList.add('hidden');
-                    sidebar.classList.remove('flex');
-                }
-                if (chatArea) {
-                    // Logic Removed
-                }
-            }
-
-            activeConversationId = null;
-            chatFile = null;
-            // clearFileSelection();
-
-            // Update UI (Removed)
-
-            try {
-               // Chat setup logic removed
-            } catch (e) {
-                console.error("Error setting up chat:", e);
-            }
-        }
-
-        // Load Messages (Removed)
-        async function loadMessages() {
-            // Removed
-        }
-
-        // Subscribe to Realtime (Removed)
-        function subscribeToConversation() {
-           // Removed
-        }
-
-        // Append Message to UI (Removed)
-        function appendMessage(msg) {
-           // Removed
-        }
-
-        // Send Message (Removed)
-        async function sendMessage() {
-           // Removed
-        }
-
-        // Helper: File Handling (Removed)
-        function handleChatFileUpload(input) {
-           // Removed
-        }
-
-        function clearFileSelection() {
-           // Removed
-        }
-
-        function handleChatInputKey(e) {
-           // Removed
-        }
-
-        function scrollToBottom() {
-           // Removed
-        }
-
-        function closeChat() {
-           // Removed
-        }
-
-        // Emoji Picker (Removed)
-        function toggleEmojiPicker(btn) {
-           // Removed
-        }
-            });
-
-            btn.parentElement.parentElement.appendChild(picker);
-
-            const closeFn = (e) => {
-                if (!picker.contains(e.target) && e.target !== btn && !btn.contains(e.target)) {
-                    picker.remove();
-                    document.removeEventListener('click', closeFn);
-                }
-            };
-            setTimeout(() => document.addEventListener('click', closeFn), 0);
-        }
-    </script>
 
     <!-- Hidden Certificate Template -->
     <!-- Google Font for Signature and Computerized ID -->
@@ -11108,13 +11179,8 @@
                 <!-- Institute Logo -->
                 <div class="flex items-center gap-4">
                         <div class="text-right">
-                        <h1 class="text-lg font-black text-slate-800 uppercase tracking-widest leading-none mb-0.5">Super Sys-Tech</h1>
+                        <h1 class="text-lg font-black text-slate-800 uppercase tracking-widest leading-none mb-0.5">Super Systech</h1>
                         <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider">Computers Umerkot</p>
-                        <!-- Single row container with no wrapping -->
-                        <div class="mt-0.5 whitespace-nowrap">
-                            <span class="inline-block text-[9px] font-bold text-slate-400 uppercase tracking-widest translate-y-[2px]">Certificate ID:</span>
-                            <span id="cert-id" class="inline-block text-[10px] text-slate-600 font-bold ml-2" style="font-family: 'Share Tech Mono', monospace;">BBS-HTML-2026-0000</span>
-                        </div>
                     </div>
                     <!-- Placeholder for Institute Logo -->
                     <img src="assets/institute_logo.png" onerror="this.src='https://ui-avatars.com/api/?name=ST&background=0D8ABC&color=fff&size=128'" class="h-14 w-auto object-contain drop-shadow-md rounded-lg" alt="Institute Logo" crossorigin="anonymous">
@@ -11166,6 +11232,12 @@
                 </div>
             </div>
 
+            <!-- Certificate ID (Moved to Footer Top) -->
+            <div class="text-center mb-2 relative z-10">
+                <span class="inline-block text-[9px] font-bold text-slate-400 uppercase tracking-widest">Certificate ID:</span>
+                <span id="cert-id" class="inline-block text-[10px] text-slate-600 font-bold ml-2" style="font-family: 'Share Tech Mono', monospace;">BBS-HTML-2026-0000</span>
+            </div>
+
             <!-- Footer / Signatures Section -->
             <div class="w-full grid grid-cols-3 gap-8 items-end pt-2 pb-0 relative z-10 px-8">
                 
@@ -11213,6 +11285,98 @@
             <!-- Footer Bottom Text -->
                 <div class="w-full text-center mt-3 border-t border-slate-100 pt-2 relative z-10 pb-2">
                 <p class="text-sm font-bold text-slate-600 uppercase tracking-widest">Super Systech Computers Umerkot</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Feedback Popup Modal (Advanced Professional) -->
+    <div id="feedback-modal" class="fixed inset-0 z-[100] hidden items-center justify-center bg-slate-900/50 backdrop-blur-md opacity-0 transition-opacity duration-500">
+        <div class="relative w-full max-w-lg mx-4 transform scale-95 transition-all duration-500 ease-out group">
+            
+            <!-- Ambient Glow Effects -->
+            <div class="absolute -inset-1 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-[2rem] blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
+            
+            <!-- Main Card -->
+            <div class="relative bg-white/95 dark:bg-slate-900/95 backdrop-blur-2xl rounded-[1.8rem] shadow-2xl overflow-hidden border border-white/20 dark:border-slate-700/50 ring-1 ring-black/5">
+                
+                <!-- Subtle Grid Pattern Background -->
+                <div class="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAiIGhlaWdodD0iMjAiIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyI+PGNpcmNsZSBjeD0iMSIgY3k9IjEiIHI9IjEiIGZpbGw9InJnYmEoOTksIDEwMiwgMjQ1LCAwLjA3KSIvPjwvc3ZnPg==')] [mask-image:linear-gradient(to_bottom,white,transparent)]"></div>
+
+                <div class="relative px-8 py-12 text-center">
+                    <!-- Close Button (Subtle) -->
+                    <button onclick="closeFeedbackModal()" class="absolute top-4 right-4 p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 transition-colors rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+                        <i data-lucide="x" class="w-5 h-5"></i>
+                    </button>
+
+                    <!-- Floating 3D Icon Composition -->
+                    <div class="mb-8 relative inline-block">
+                        <!-- Glow behind -->
+                        <div class="absolute inset-0 bg-indigo-500 blur-2xl opacity-20 animate-pulse"></div>
+                        
+                        <!-- Main Icon Box -->
+                        <div class="relative w-24 h-24 bg-gradient-to-tr from-indigo-500 to-purple-600 rounded-2xl rotate-3 flex items-center justify-center shadow-lg shadow-indigo-500/30 transform transition-transform group-hover:rotate-6 group-hover:scale-105 duration-500">
+                            <div class="w-[5.5rem] h-[5.5rem] bg-white dark:bg-slate-900 rounded-xl flex items-center justify-center -rotate-3 shadow-inner border border-white/10">
+                                <!-- Gradient Icon -->
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="url(#icon-gradient)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="lucide lucide-message-square-heart">
+                                    <defs>
+                                        <linearGradient id="icon-gradient" x1="0" y1="0" x2="1" y2="1">
+                                            <stop offset="0%" stop-color="#6366f1" />
+                                            <stop offset="100%" stop-color="#ec4899" />
+                                        </linearGradient>
+                                    </defs>
+                                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/>
+                                    <path d="M12 11.5 10 9"/>
+                                    <path d="m14 9-2 2.5"/>
+                                </svg>
+                            </div>
+                        </div>
+                        
+                        <!-- Floating Particles -->
+                        <div class="absolute -top-3 -right-5 w-8 h-8 bg-pink-500/20 backdrop-blur-md rounded-lg rotate-12 flex items-center justify-center animate-bounce" style="animation-duration: 3s;">
+                            <i data-lucide="heart" class="w-4 h-4 text-pink-500 fill-pink-500"></i>
+                        </div>
+                        <div class="absolute -bottom-2 -left-6 w-10 h-10 bg-indigo-500/10 backdrop-blur-md rounded-full flex items-center justify-center animate-bounce" style="animation-duration: 4s; animation-delay: 1s;">
+                            <i data-lucide="thumbs-up" class="w-5 h-5 text-indigo-500"></i>
+                        </div>
+                    </div>
+
+                    <!-- Modern Typography -->
+                    <h3 class="text-3xl font-black text-slate-900 dark:text-white mb-3 tracking-tight">
+                        Your Voice <span class="text-transparent bg-clip-text bg-gradient-to-r from-indigo-500 to-pink-500">Matters</span>
+                    </h3>
+                    
+                    <p class="text-slate-500 dark:text-slate-400 mb-8 text-base leading-relaxed max-w-sm mx-auto font-medium">
+                        Help us craft the ultimate learning experience. <br>Your insights drive our innovation.
+                    </p>
+
+                    <!-- Visual Star Rating (Engagement Trigger) -->
+                    <div class="flex justify-center gap-3 mb-8 opacity-90 group-hover:scale-105 transition-transform duration-500 cursor-default">
+                        <i data-lucide="star" class="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-sm"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-sm"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-sm"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-amber-400 fill-amber-400 drop-shadow-sm"></i>
+                        <i data-lucide="star" class="w-6 h-6 text-slate-200 dark:text-slate-700 fill-slate-200 dark:fill-slate-700"></i>
+                    </div>
+
+                    <!-- High-Contrast Action Button -->
+                    <a href="https://bbsydp-lms.netlify.app/feedback.html" target="_blank" onclick="closeFeedbackModal()" 
+                       class="group/btn relative inline-flex items-center justify-center w-full py-4 px-8 bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-bold text-lg rounded-2xl overflow-hidden shadow-xl shadow-indigo-500/20 hover:shadow-indigo-500/40 transition-all transform hover:-translate-y-1">
+                        <!-- Shimmer Overlay -->
+                        <div class="absolute inset-0 w-full h-full bg-gradient-to-r from-transparent via-white/20 dark:via-black/10 to-transparent -translate-x-full group-hover/btn:animate-[shimmer_1.5s_infinite]"></div>
+                        
+                        <span class="relative flex items-center gap-3">
+                            Share Feedback
+                            <i data-lucide="arrow-right" class="w-5 h-5 transition-transform group-hover/btn:translate-x-1"></i>
+                        </span>
+                    </a>
+
+                    <!-- Minimal Secondary Action -->
+                    <div class="mt-6">
+                        <button onclick="closeFeedbackModal()" class="text-xs font-bold text-slate-400 hover:text-slate-600 dark:text-slate-500 dark:hover:text-slate-300 uppercase tracking-widest transition-colors">
+                            Remind Me Later
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
