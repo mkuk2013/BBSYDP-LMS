@@ -1,0 +1,700 @@
+
+ 1. HTML ka full form kya hai? 
+ A) Hyper Text Markup Language 
+ B) High Text Machine Language 
+ C) Hyper Tool Markup Language 
+ D) Hyper Text Machine Language 
+ Correct Answer: A 
+ 
+ 2. HTML ka use kis liye hota hai? 
+ A) Styling 
+ B) Programming 
+ C) Web page ka structure 
+ D) Database 
+ Correct Answer: C 
+ 
+ 3. HTML file ka extension kya hota hai? 
+ A) .ht 
+ B) .html 
+ C) .web 
+ D) .doc 
+ Correct Answer: B 
+ 
+ 4. Root element kaunsa hota hai? 
+ A) <head> 
+ B) <body> 
+ C) <html> 
+ D) <title> 
+ Correct Answer: C 
+ 
+ 5. Page ka title kahan likhte hain? 
+ A) <body> 
+ B) <meta> 
+ C) <title> 
+ D) <h1> 
+ Correct Answer: C 
+ 
+ 6. Heading tags ka range kya hai? 
+ A) <h1> to <h3> 
+ B) <h1> to <h6> 
+ C) <h2> to <h6> 
+ D) <h1> to <h5> 
+ Correct Answer: B 
+ 
+ 7. Paragraph ke liye kaunsa tag hai? 
+ A) <para> 
+ B) <p> 
+ C) <text> 
+ D) <pg> 
+ Correct Answer: B 
+ 
+ 8. Line break ke liye kaunsa tag? 
+ A) <lb> 
+ B) <br> 
+ C) <break> 
+ D) <hr> 
+ Correct Answer: B 
+ 
+ 9. Horizontal line ke liye? 
+ A) <br> 
+ B) <line> 
+ C) <hr> 
+ D) <border> 
+ Correct Answer: C 
+ 
+ 10. Anchor tag ka use? 
+ A) Image 
+ B) Link 
+ C) Form 
+ D) Table 
+ Correct Answer: B 
+ 
+ 11. Link ka address kis attribute me hota hai? 
+ A) src 
+ B) href 
+ C) link 
+ D) url 
+ Correct Answer: B 
+ 
+ 12. New tab me link open karne ke liye? 
+ A) open 
+ B) blank 
+ C) target="_blank" 
+ D) new 
+ Correct Answer: C 
+ 
+ 13. Image ke liye kaunsa tag? 
+ A) <image> 
+ B) <img> 
+ C) <pic> 
+ D) <src> 
+ Correct Answer: B 
+ 
+ 14. Image ka path kis attribute se dete hain? 
+ A) href 
+ B) src 
+ C) alt 
+ D) title 
+ Correct Answer: B 
+ 
+ 15. Image ka alternative text? 
+ A) name 
+ B) title 
+ C) alt 
+ D) value 
+ Correct Answer: C 
+ 
+ 16. HTML comment ka sahi tareeqa? 
+ A) // comment 
+ B) /* comment */ 
+ C) <!-- comment --> 
+ D) ## comment 
+ Correct Answer: C 
+ 
+ 17. Bold text ke liye? 
+ A) <b> 
+ B) <strong> 
+ C) Dono A aur B 
+ D) <bold> 
+ Correct Answer: C 
+ 
+ 18. Italic text ke liye? 
+ A) <i> 
+ B) <em> 
+ C) Dono A aur B 
+ D) <italic> 
+ Correct Answer: C 
+ 
+ 19. Underline ke liye? 
+ A) <u> 
+ B) <ul> 
+ C) <underline> 
+ D) <li> 
+ Correct Answer: A 
+ 
+ 20. Subscript ke liye? 
+ A) <sup> 
+ B) <sub> 
+ C) <small> 
+ D) <big> 
+ Correct Answer: B 
+ 
+ 21. Superscript ke liye? 
+ A) <sub> 
+ B) <sup> 
+ C) <small> 
+ D) <big> 
+ Correct Answer: B 
+ 
+ 22. Ordered list ka tag? 
+ A) <ul> 
+ B) <ol> 
+ C) <li> 
+ D) <list> 
+ Correct Answer: B 
+ 
+ 23. Unordered list ka tag? 
+ A) <ul> 
+ B) <ol> 
+ C) <li> 
+ D) <u> 
+ Correct Answer: A 
+ 
+ 24. List item ka tag? 
+ A) <item> 
+ B) <li> 
+ C) <list> 
+ D) <il> 
+ Correct Answer: B 
+ 
+ 25. Description list ka main tag? 
+ A) <dl> 
+ B) <dt> 
+ C) <dd> 
+ D) <list> 
+ Correct Answer: A 
+ 
+ 26. Definition term ka tag? 
+ A) <dl> 
+ B) <dt> 
+ C) <dd> 
+ D) <li> 
+ Correct Answer: B 
+ 
+ 27. Definition description ka tag? 
+ A) <dl> 
+ B) <dt> 
+ C) <dd> 
+ D) <li> 
+ Correct Answer: C 
+ 
+ 28. Form banane ka tag? 
+ A) <input> 
+ B) <form> 
+ C) <label> 
+ D) <fieldset> 
+ Correct Answer: B 
+ 
+ 29. Label ka use? 
+ A) Styling 
+ B) Input ka naam show 
+ C) Data store 
+ D) Validation 
+ Correct Answer: B 
+ 
+ 30. Text input ke liye? 
+ A) email 
+ B) password 
+ C) text 
+ D) number 
+ Correct Answer: C 
+ 
+ 31. Email input type? 
+ A) mail 
+ B) email 
+ C) text 
+ D) gmail 
+ Correct Answer: B 
+ 
+ 32. Password input type? 
+ A) hidden 
+ B) secure 
+ C) password 
+ D) lock 
+ Correct Answer: C 
+ 
+ 33. Radio button ka type? 
+ A) checkbox 
+ B) radio 
+ C) select 
+ D) option 
+ Correct Answer: B 
+ 
+ 34. Checkbox ka type? 
+ A) check 
+ B) tick 
+ C) checkbox 
+ D) box 
+ Correct Answer: C 
+ 
+ 35. Mobile number ke liye type? 
+ A) phone 
+ B) tel 
+ C) number 
+ D) mobile 
+ Correct Answer: B 
+ 
+ 36. Textarea ka use? 
+ A) Single line text 
+ B) Multiple line text 
+ C) Image upload 
+ D) Dropdown 
+ Correct Answer: B 
+ 
+ 37. Dropdown banane ka tag? 
+ A) <option> 
+ B) <select> 
+ C) <list> 
+ D) <input> 
+ Correct Answer: B 
+ 
+ 38. Dropdown ke option ka tag? 
+ A) <li> 
+ B) <option> 
+ C) <select> 
+ D) <opt> 
+ Correct Answer: B 
+ 
+ 39. Fieldset ka use? 
+ A) Button banana 
+ B) Form fields group 
+ C) Styling 
+ D) Input hide 
+ Correct Answer: B 
+ 
+ 40. Fieldset ka title? 
+ A) <title> 
+ B) <label> 
+ C) <legend> 
+ D) <head> 
+ Correct Answer: C 
+ 
+ 41. Table banane ka tag? 
+ A) <tbl> 
+ B) <table> 
+ C) <tr> 
+ D) <td> 
+ Correct Answer: B 
+ 
+ 42. Table row ka tag? 
+ A) <td> 
+ B) <tr> 
+ C) <th> 
+ D) <row> 
+ Correct Answer: B 
+ 
+ 43. Table heading cell? 
+ A) <td> 
+ B) <tr> 
+ C) <th> 
+ D) <thead> 
+ Correct Answer: C 
+ 
+ 44. Table data cell? 
+ A) <th> 
+ B) <td> 
+ C) <tr> 
+ D) <cell> 
+ Correct Answer: B 
+ 
+ 45. Table border attribute? 
+ A) frame 
+ B) border 
+ C) cellpadding 
+ D) cellspacing 
+ Correct Answer: B 
+ 
+ 46. Cell ke andar space? 
+ A) cellspacing 
+ B) cellpadding 
+ C) margin 
+ D) padding 
+ Correct Answer: B 
+ 
+ 47. Cells ke darmiyan space? 
+ A) border 
+ B) cellpadding 
+ C) cellspacing 
+ D) space 
+ Correct Answer: C 
+ 
+ 48. Object tag ka use? 
+ A) Image 
+ B) External resource embed 
+ C) Form 
+ D) Table 
+ Correct Answer: B 
+ 
+ 49. Object tag me file path ka attribute? 
+ A) src 
+ B) data 
+ C) href 
+ D) link 
+ Correct Answer: B 
+ 
+ 50. Object tag ka alternate content kyun? 
+ A) Styling 
+ B) Load fail hone par 
+ C) Validation 
+ D) Database 
+ Correct Answer: B 
+ 
+ 51. iframe ka use? 
+ A) Image 
+ B) Video 
+ C) Another webpage show 
+ D) Form 
+ Correct Answer: C 
+ 
+ 52. iframe ka attribute jo URL deta hai? 
+ A) href 
+ B) src 
+ C) link 
+ D) path 
+ Correct Answer: B 
+ 
+ 53. iframe kis cheez ke liye common hai? 
+ A) PDF 
+ B) Google Maps 
+ C) YouTube 
+ D) All of these 
+ Correct Answer: D 
+ 
+ 54. Audio tag ka use? 
+ A) Video 
+ B) Sound play 
+ C) Image 
+ D) Text 
+ Correct Answer: B 
+ 
+ 55. Audio tag ka attribute jo controls show kare? 
+ A) play 
+ B) show 
+ C) controls 
+ D) audio 
+ Correct Answer: C 
+ 
+ 56. Audio file ka common format? 
+ A) .mp3 
+ B) .jpg 
+ C) .html 
+ D) .css 
+ Correct Answer: A 
+ 
+ 57. Video tag ka use? 
+ A) Audio 
+ B) Image 
+ C) Video play 
+ D) Form 
+ Correct Answer: C 
+ 
+ 58. Video controls dikhane ke liye? 
+ A) play 
+ B) show 
+ C) controls 
+ D) view 
+ Correct Answer: C 
+ 
+ 59. Video ke liye common format? 
+ A) .mp4 
+ B) .mp3 
+ C) .png 
+ D) .css 
+ Correct Answer: A 
+
+ 60. Video autoplay ka attribute? 
+ A) auto 
+ B) play 
+ C) autoplay 
+ D) start 
+ Correct Answer: C 
+ 
+ 61. muted attribute ka use? 
+ A) Sound increase 
+ B) Sound band 
+ C) Video stop 
+ D) Reload 
+ Correct Answer: B 
+ 
+ 62. loop attribute ka use? 
+ A) Video band 
+ B) Repeat play 
+ C) Fast 
+ D) Pause 
+ Correct Answer: B 
+ 
+ 63. Form data submit karne ke liye? 
+ A) reset 
+ B) submit 
+ C) button 
+ D) send 
+ Correct Answer: B 
+ 
+ 64. Reset button ka kaam? 
+ A) Submit 
+ B) Clear form 
+ C) Save 
+ D) Reload 
+ Correct Answer: B 
+ 
+ 65. Placeholder ka use? 
+ A) Value store 
+ B) Hint dikhana 
+ C) Label banana 
+ D) Hide 
+ Correct Answer: B 
+ 
+ 66. Required attribute ka use? 
+ A) Optional banana 
+ B) Field mandatory banana 
+ C) Styling 
+ D) Hide 
+ Correct Answer: B 
+ 
+ 67. Name attribute ka kaam? 
+ A) Styling 
+ B) Data identify 
+ C) Size 
+ D) Color 
+ Correct Answer: B 
+ 
+ 68. Select tag kis ke sath use hota hai? 
+ A) <li> 
+ B) <option> 
+ C) <input> 
+ D) <label> 
+ Correct Answer: B 
+ 
+ 69. Audio tag ke andar source ka tag? 
+ A) <src> 
+ B) <file> 
+ C) <source> 
+ D) <link> 
+ Correct Answer: C 
+ 
+ 70. Video tag ke andar source? 
+ A) <src> 
+ B) <file> 
+ C) <source> 
+ D) <link> 
+ Correct Answer: C 
+ 
+ 71. iframe ek ______ element hai 
+ A) Form 
+ B) Media 
+ C) Inline frame 
+ D) Block 
+ Correct Answer: C 
+ 
+ 72. object tag kis type ka content load karta hai? 
+ A) External 
+ B) Internal 
+ C) CSS 
+ D) Script 
+ Correct Answer: A 
+ 
+ 73. HTML case sensitive hoti hai? 
+ A) Yes 
+ B) No 
+ C) Kabhi kabhi 
+ D) Attributes only 
+ Correct Answer: B 
+ 
+ 74. HTML ek ______ language hai 
+ A) Programming 
+ B) Scripting 
+ C) Markup 
+ D) Query 
+ Correct Answer: C 
+ 
+ 75. Meta tag kahan hota hai? 
+ A) body 
+ B) footer 
+ C) head 
+ D) html 
+ Correct Answer: C 
+ 
+ 76. Charset ka kaam? 
+ A) Font size 
+ B) Encoding batana 
+ C) Color 
+ D) Layout 
+ Correct Answer: B 
+ 
+ 77. Viewport ka use? 
+ A) SEO 
+ B) Responsive design 
+ C) Database 
+ D) Security 
+ Correct Answer: B 
+ 
+ 78. iframe me height/width kis liye? 
+ A) Style 
+ B) Size control 
+ C) Color 
+ D) Border 
+ Correct Answer: B 
+ 
+ 79. Audio autoplay attribute? 
+ A) auto 
+ B) play 
+ C) autoplay 
+ D) start 
+ Correct Answer: C 
+ 
+ 80. Video poster attribute ka use? 
+ A) Thumbnail image 
+ B) Sound 
+ C) Caption 
+ D) Loop 
+ Correct Answer: A 
+ 
+ 81. iframe me border remove karne ke liye? 
+ A) border 
+ B) frameborder="0" 
+ C) none 
+ D) remove 
+ Correct Answer: B 
+ 
+ 82. Object tag me width/height? 
+ A) Styling 
+ B) Size define 
+ C) Link 
+ D) Validation 
+ Correct Answer: B 
+ 
+ 83. Form ka method attribute? 
+ A) get/post 
+ B) send 
+ C) push 
+ D) fetch 
+ Correct Answer: A 
+ 
+ 84. Action attribute ka use? 
+ A) Styling 
+ B) Data submit URL 
+ C) Validation 
+ D) Hide 
+ Correct Answer: B 
+ 
+ 85. Label ko input se connect karne ke liye? 
+ A) name 
+ B) id 
+ C) for 
+ D) class 
+ Correct Answer: C 
+ 
+ 86. iframe me sandbox attribute? 
+ A) Styling 
+ B) Security 
+ C) Layout 
+ D) Audio 
+ Correct Answer: B 
+ 
+ 87. Audio loop attribute? 
+ A) repeat 
+ B) loop 
+ C) again 
+ D) play 
+ Correct Answer: B 
+ 
+ 88. Video muted attribute? 
+ A) Sound off 
+ B) Sound on 
+ C) Replay 
+ D) Pause 
+ Correct Answer: A 
+ 
+ 89. Object tag fallback content kab dikhta hai? 
+ A) Jab load ho 
+ B) Jab fail ho 
+ C) Hamesha 
+ D) Kabhi nahi 
+ Correct Answer: B 
+ 
+ 90. iframe ke andar text likha ja sakta hai? 
+ A) Yes 
+ B) No 
+ C) Kabhi kabhi 
+ D) CSS se 
+ Correct Answer: A 
+ 
+ 91. Audio controls attribute? 
+ A) show 
+ B) controls 
+ C) play 
+ D) sound 
+ Correct Answer: B 
+ 
+ 92. Video controls attribute? 
+ A) show 
+ B) controls 
+ C) view 
+ D) play 
+ Correct Answer: B 
+ 
+ 93. Object tag ke andar kis type ka content ho sakta hai? 
+ A) Text 
+ B) Image 
+ C) Media 
+ D) All 
+ Correct Answer: D 
+ 
+ 94. iframe inline element hai ya block? 
+ A) Block 
+ B) Inline 
+ C) Dono 
+ D) None 
+ Correct Answer: B 
+ 
+ 95. Video tag ke sath kis tag ka use hota hai? 
+ A) <link> 
+ B) <source> 
+ C) <img> 
+ D) <file> 
+ Correct Answer: B 
+ 
+ 96. Audio tag kis section me hota hai? 
+ A) head 
+ B) body 
+ C) footer 
+ D) meta 
+ Correct Answer: B 
+ 
+ 97. iframe ka common use? 
+ A) Image 
+ B) Map 
+ C) External page 
+ D) All 
+ Correct Answer: D 
+ 
+ 98. HTML me multimedia tags kaunse hain? 
+ A) audio, video 
+ B) img, link 
+ C) p, h1 
+ D) form, input 
+ Correct Answer: A 
+ 
+ 99. Object tag HTML me kyun use hota hai? 
+ A) Styling 
+ B) Embed resources 
+ C) Layout 
+ D) Validation 
+ Correct Answer: B 
+ 
+ 100. HTML beginners ke liye sabse pehle kya seekhna chahiye? 
+ A) JavaScript 
+ B) CSS 
+ C) HTML structure & basic tags 
+ D) Database 
+ Correct Answer: C

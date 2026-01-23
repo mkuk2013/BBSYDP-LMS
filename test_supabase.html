@@ -1,0 +1,40 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Supabase</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+<body>
+    <h1>Supabase Test</h1>
+    <div id="output">Testing...</div>
+
+    <script>
+        const SUPABASE_URL = 'https://oaycnrsbrgancgrxhztd.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9heWNucnNicmdhbmNncnhoenRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNjIyMzIsImV4cCI6MjA4MTczODIzMn0.Md8TTNA7nY504_STka-04BM9WAoVZ32J_-JCirAGgC4';
+        
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        async function test() {
+            const output = document.getElementById('output');
+            
+            // Try to read profiles
+            const { data, error } = await supabase.from('profiles').select('*').limit(5);
+            
+            if (error) {
+                output.innerHTML += '<br>Error reading profiles: ' + JSON.stringify(error);
+            } else {
+                output.innerHTML += '<br>Success reading profiles: ' + JSON.stringify(data);
+            }
+
+            // Check session
+            const { data: { session } } = await supabase.auth.getSession();
+            output.innerHTML += '<br>Session: ' + (session ? 'Active' : 'None');
+        }
+
+        test();
+    </script>
+</body>
+</html>

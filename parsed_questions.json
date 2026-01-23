@@ -1,0 +1,1002 @@
+[
+  {
+    "q": "HTML ka full form kya hai?",
+    "o": [
+      "Hyper Text Markup Language",
+      "High Text Machine Language",
+      "Hyper Tool Markup Language",
+      "Hyper Text Machine Language"
+    ],
+    "a": 0
+  },
+  {
+    "q": "HTML ka use kis liye hota hai?",
+    "o": [
+      "Styling",
+      "Programming",
+      "Web page ka structure",
+      "Database"
+    ],
+    "a": 2
+  },
+  {
+    "q": "HTML file ka extension kya hota hai?",
+    "o": [
+      ".ht",
+      ".html",
+      ".web",
+      ".doc"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Root element kaunsa hota hai?",
+    "o": [
+      "<head>",
+      "<body>",
+      "<html>",
+      "<title>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Page ka title kahan likhte hain?",
+    "o": [
+      "<body>",
+      "<meta>",
+      "<title>",
+      "<h1>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Heading tags ka range kya hai?",
+    "o": [
+      "<h1> to <h3>",
+      "<h1> to <h6>",
+      "<h2> to <h6>",
+      "<h1> to <h5>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Paragraph ke liye kaunsa tag hai?",
+    "o": [
+      "<para>",
+      "<p>",
+      "<text>",
+      "<pg>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Line break ke liye kaunsa tag?",
+    "o": [
+      "<lb>",
+      "<br>",
+      "<break>",
+      "<hr>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Horizontal line ke liye?",
+    "o": [
+      "<br>",
+      "<line>",
+      "<hr>",
+      "<border>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Anchor tag ka use?",
+    "o": [
+      "Image",
+      "Link",
+      "Form",
+      "Table"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Link ka address kis attribute me hota hai?",
+    "o": [
+      "src",
+      "href",
+      "link",
+      "url"
+    ],
+    "a": 1
+  },
+  {
+    "q": "New tab me link open karne ke liye?",
+    "o": [
+      "open",
+      "blank",
+      "target=\"_blank\"",
+      "new"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Image ke liye kaunsa tag?",
+    "o": [
+      "<image>",
+      "<img>",
+      "<pic>",
+      "<src>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Image ka path kis attribute se dete hain?",
+    "o": [
+      "href",
+      "src",
+      "alt",
+      "title"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Image ka alternative text?",
+    "o": [
+      "name",
+      "title",
+      "alt",
+      "value"
+    ],
+    "a": 2
+  },
+  {
+    "q": "HTML comment ka sahi tareeqa?",
+    "o": [
+      "// comment",
+      "/* comment */",
+      "<!-- comment -->",
+      "## comment"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Bold text ke liye?",
+    "o": [
+      "<b>",
+      "<strong>",
+      "Dono A aur B",
+      "<bold>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Italic text ke liye?",
+    "o": [
+      "<i>",
+      "<em>",
+      "Dono A aur B",
+      "<italic>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Underline ke liye?",
+    "o": [
+      "<u>",
+      "<ul>",
+      "<underline>",
+      "<li>"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Subscript ke liye?",
+    "o": [
+      "<sup>",
+      "<sub>",
+      "<small>",
+      "<big>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Superscript ke liye?",
+    "o": [
+      "<sub>",
+      "<sup>",
+      "<small>",
+      "<big>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Ordered list ka tag?",
+    "o": [
+      "<ul>",
+      "<ol>",
+      "<li>",
+      "<list>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Unordered list ka tag?",
+    "o": [
+      "<ul>",
+      "<ol>",
+      "<li>",
+      "<u>"
+    ],
+    "a": 0
+  },
+  {
+    "q": "List item ka tag?",
+    "o": [
+      "<item>",
+      "<li>",
+      "<list>",
+      "<il>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Description list ka main tag?",
+    "o": [
+      "<dl>",
+      "<dt>",
+      "<dd>",
+      "<list>"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Definition term ka tag?",
+    "o": [
+      "<dl>",
+      "<dt>",
+      "<dd>",
+      "<li>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Definition description ka tag?",
+    "o": [
+      "<dl>",
+      "<dt>",
+      "<dd>",
+      "<li>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Form banane ka tag?",
+    "o": [
+      "<input>",
+      "<form>",
+      "<label>",
+      "<fieldset>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Label ka use?",
+    "o": [
+      "Styling",
+      "Input ka naam show",
+      "Data store",
+      "Validation"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Text input ke liye?",
+    "o": [
+      "email",
+      "password",
+      "text",
+      "number"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Email input type?",
+    "o": [
+      "mail",
+      "email",
+      "text",
+      "gmail"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Password input type?",
+    "o": [
+      "hidden",
+      "secure",
+      "password",
+      "lock"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Radio button ka type?",
+    "o": [
+      "checkbox",
+      "radio",
+      "select",
+      "option"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Checkbox ka type?",
+    "o": [
+      "check",
+      "tick",
+      "checkbox",
+      "box"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Mobile number ke liye type?",
+    "o": [
+      "phone",
+      "tel",
+      "number",
+      "mobile"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Textarea ka use?",
+    "o": [
+      "Single line text",
+      "Multiple line text",
+      "Image upload",
+      "Dropdown"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Dropdown banane ka tag?",
+    "o": [
+      "<option>",
+      "<select>",
+      "<list>",
+      "<input>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Dropdown ke option ka tag?",
+    "o": [
+      "<li>",
+      "<option>",
+      "<select>",
+      "<opt>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Fieldset ka use?",
+    "o": [
+      "Button banana",
+      "Form fields group",
+      "Styling",
+      "Input hide"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Fieldset ka title?",
+    "o": [
+      "<title>",
+      "<label>",
+      "<legend>",
+      "<head>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Table banane ka tag?",
+    "o": [
+      "<tbl>",
+      "<table>",
+      "<tr>",
+      "<td>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Table row ka tag?",
+    "o": [
+      "<td>",
+      "<tr>",
+      "<th>",
+      "<row>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Table heading cell?",
+    "o": [
+      "<td>",
+      "<tr>",
+      "<th>",
+      "<thead>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Table data cell?",
+    "o": [
+      "<th>",
+      "<td>",
+      "<tr>",
+      "<cell>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Table border attribute?",
+    "o": [
+      "frame",
+      "border",
+      "cellpadding",
+      "cellspacing"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Cell ke andar space?",
+    "o": [
+      "cellspacing",
+      "cellpadding",
+      "margin",
+      "padding"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Cells ke darmiyan space?",
+    "o": [
+      "border",
+      "cellpadding",
+      "cellspacing",
+      "space"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Object tag ka use?",
+    "o": [
+      "Image",
+      "External resource embed",
+      "Form",
+      "Table"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Object tag me file path ka attribute?",
+    "o": [
+      "src",
+      "data",
+      "href",
+      "link"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Object tag ka alternate content kyun?",
+    "o": [
+      "Styling",
+      "Load fail hone par",
+      "Validation",
+      "Database"
+    ],
+    "a": 1
+  },
+  {
+    "q": "iframe ka use?",
+    "o": [
+      "Image",
+      "Video",
+      "Another webpage show",
+      "Form"
+    ],
+    "a": 2
+  },
+  {
+    "q": "iframe ka attribute jo URL deta hai?",
+    "o": [
+      "href",
+      "src",
+      "link",
+      "path"
+    ],
+    "a": 1
+  },
+  {
+    "q": "iframe kis cheez ke liye common hai?",
+    "o": [
+      "PDF",
+      "Google Maps",
+      "YouTube",
+      "All of these"
+    ],
+    "a": 3
+  },
+  {
+    "q": "Audio tag ka use?",
+    "o": [
+      "Video",
+      "Sound play",
+      "Image",
+      "Text"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Audio tag ka attribute jo controls show kare?",
+    "o": [
+      "play",
+      "show",
+      "controls",
+      "audio"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Audio file ka common format?",
+    "o": [
+      ".mp3",
+      ".jpg",
+      ".html",
+      ".css"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Video tag ka use?",
+    "o": [
+      "Audio",
+      "Image",
+      "Video play",
+      "Form"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Video controls dikhane ke liye?",
+    "o": [
+      "play",
+      "show",
+      "controls",
+      "view"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Video ke liye common format?",
+    "o": [
+      ".mp4",
+      ".mp3",
+      ".png",
+      ".css"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Video autoplay ka attribute?",
+    "o": [
+      "auto",
+      "play",
+      "autoplay",
+      "start"
+    ],
+    "a": 2
+  },
+  {
+    "q": "muted attribute ka use?",
+    "o": [
+      "Sound increase",
+      "Sound band",
+      "Video stop",
+      "Reload"
+    ],
+    "a": 1
+  },
+  {
+    "q": "loop attribute ka use?",
+    "o": [
+      "Video band",
+      "Repeat play",
+      "Fast",
+      "Pause"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Form data submit karne ke liye?",
+    "o": [
+      "reset",
+      "submit",
+      "button",
+      "send"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Reset button ka kaam?",
+    "o": [
+      "Submit",
+      "Clear form",
+      "Save",
+      "Reload"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Placeholder ka use?",
+    "o": [
+      "Value store",
+      "Hint dikhana",
+      "Label banana",
+      "Hide"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Required attribute ka use?",
+    "o": [
+      "Optional banana",
+      "Field mandatory banana",
+      "Styling",
+      "Hide"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Name attribute ka kaam?",
+    "o": [
+      "Styling",
+      "Data identify",
+      "Size",
+      "Color"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Select tag kis ke sath use hota hai?",
+    "o": [
+      "<li>",
+      "<option>",
+      "<input>",
+      "<label>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Audio tag ke andar source ka tag?",
+    "o": [
+      "<src>",
+      "<file>",
+      "<source>",
+      "<link>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Video tag ke andar source?",
+    "o": [
+      "<src>",
+      "<file>",
+      "<source>",
+      "<link>"
+    ],
+    "a": 2
+  },
+  {
+    "q": "iframe ek ______ element hai",
+    "o": [
+      "Form",
+      "Media",
+      "Inline frame",
+      "Block"
+    ],
+    "a": 2
+  },
+  {
+    "q": "object tag kis type ka content load karta hai?",
+    "o": [
+      "External",
+      "Internal",
+      "CSS",
+      "Script"
+    ],
+    "a": 0
+  },
+  {
+    "q": "HTML case sensitive hoti hai?",
+    "o": [
+      "Yes",
+      "No",
+      "Kabhi kabhi",
+      "Attributes only"
+    ],
+    "a": 1
+  },
+  {
+    "q": "HTML ek ______ language hai",
+    "o": [
+      "Programming",
+      "Scripting",
+      "Markup",
+      "Query"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Meta tag kahan hota hai?",
+    "o": [
+      "body",
+      "footer",
+      "head",
+      "html"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Charset ka kaam?",
+    "o": [
+      "Font size",
+      "Encoding batana",
+      "Color",
+      "Layout"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Viewport ka use?",
+    "o": [
+      "SEO",
+      "Responsive design",
+      "Database",
+      "Security"
+    ],
+    "a": 1
+  },
+  {
+    "q": "iframe me height/width kis liye?",
+    "o": [
+      "Style",
+      "Size control",
+      "Color",
+      "Border"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Audio autoplay attribute?",
+    "o": [
+      "auto",
+      "play",
+      "autoplay",
+      "start"
+    ],
+    "a": 2
+  },
+  {
+    "q": "Video poster attribute ka use?",
+    "o": [
+      "Thumbnail image",
+      "Sound",
+      "Caption",
+      "Loop"
+    ],
+    "a": 0
+  },
+  {
+    "q": "iframe me border remove karne ke liye?",
+    "o": [
+      "border",
+      "frameborder=\"0\"",
+      "none",
+      "remove"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Object tag me width/height?",
+    "o": [
+      "Styling",
+      "Size define",
+      "Link",
+      "Validation"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Form ka method attribute?",
+    "o": [
+      "get/post",
+      "send",
+      "push",
+      "fetch"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Action attribute ka use?",
+    "o": [
+      "Styling",
+      "Data submit URL",
+      "Validation",
+      "Hide"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Label ko input se connect karne ke liye?",
+    "o": [
+      "name",
+      "id",
+      "for",
+      "class"
+    ],
+    "a": 2
+  },
+  {
+    "q": "iframe me sandbox attribute?",
+    "o": [
+      "Styling",
+      "Security",
+      "Layout",
+      "Audio"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Audio loop attribute?",
+    "o": [
+      "repeat",
+      "loop",
+      "again",
+      "play"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Video muted attribute?",
+    "o": [
+      "Sound off",
+      "Sound on",
+      "Replay",
+      "Pause"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Object tag fallback content kab dikhta hai?",
+    "o": [
+      "Jab load ho",
+      "Jab fail ho",
+      "Hamesha",
+      "Kabhi nahi"
+    ],
+    "a": 1
+  },
+  {
+    "q": "iframe ke andar text likha ja sakta hai?",
+    "o": [
+      "Yes",
+      "No",
+      "Kabhi kabhi",
+      "CSS se"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Audio controls attribute?",
+    "o": [
+      "show",
+      "controls",
+      "play",
+      "sound"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Video controls attribute?",
+    "o": [
+      "show",
+      "controls",
+      "view",
+      "play"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Object tag ke andar kis type ka content ho sakta hai?",
+    "o": [
+      "Text",
+      "Image",
+      "Media",
+      "All"
+    ],
+    "a": 3
+  },
+  {
+    "q": "iframe inline element hai ya block?",
+    "o": [
+      "Block",
+      "Inline",
+      "Dono",
+      "None"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Video tag ke sath kis tag ka use hota hai?",
+    "o": [
+      "<link>",
+      "<source>",
+      "<img>",
+      "<file>"
+    ],
+    "a": 1
+  },
+  {
+    "q": "Audio tag kis section me hota hai?",
+    "o": [
+      "head",
+      "body",
+      "footer",
+      "meta"
+    ],
+    "a": 1
+  },
+  {
+    "q": "iframe ka common use?",
+    "o": [
+      "Image",
+      "Map",
+      "External page",
+      "All"
+    ],
+    "a": 3
+  },
+  {
+    "q": "HTML me multimedia tags kaunse hain?",
+    "o": [
+      "audio, video",
+      "img, link",
+      "p, h1",
+      "form, input"
+    ],
+    "a": 0
+  },
+  {
+    "q": "Object tag HTML me kyun use hota hai?",
+    "o": [
+      "Styling",
+      "Embed resources",
+      "Layout",
+      "Validation"
+    ],
+    "a": 1
+  },
+  {
+    "q": "HTML beginners ke liye sabse pehle kya seekhna chahiye?",
+    "o": [
+      "JavaScript",
+      "CSS",
+      "HTML structure & basic tags",
+      "Database"
+    ],
+    "a": 2
+  }
+]
