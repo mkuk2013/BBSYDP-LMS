@@ -7461,14 +7461,22 @@
                 if (newPass.length < 6) return alert("Password must be at least 6 characters.");
 
                 try {
-                    const { data, error } = await client.auth.admin.updateUserById(uid, { password: newPass });
-                    // fallback if client-side admin disabled
-                    if (error) throw error;
+                    // Try RPC call first (Requires 'admin_reset_password' function in DB)
+                    const { error } = await client.rpc('admin_reset_password', { 
+                        target_user_id: uid, 
+                        new_password: newPass 
+                    });
+
+                    if (error) {
+                        console.warn("RPC Failed, trying fallback...", error);
+                        throw error;
+                    }
+
                     alert("Password updated successfully!");
                 } catch (e) {
-                    // Simulate success if purely client-side demo
+                    console.error("Password Reset Error:", e);
                     navigator.clipboard.writeText(newPass);
-                    alert(`Password updated to: ${newPass} \n(Copied to clipboard)`);
+                    alert(`Password reset failed (Backend function missing?).\n\nNew Password: ${newPass}\n(Copied to clipboard)\n\nTech Note: Please run 'reset_password_function.sql' in Supabase SQL Editor.`);
                 }
             }
         };
