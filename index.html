@@ -94,11 +94,11 @@
         };
 
         // Helper to render text with emojis as an image (for PDF)
-        window.textToImage = (text, fontSize, color, maxWidth, scaleFactor = 4) => {
+        window.textToImage = (text, fontSize, color, maxWidth, scaleFactor = 4, fontWeight = 'bold') => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
             
-            const font = `bold ${fontSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+            const font = `${fontWeight} ${fontSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
             ctx.font = font;
             
             // Text Wrapping Logic
@@ -6438,7 +6438,21 @@
                 } catch(e) { console.warn("Profile image fetch failed", e); }
             }
 
-            const submissions = window.allSubmissions.filter(s => s.student_id === userId && s.status === 'graded');
+            // Deduplicate submissions (keep highest grade) and filter valid grades
+            const rawSubmissions = window.allSubmissions.filter(s => s.student_id === userId && s.status === 'graded' && s.grade != null && s.grade !== '');
+            const uniqueTasksMap = new Map();
+            
+            rawSubmissions.forEach(s => {
+                const existing = uniqueTasksMap.get(s.task_id);
+                const sGrade = parseFloat(s.grade) || 0;
+                const existingGrade = existing ? (parseFloat(existing.grade) || 0) : -1;
+                
+                if (!existing || sGrade > existingGrade) {
+                    uniqueTasksMap.set(s.task_id, s);
+                }
+            });
+
+            const submissions = Array.from(uniqueTasksMap.values()).sort((a, b) => new Date(b.submitted_at) - new Date(a.submitted_at));
             const progress = window.allArcadeProgress ? window.allArcadeProgress.find(p => p.user_id === userId) : null;
 
             // Calculate Stats
@@ -6719,7 +6733,10 @@
 
                             // Generate Image with Wrapping and High DPI (Scale 4)
                             // We use the pixel width calculated from mm to ensure 1:1 visual scaling
-                            const imgObj = window.textToImage(text, pxSize, colorStyle, cellWidthPx, 4);
+                            let weight = data.cell.styles.fontStyle || 'normal';
+                            if (weight === 'bolditalic') weight = 'italic bold';
+                            
+                            const imgObj = window.textToImage(text, pxSize, colorStyle, cellWidthPx, 4, weight);
                             
                             // Dimensions for PDF (mm)
                             // We want to fill the available width in the cell
@@ -6787,7 +6804,7 @@
                  const maxWidthPx = maxWidthMm * 3.78; // mm to px
 
                  // Generate High-Res Image of Text
-                 const imgObj = window.textToImage(instructorRemarks, pxSize, colorStyle, maxWidthPx, 4);
+                 const imgObj = window.textToImage(instructorRemarks, pxSize, colorStyle, maxWidthPx, 4, 'normal');
                  
                  // Calculate dimensions
                  const ratio = imgObj.height / imgObj.width;
