@@ -48,6 +48,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.css" />
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/cropperjs/1.5.13/cropper.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
@@ -2264,6 +2265,27 @@
                         </div>
                     </div>
 
+                    <!-- Admin Live Widget -->
+                    <div id="admin-live-widget" class="hidden w-full mb-6 animate-in slide-in-from-top-5">
+                         <div class="v-card p-4 border-l-4 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10 flex items-center justify-between cursor-pointer hover:bg-emerald-100/50 transition-colors" onclick="showOnlineStudentsModal()">
+                             <div class="flex items-center gap-4">
+                                 <div class="relative">
+                                     <span class="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
+                                     <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
+                                         <i data-lucide="users" class="w-5 h-5"></i>
+                                     </div>
+                                 </div>
+                                 <div>
+                                     <h4 class="text-sm font-black uppercase text-emerald-700 dark:text-emerald-400 tracking-wider">Live Activity</h4>
+                                     <p class="text-xs font-bold text-emerald-600/80 dark:text-emerald-500/80"><span id="dashboard-online-count">0</span> Students Online Now</p>
+                                 </div>
+                             </div>
+                             <div class="text-emerald-500">
+                                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                             </div>
+                         </div>
+                    </div>
+
                     <!-- Stats Grid -->
                     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
                         <!-- Stat 1: Pending Tasks (Gradient) -->
@@ -3188,6 +3210,7 @@
                                     class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
                             </div>
                             <div class="flex items-center gap-4">
+                                <span id="online-student-count" class="text-[10px] font-black uppercase tracking-widest text-emerald-500 hidden sm:block cursor-pointer hover:underline" onclick="showOnlineStudentsModal()">0 Online</span>
                                 <span id="total-student-count"
                                     class="text-[10px] font-black uppercase tracking-widest text-slate-400 hidden sm:block">0
                                     Records</span>
@@ -5481,7 +5504,13 @@
                 });
                 const uniqueSubs = Array.from(uniqueSubsMap.values());
 
-                $('#stat-label-1').text("Active Tasks"); $('#stat-active').text(tasks.length);
+                // FIX: Filter only ACTIVE tasks (not expired) for the count
+                const activeTasksCount = tasks.filter(t => {
+                     // Active = No deadline OR Deadline is in the future
+                     return !t.deadline || new Date(t.deadline) > new Date();
+                }).length;
+
+                $('#stat-label-1').text("Active Tasks"); $('#stat-active').text(activeTasksCount);
 
                 // Stat 2: Total unique verified submissions (Graded or Pending)
                 $('#stat-label-2').text("Total Submissions");
@@ -5879,6 +5908,13 @@
             // SHOW LOADER IN FOOTER
             // This prevents the "New Form" from flashing or appearing falsely while we check the DataBase
             const footer = $('#submission-section');
+            
+            // TRACKING: Update Activity
+            if (typeof window.updateActivity === 'function') {
+                const taskTitle = t.title ? t.title.substring(0, 15) + (t.title.length > 15 ? '...' : '') : 'Task';
+                window.updateActivity(`Viewing Task: ${taskTitle}`);
+            }
+
             footer.html(`
                 <div class="py-10 text-center flex flex-col items-center justify-center animate-in fade-in">
                     <i data-lucide="loader-2" class="w-6 h-6 text-indigo-500 animate-spin mb-3"></i>
@@ -6187,6 +6223,9 @@
                 // ROBUST ID CHECK: Use uid or id
                 const userId = u.uid || u.id;
 
+                // Real-time Online Check
+                const isOnline = window.onlineUsers && window.onlineUsers.some(ou => ou.user_id === userId);
+
                 const uSubsRaw = window.allSubmissions.filter(s => s.student_id === userId);
 
                 // DEDUPLICATE: Map task_id -> latest submission
@@ -6227,11 +6266,14 @@
                 };
 
                 container.append(`
-                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-50 dark:border-slate-800/50 text-xs">
+                    <tr class="hover:bg-slate-50 dark:hover:bg-slate-900/50 transition-colors border-b border-slate-50 dark:border-slate-800/50 text-xs ${isOnline ? 'bg-emerald-50/30 dark:bg-emerald-900/10' : ''}">
                         <td class="px-6 py-4">
                             <div class="flex items-center gap-3">
-                                <div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm shrink-0">
-                                    <img src="${avatar}" class="w-full h-full object-cover" alt="${u.name}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random';">
+                                <div class="relative w-8 h-8 shrink-0">
+                                    <div class="w-8 h-8 rounded-full overflow-hidden border border-slate-200 dark:border-slate-700 shadow-sm">
+                                        <img src="${avatar}" class="w-full h-full object-cover" alt="${u.name}" onerror="this.onerror=null; this.src='https://ui-avatars.com/api/?name=${encodeURIComponent(u.name)}&background=random';">
+                                    </div>
+                                    ${isOnline ? '<span class="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-emerald-500 border-2 border-white dark:border-slate-900 rounded-full animate-pulse" title="Online Now"></span>' : ''}
                                 </div>
                                 <div class="min-w-0">
                                     <div class="font-black text-slate-900 dark:text-indigo-400 uppercase tracking-tight text-sm mb-0.5 truncate">${u.name}</div>
@@ -6264,7 +6306,7 @@
                             </div>
                         </td>
                         <td class="px-6 py-4 text-center">
-                            <span class="px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] shadow-sm ${status === 'approved' || status === 'active' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}">${status}</span>
+                            <span class="px-3 py-1 rounded-lg text-[8px] font-black uppercase tracking-[0.15em] shadow-sm ${status === 'approved' || status === 'active' || status === 'online' ? 'bg-emerald-500 text-white' : 'bg-amber-500 text-white'}">${status === 'online' ? 'approved' : status}</span>
                         </td>
                         <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap flex justify-end gap-1">
                              ${status === 'pending' ? `<button onclick="approveUser('${userId}')" class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all"><i data-lucide="shield-check" class="w-4 h-4"></i></button>` : ''}
@@ -7298,6 +7340,23 @@
 
             // --- 7. SPECIFIC TAB INITIALIZATIONS & LOGIC ---
 
+            // TRACKING: Update Activity
+            if (typeof window.updateActivity === 'function') {
+                const activityMap = {
+                    'dashboard': 'Dashboard',
+                    'tasks': 'Viewing Tasks',
+                    'resources': 'Resources',
+                    'leaderboard': 'Checking Leaderboard',
+                    'arcade': 'Gaming in Arcade',
+                    'grading': 'Grading Tasks',
+                    'users': 'Managing Users',
+                    'profile': 'Editing Profile',
+                    'playground': 'Coding in Playground',
+                    'exam': 'Taking Exam'
+                };
+                window.updateActivity(activityMap[tabId] || 'Browsing LMS');
+            }
+
             // Exam
             if (tabId === 'exam') {
                 if (typeof initExamSystem === 'function') initExamSystem();
@@ -7520,20 +7579,154 @@
                 }).subscribe();
             }
 
-            // --- PRESENCE (Minimal for typing in tasks?) ---
+            // --- PRESENCE (Enhanced for Online Tracking) ---
             const presenceChannel = client.channel('online-users', {
-                config: { presence: { key: currentUser.id } }
+                config: { 
+                    presence: { key: currentUser.id },
+                    broadcast: { self: true } // Allow receiving own broadcasts for testing if needed
+                }
+            });
+
+            // Activity Tracking State
+            let lastActive = Date.now();
+            let currentStatus = 'online'; // online, idle
+            let currentActivity = 'Dashboard'; // Dashboard, Viewing Task X, etc.
+            
+            // Sync Helper
+            const syncPresence = async () => {
+                const newState = {
+                    user_id: currentUser.id,
+                    user_name: userProfile.name,
+                    role: userProfile.role,
+                    online_at: new Date().toISOString(),
+                    status: currentStatus,
+                    activity: currentActivity
+                };
+                await presenceChannel.track(newState);
+            };
+
+            // Activity Listeners (Reset Idle Timer)
+            const resetIdleTimer = () => {
+                lastActive = Date.now();
+                if (currentStatus === 'idle') {
+                    currentStatus = 'online';
+                    syncPresence();
+                }
+            };
+            ['mousemove', 'keydown', 'click', 'scroll'].forEach(evt => document.addEventListener(evt, resetIdleTimer));
+
+            // Idle Check Loop (Every 1 min)
+            setInterval(() => {
+                if (Date.now() - lastActive > 5 * 60 * 1000) { // 5 Minutes
+                    if (currentStatus !== 'idle') {
+                        currentStatus = 'idle';
+                        syncPresence();
+                    }
+                }
+            }, 60000);
+
+            // Export for Global Usage
+            window.updateActivity = (activityName) => {
+                if (currentActivity !== activityName) {
+                    currentActivity = activityName;
+                    syncPresence();
+                }
+            };
+
+            presenceChannel.on('presence', { event: 'sync' }, () => {
+                const state = presenceChannel.presenceState();
+                window.onlineUsers = [];
+                for (const key in state) {
+                    window.onlineUsers.push(...state[key]);
+                }
+                
+                // Admin Update Logic
+                if (userProfile.role === 'admin') {
+                    const students = window.onlineUsers.filter(u => u.role === 'student');
+                    
+                    // Update User List Count
+                    const countEl = document.getElementById('online-student-count');
+                    if (countEl) {
+                        countEl.innerText = `${students.length} Online`;
+                        $(countEl).removeClass('hidden');
+                    }
+
+                    // Update Dashboard Widget
+                    const dashCount = document.getElementById('dashboard-online-count');
+                    if (dashCount) {
+                        dashCount.innerText = students.length;
+                        $('#admin-live-widget').removeClass('hidden');
+                    }
+                        
+                    // Initial Notification
+                    if (!window.hasShownOnlineNotif && students.length > 0) {
+                         window.hasShownOnlineNotif = true;
+                         showToast(`${students.length} Students are currently Online`, 'success');
+                    }
+
+                    // Refresh Table to show Online indicators
+                    if (window.allUsersCache) {
+                        renderUsers(window.allUsersCache);
+                    }
+                    
+                    // Live Update Modal if Open
+                    if ($('#onlineUsersModal').hasClass('show')) {
+                        window.showOnlineStudentsModal();
+                    }
+                }
             });
 
             presenceChannel.subscribe(async (status) => {
                 if (status === 'SUBSCRIBED') {
-                    await presenceChannel.track({
-                        user_id: currentUser.id,
-                        user_name: userProfile.name,
-                        role: userProfile.role,
-                        online_at: new Date().toISOString(),
+                    await syncPresence();
+                }
+            });
+
+            // Nudge Listener (Broadcast)
+            presenceChannel.on('broadcast', { event: 'nudge' }, ({ payload }) => {
+                if (payload.target_id === currentUser.id) {
+                    // Play Alert Sound
+                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
+                    audio.play().catch(e => {});
+                    
+                    // Show SweetAlert
+                    Swal.fire({
+                        title: '👋 Admin Nudge!',
+                        text: 'Admin is requesting your attention. Please check your pending tasks.',
+                        icon: 'info',
+                        confirmButtonText: 'Okay, I am here!',
+                        confirmButtonColor: '#6366f1',
+                        timer: 10000,
+                        timerProgressBar: true
+                    }).then((result) => {
+                        // Ack by resetting idle
+                        resetIdleTimer();
+                        
+                        // Send Acknowledgement to Admin
+                        if (result.isConfirmed) {
+                             presenceChannel.send({
+                                type: 'broadcast',
+                                event: 'nudge-ack',
+                                payload: { 
+                                    user_name: userProfile.name,
+                                    user_id: currentUser.id 
+                                }
+                            });
+                        }
                     });
                 }
+            });
+
+            // Nudge Acknowledgement Listener (For Admin)
+            presenceChannel.on('broadcast', { event: 'nudge-ack' }, ({ payload }) => {
+                 if (userProfile.role === 'admin') {
+                      // Play subtle sound
+                      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3'); // Ping sound
+                      audio.volume = 0.5;
+                      audio.play().catch(e => {});
+
+                      showToast(`✅ ${payload.user_name} acknowledged your nudge!`, 'success');
+                 }
             });
 
             // Typing Indicators (Broadcast) - Only for Task Hub now
@@ -7642,6 +7835,68 @@
 
         $('#comment-input').on('keydown', () => broadcastTyping(currentTask?.id));
 
+
+        window.showOnlineStudentsModal = () => {
+            const students = window.onlineUsers ? window.onlineUsers.filter(u => u.role === 'student') : [];
+            const list = $('#online-users-list').empty();
+            
+            if (students.length === 0) {
+                list.html('<div class="text-center py-8 text-slate-400 font-bold uppercase tracking-widest text-xs">No students currently online</div>');
+            } else {
+                students.forEach(s => {
+                    const onlineSince = s.online_at ? new Date(s.online_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
+                    const isIdle = s.status === 'idle';
+                    const activity = s.activity || 'Dashboard';
+                    
+                    list.append(`
+                        <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+                            <div class="relative w-8 h-8 rounded-full ${isIdle ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'} flex items-center justify-center">
+                                <i data-lucide="${isIdle ? 'coffee' : 'wifi'}" class="w-4 h-4"></i>
+                                <div class="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-800 ${isIdle ? 'bg-amber-500' : 'bg-emerald-500'}"></div>
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center justify-between mb-0.5">
+                                    <p class="text-xs font-black text-slate-900 dark:text-slate-200 uppercase tracking-tight truncate">${s.user_name}</p>
+                                    <span class="text-[8px] font-bold uppercase tracking-widest ${isIdle ? 'text-amber-500' : 'text-emerald-500'}">${isIdle ? 'IDLE' : 'ACTIVE'}</span>
+                                </div>
+                                <p class="text-[9px] text-indigo-500 font-bold uppercase tracking-wide truncate mb-0.5"><i data-lucide="eye" class="w-2.5 h-2.5 inline mr-0.5"></i> ${activity}</p>
+                                <p class="text-[8px] text-slate-400 font-bold uppercase tracking-widest">Since ${onlineSince}</p>
+                            </div>
+                            <button onclick="nudgeStudent('${s.user_id}', '${s.user_name}')" class="w-8 h-8 rounded-full bg-indigo-50 dark:bg-indigo-900/30 text-indigo-500 hover:bg-indigo-100 dark:hover:bg-indigo-900/50 flex items-center justify-center transition-colors" title="Nudge Student">
+                                <i data-lucide="bell-ring" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                    `);
+                });
+            }
+            
+            lucide.createIcons();
+            // Only show if not already shown (to avoid flicker during re-render)
+            if (!$('#onlineUsersModal').hasClass('show')) {
+                new bootstrap.Modal(document.getElementById('onlineUsersModal')).show();
+            }
+        };
+
+        window.nudgeStudent = async (uid, name) => {
+            const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+            const channel = client.channel('online-users');
+            
+            // Send Broadcast
+            await channel.send({
+                type: 'broadcast',
+                event: 'nudge',
+                payload: { target_id: uid }
+            });
+
+            // Feedback
+            const btn = $(event.currentTarget);
+            const originalIcon = btn.html();
+            btn.html('<div class="spinner-border spinner-border-sm text-indigo-500"></div>');
+            setTimeout(() => {
+                btn.html(originalIcon);
+                showToast(`Nudged ${name}!`, 'success');
+            }, 800);
+        };
 
         window.toggleSidebarCollapse = () => {
             const sidebar = $('#main-sidebar');
@@ -11527,6 +11782,22 @@
     <!-- PDF Generation Libraries -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <!-- Online Users Modal -->
+    <div class="modal fade" id="onlineUsersModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-sm">
+            <div class="modal-content v-card border-t-4 border-emerald-500">
+                <div class="modal-header border-0 pb-0">
+                    <h5 class="modal-title text-lg font-black uppercase tracking-tighter text-slate-900 dark:text-slate-100">Online Students</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <div id="online-users-list" class="space-y-3 max-h-[300px] overflow-y-auto pr-1">
+                        <!-- Injected -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </body>
 
 </html>
