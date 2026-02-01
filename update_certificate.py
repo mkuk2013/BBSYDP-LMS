@@ -88,7 +88,7 @@ new_template = """        <div id="certificate-template" class="w-[1123px] h-[79
                     </div>
 
                     <!-- Stats Row -->
-                    <div class="flex gap-12 text-center opacity-80">
+                    <div class="flex gap-12 text-center opacity-80 items-center">
                         <div>
                             <p class="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-1">Score</p>
                             <p id="cert-score" class="text-2xl font-black text-slate-700 font-['Cinzel']">98%</p>
@@ -98,6 +98,14 @@ new_template = """        <div id="certificate-template" class="w-[1123px] h-[79
                             <p class="text-[10px] font-bold uppercase text-slate-400 tracking-widest mb-1">Date</p>
                             <p id="cert-date" class="text-2xl font-bold text-slate-700 font-['Cinzel']">Jan 01, 2026</p>
                         </div>
+                         <div class="w-px h-10 bg-slate-200"></div>
+                        <div class="flex flex-col items-center">
+                             <!-- QR Code Container -->
+                             <div id="cert-qr-code" class="w-16 h-16 bg-white flex items-center justify-center overflow-hidden"></div>
+                             <p class="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Verify</p>
+                        </div>
+                    </div>
+                </div>
                     </div>
                 </div>
 

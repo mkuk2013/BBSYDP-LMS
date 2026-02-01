@@ -52,6 +52,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf-autotable/3.8.2/jspdf.plugin.autotable.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
     <script>
         // Standard UMD Alias
         window.jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
@@ -2742,6 +2743,15 @@
                                     <i data-lucide="download" class="w-5 h-5"></i>
                                     <span>Download Professional Certificate</span>
                                 </button>
+                                
+                                <div id="verify-link-container" class="hidden w-full mb-4 text-center">
+                                    <p class="text-xs text-slate-500 mb-2">Want to verify the authenticity of this certificate?</p>
+                                    <a href="verify.html" target="_blank" 
+                                       class="text-xs font-bold text-indigo-500 hover:text-indigo-600 hover:underline flex items-center justify-center gap-1">
+                                        <span>Verify Certificate Authenticity</span>
+                                        <i data-lucide="external-link" class="w-3 h-3"></i>
+                                    </a>
+                                </div>
 
                                 <button onclick="switchTab('dashboard')"
                                     class="w-full py-3 bg-slate-100 dark:bg-slate-800 hover:bg-slate-200 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 rounded-xl font-bold transition-colors">
@@ -11480,13 +11490,21 @@
             const percentage = Math.round((score / examQuestions.length) * 100);
             const passed = percentage >= 40;
 
+            // Generate unique Certificate ID if passed
+            let certId = null;
+            if (passed) {
+                 const randomPart = Math.floor(1000 + Math.random() * 9000); // 4 digit
+                 certId = "BBS-HTML-" + new Date().getFullYear() + "-" + randomPart;
+            }
+
             if (window.client && currentUser && userProfile) {
                 await window.client.from('exam_results').insert({
                     student_id: currentUser.id,
                     student_name: userProfile.name,
                     score: percentage,
                     total_marks: 100,
-                    status: passed ? 'PASS' : 'FAIL'
+                    status: passed ? 'PASS' : 'FAIL',
+                    certificate_id: certId
                 });
             }
 
@@ -11509,8 +11527,10 @@
             // Show Download Button if passed
             if (passed) {
                 $('#btn-download-cert').removeClass('hidden');
+                $('#verify-link-container').removeClass('hidden');
             } else {
                 $('#btn-download-cert').addClass('hidden');
+                $('#verify-link-container').addClass('hidden');
             }
 
             lucide.createIcons();
@@ -11527,8 +11547,56 @@
             const name = (userProfile && userProfile.name) ? userProfile.name : "Student Name";
             const score = $('#result-score').text();
             const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
-            // Generate a random ID for "authenticity"
-            const certId = "BBS-HTML-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
+            
+            // Fetch ID from Supabase
+            let certId = null;
+            try {
+                 const { data, error: fetchError } = await window.client.from('exam_results')
+                    .select('certificate_id, id')
+                    .eq('student_id', currentUser.id)
+                    .eq('status', 'PASS')
+                    .order('created_at', { ascending: false })
+                    .limit(1)
+                    .single();
+                 
+                 if (fetchError) {
+                     console.error("Error fetching exam result:", fetchError);
+                 } else if (data) {
+                     if (data.certificate_id && data.certificate_id.length > 5) {
+                         // Found existing valid ID
+                         certId = data.certificate_id;
+                     } else {
+                         // ID is missing or invalid, generate PERMANENT ID
+                         const randomPart = Math.floor(1000 + Math.random() * 9000);
+                         const newId = "BBS-HTML-" + new Date().getFullYear() + "-" + randomPart;
+                         
+                         // Attempt to save to Supabase
+                         const { error: updateError } = await window.client.from('exam_results')
+                            .update({ certificate_id: newId })
+                            .eq('id', data.id);
+                         
+                         if (updateError) {
+                             console.error("Failed to persist Certificate ID:", updateError);
+                             showToast("Database Error: Could not save Certificate ID. Verification will fail.", "error");
+                             // We still use the new ID for display, but warn the user
+                             certId = newId; 
+                         } else {
+                             console.log("Generated and saved new Certificate ID:", newId);
+                             certId = newId;
+                         }
+                     }
+                 } else {
+                     console.error("No passed exam record found for this user.");
+                     showToast("Error: No exam record found. Please contact support.", "error");
+                     return; // Stop execution if no record found
+                 }
+            } catch(e) { console.error("Cert ID logic error", e); }
+
+            // Final safety check
+            if (!certId) {
+                showToast("Critical Error: Could not retrieve Certificate ID.", "error");
+                return;
+            }
 
             // Populate Data
             $('#cert-student-name').text(name);
@@ -11557,6 +11625,26 @@
             clone.style.zIndex = '9999';
             clone.style.width = '1123px';
             clone.style.height = '794px'; // Match PDF size
+
+            // Generate QR Code INSIDE THE CLONE (Canvas content is not cloned)
+            try {
+                // Find the QR container in the clone
+                const qrContainer = clone.querySelector('#cert-qr-code');
+                if (qrContainer && window.QRCode) {
+                    qrContainer.innerHTML = ""; // Clear existing
+                    const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf('/')) + "/verify.html";
+                    const verifyUrl = baseUrl + "?id=" + certId;
+                    
+                    new QRCode(qrContainer, {
+                        text: verifyUrl,
+                        width: 64,
+                        height: 64,
+                        colorDark : "#0f172a",
+                        colorLight : "#ffffff",
+                        correctLevel : QRCode.CorrectLevel.M
+                    });
+                }
+            } catch(e) { console.error("QR Gen Error", e); }
 
             // Important: Ensure images in clone are loaded or have correct src
             // The cloneNode(true) copies attributes, but we need to ensure the signature image source is set if it was set via JS
@@ -11906,13 +11994,8 @@
                         </div>
                         <div class="w-px h-8 bg-slate-200"></div>
                         <div class="flex flex-col items-center">
-                             <!-- QR Code SVG -->
-                             <svg class="w-8 h-8 text-slate-800" viewBox="0 0 100 100" fill="currentColor">
-                                 <path d="M10 10h30v30H10zM60 10h30v30H60zM10 60h30v30H10z" />
-                                 <path d="M20 20h10v10H20zM70 20h10v10H70zM20 70h10v10H20z" fill="#fff" />
-                                 <path d="M22 22h6v6h-6zM72 22h6v6h-6zM22 72h6v6h-6z" />
-                                 <path d="M50 50h10v10H50zM70 50h10v10H70zM50 70h10v10H50zM80 80h10v10H80zM60 60h10v10H60zM80 60h10v10H80zM60 80h10v10H60z" />
-                             </svg>
+                             <!-- QR Code Container -->
+                             <div id="cert-qr-code" class="w-16 h-16 bg-white flex items-center justify-center overflow-hidden"></div>
                              <p class="text-[7px] font-bold text-slate-400 uppercase tracking-widest mt-0.5">Verify</p>
                         </div>
                     </div>
