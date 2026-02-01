@@ -255,6 +255,15 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
 
+        /* UpDown Animation for Loader */
+        @keyframes updown {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        .animate-updown {
+            animation: updown 2.5s ease-in-out infinite;
+        }
+
         :root {
             --plus-indigo: #6366f1;
             --plus-indigo-glow: rgba(99, 102, 241, 0.15);
@@ -1723,17 +1732,21 @@
 <body class="bg-slate-50 dark:bg-[#0b1120] text-slate-950 dark:text-slate-100 font-sans">
 
     <!-- GLOBAL LOADER -->
-    <div id="global-loader" class="fixed inset-0 bg-white dark:bg-[#0b1120] z-[9999] flex items-center justify-center">
-        <div class="loader">
-            <div>
-                <ul>
-                    <li>
-                        <svg fill="currentColor" viewBox="0 0 90 120">
-                            <path
-                                d="M90,0 L90,120 L11,120 C4.92486775,120 0,115.075132 0,109 L0,11 C0,4.92486775 4.92486775,0 11,0 L90,0 Z M71.5,81 L18.5,81 C17.1192881,81 16,82.1192881 16,83.5 C16,84.8254834 17.0315359,85.9100387 18.3356243,85.9946823 L18.5,86 L71.5,86 C72.8807119,86 74,84.8807119 74,83.5 C74,82.1745166 72.9684641,81.0899613 71.6643757,81.0053177 L71.5,81 Z M71.5,57 L18.5,57 C17.1192881,57 16,58.1192881 16,59.5 C16,60.8254834 17.0315359,61.9100387 18.3356243,61.9946823 L18.5,62 L71.5,62 C72.8807119,62 74,60.8807119 74,59.5 C74,58.1192881 72.8807119,57 71.5,57 Z M71.5,33 L18.5,33 C17.1192881,33 16,34.1192881 16,35.5 C16,36.8254834 17.0315359,37.9100387 18.3356243,37.9946823 L18.5,38 L71.5,38 C72.8807119,38 74,36.8807119 74,35.5 C74,34.1192881 72.8807119,33 71.5,33 Z">
-                            </path>
-                        </svg>
-                    </li>
+    <div id="global-loader" class="fixed inset-0 z-[9999] bg-slate-50 dark:bg-[#0b1120] flex flex-col items-center justify-center transition-opacity duration-700">
+        <div class="relative flex flex-col items-center translate-y-16">
+            <!-- Logo with UpDown Animation -->
+            <div class="animate-updown -mb-5 relative">
+                 <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-32 h-32 object-contain relative z-10">
+            </div>
+            
+            <!-- Loading Text -->
+            <div class="flex flex-col items-center gap-2">
+                <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em] animate-pulse">Please wait loading...</span>
+            </div>
+        </div>
+    </div>
+    <!-- OLD LOADER REMOVED
+
                     <li>
                         <svg fill="currentColor" viewBox="0 0 90 120">
                             <path
@@ -1760,6 +1773,7 @@
             <span>Loading</span>
         </div>
     </div>
+    -->
 
 
 
@@ -1959,7 +1973,7 @@
                     data-tooltip="My Storage">
                     <i data-lucide="hard-drive" class="w-5 h-5"></i> <span class="hide-on-collapse">My Storage</span>
                 </button>
-                <a href="verify.html" target="_blank" class="nav-item w-full" data-tooltip="Verify Certificate">
+                <a href="verify.html" id="nav-verify" target="_blank" class="nav-item w-full" data-tooltip="Verify Certificate">
                     <i data-lucide="shield-check" class="w-5 h-5"></i> <span class="hide-on-collapse">Verify Certificate</span>
                 </a>
 
@@ -5350,9 +5364,9 @@
                 $('#nav-tasks').removeClass('hidden').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> <span class="hide-on-collapse">Manage Tasks</span>');
                 // Admin Storage View
                 $('#nav-storage').html('<i data-lucide="database" class="w-5 h-5"></i> <span class="hide-on-collapse">Student\'s Storage</span>').attr('data-tooltip', 'Student Files');
-                $('#nav-arcade, #nav-playground').addClass('hidden');
+                $('#nav-arcade, #nav-playground, #nav-verify').addClass('hidden');
             } else {
-                $('#nav-dashboard, #nav-tasks, #nav-leaderboard, #nav-resources, #profile-tab, #nav-arcade, #nav-playground').removeClass('hidden');
+                $('#nav-dashboard, #nav-tasks, #nav-leaderboard, #nav-resources, #profile-tab, #nav-arcade, #nav-playground, #nav-verify').removeClass('hidden');
                 $('#nav-tasks').html('<i data-lucide="clipboard-list" class="w-5 h-5"></i> <span class="hide-on-collapse">My Tasks</span>');
                 // Student Storage View
                 $('#nav-storage').html('<i data-lucide="hard-drive" class="w-5 h-5"></i> <span class="hide-on-collapse">My Storage</span>').attr('data-tooltip', 'My Storage');
