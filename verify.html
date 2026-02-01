@@ -178,6 +178,50 @@
 
     </main>
 
+    <!-- Global Footer -->
+    <footer class="mt-auto py-6 px-4 md:px-8">
+        <div class="bg-white dark:bg-[#1e293b] border border-slate-200 dark:border-slate-800 rounded-2xl p-4 md:p-5 flex flex-col md:flex-row items-center justify-between gap-4 shadow-sm relative overflow-hidden group">
+
+            <!-- Decorative Gradient Pulse -->
+            <div class="absolute top-0 left-0 w-1 h-full bg-gradient-to-b from-indigo-500 via-purple-500 to-indigo-500 opacity-50 group-hover:opacity-100 transition-opacity">
+            </div>
+
+            <!-- Left: System Identity -->
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center p-2 border border-indigo-100 dark:border-indigo-900/30">
+                    <img src="assets/bbsydp_logo.png" class="w-full h-full object-contain">
+                </div>
+                <div class="flex flex-col">
+                    <span class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-none mb-1">BBSHRRDB LMS <span class="text-indigo-500 text-[10px] ml-1">v2.0</span></span>
+                    <span class="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">© <span class="dynamic-year">2026</span> Super Systech Computers Umerkot</span>
+                </div>
+            </div>
+
+            <!-- Right: Creator Identity & Status -->
+            <div class="flex flex-col md:flex-row items-center gap-3 md:gap-6">
+
+                <div class="flex flex-col items-center md:items-end">
+                    <div class="text-[8px] font-bold text-slate-400 uppercase tracking-[0.2em] mb-0.5">Designed & Developed By</div>
+                    <div class="flex items-center gap-1.5">
+                        <span class="text-[11px] font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-widest">Mukesh Kumar</span>
+                        <i data-lucide="badge-check" class="w-3.5 h-3.5 text-indigo-500 fill-indigo-100 dark:fill-indigo-900/50"></i>
+                    </div>
+                </div>
+
+                <div class="hidden md:block w-px h-8 bg-slate-100 dark:bg-slate-800"></div>
+
+                <div class="flex items-center gap-2 px-3 py-1.5 bg-emerald-50 dark:bg-emerald-500/10 rounded-lg border border-emerald-100 dark:border-emerald-500/20">
+                    <div class="relative flex h-2 w-2">
+                        <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                        <span class="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                    </div>
+                    <span class="text-[9px] font-black uppercase text-emerald-600 dark:text-emerald-400 tracking-wider">Online</span>
+                </div>
+            </div>
+
+        </div>
+    </footer>
+
     <!-- Hidden element for file scanning -->
     <div id="file-reader" class="hidden"></div>
 
@@ -369,6 +413,12 @@
 
         // Auto-verify if URL has ID param
         window.onload = () => {
+            // Update Dynamic Year
+            const yearSpan = document.querySelector('.dynamic-year');
+            if (yearSpan) {
+                yearSpan.textContent = new Date().getFullYear();
+            }
+
             const urlParams = new URLSearchParams(window.location.search);
             const id = urlParams.get('id');
             if (id) {
