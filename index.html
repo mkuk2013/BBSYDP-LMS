@@ -9348,7 +9348,9 @@
         };
 
         window.renderNotifications = () => {
-            const list = $('#notification-list').empty();
+            const list = $('#notification-list');
+            if (!list.length) return;
+            list.empty();
 
             // CHECK CLEARED STATE
             if (localStorage.getItem('notifications_cleared') === 'true') {
@@ -9360,15 +9362,18 @@
                          <p class="text-[9px] font-black uppercase tracking-widest opacity-50">No new notifications</p>
                     </div>
                 `);
-                lucide.createIcons();
+                if (window.lucide) lucide.createIcons();
                 return;
             }
 
             // Filter pending submissions
-            // DEDUPLICATION: Only count latest submission per task
             const uniquePendingMap = new Map();
-            (window.allSubmissions || []).forEach(s => {
-                const key = `${s.student_id}_${s.task_id}`;
+            const submissions = window.allSubmissions || [];
+            
+            submissions.forEach(s => {
+                if (!s || !s.student_id || !s.task_id) return;
+                // Use concatenation to avoid potential template literal parsing issues with weird characters
+                const key = String(s.student_id) + '_' + String(s.task_id);
                 const existing = uniquePendingMap.get(key);
                 // Keep the NEWER one
                 if (!existing || new Date(s.submitted_at) > new Date(existing.submitted_at)) {
@@ -9392,18 +9397,30 @@
                          <p class="text-[9px] font-black uppercase tracking-widest opacity-50">No new notifications</p>
                     </div>
                 `);
-                lucide.createIcons();
+                if (window.lucide) lucide.createIcons();
                 return;
             }
 
+            const escapeHtml = (unsafe) => {
+                return String(unsafe || '').replace(/&/g, "&amp;")
+                    .replace(/</g, "&lt;")
+                    .replace(/>/g, "&gt;")
+                    .replace(/"/g, "&quot;")
+                    .replace(/'/g, "&#039;");
+            };
+
             pending.forEach(s => {
                 const timeAgo = (() => {
-                    const mins = Math.floor((new Date() - new Date(s.submitted_at)) / 60000);
-                    if (mins < 60) return `${mins}m ago`;
+                    const diff = new Date() - new Date(s.submitted_at);
+                    const mins = Math.floor(diff / 60000);
+                    if (mins < 60) return mins + 'm ago';
                     const hours = Math.floor(mins / 60);
-                    if (hours < 24) return `${hours}h ago`;
-                    return `${Math.floor(hours / 24)}d ago`;
+                    if (hours < 24) return hours + 'h ago';
+                    return Math.floor(hours / 24) + 'd ago';
                 })();
+
+                const safeName = escapeHtml(s.student_name || 'Student');
+                const safeTitle = escapeHtml(s.task_title || 'Task');
 
                 const notifHtml = `
                     <div onclick="switchTab('grading'); window.toggleNotifications()" class="p-3 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800/50 cursor-pointer group transition-colors border border-transparent hover:border-slate-100 dark:hover:border-slate-800">
@@ -9412,8 +9429,8 @@
                                 <i data-lucide="file-text" class="w-4 h-4"></i>
                             </div>
                             <div class="min-w-0 flex-1">
-                                <h5 class="text-[10px] font-black uppercase text-slate-900 dark:text-slate-200 leading-none mb-1 truncate">${s.student_name}</h5>
-                                <p class="text-[9px] text-slate-500 font-medium leading-tight line-clamp-2">Submitted: <span class="text-indigo-500">${s.task_title}</span></p>
+                                <h5 class="text-[10px] font-black uppercase text-slate-900 dark:text-slate-200 leading-none mb-1 truncate">${safeName}</h5>
+                                <p class="text-[9px] text-slate-500 font-medium leading-tight line-clamp-2">Submitted: <span class="text-indigo-500">${safeTitle}</span></p>
                                 <p class="text-[8px] text-slate-400 font-bold uppercase tracking-widest mt-1.5">${timeAgo}</p>
                             </div>
                             <div class="w-1.5 h-1.5 rounded-full bg-indigo-500 mt-1.5"></div>
@@ -9422,7 +9439,7 @@
                 `;
                 list.append(notifHtml);
             });
-            lucide.createIcons();
+            if (window.lucide) lucide.createIcons();
         };
 
         window.markAllRead = () => {
@@ -11740,8 +11757,20 @@
                 return;
             }
 
+            // Deduplicate: Keep only the latest result per student
+            const uniqueData = [];
+            const seenStudents = new Set();
+            
+            data.forEach(item => {
+                const identifier = item.student_id || item.student_name;
+                if (identifier && !seenStudents.has(identifier)) {
+                    seenStudents.add(identifier);
+                    uniqueData.push(item);
+                }
+            });
+
             tbody.empty();
-            data.forEach(row => {
+            uniqueData.forEach(row => {
                 const date = new Date(row.created_at).toLocaleDateString();
                 const isPass = row.status === 'PASS';
                 const tr = `
