@@ -1,4 +1,4 @@
-﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -1824,7 +1824,7 @@
         <div
             class="v-card w-full max-w-[380px] px-8 pb-8 pt-2 shadow-2xl bg-white dark:bg-[#1e293b] animate-in fade-in zoom-in duration-500">
             <div class="text-center mb-6">
-                <div class="inline-flex items-center justify-center w-32 h-32 mt-0 -mb-10">
+                <div class="inline-flex items-center justify-center w-32 h-32 mt-10 mb-0">
                     <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-full h-full object-contain">
                 </div>
                 <h1 class="font-black text-2xl tracking-tighter uppercase leading-none text-slate-800 dark:text-white">
@@ -1992,9 +1992,6 @@
                     data-tooltip="My Storage">
                     <i data-lucide="hard-drive" class="w-5 h-5"></i> <span class="hide-on-collapse">My Storage</span>
                 </button>
-                <a href="verify.html" id="nav-verify" target="_blank" class="nav-item w-full" data-tooltip="Verify Certificate">
-                    <i data-lucide="shield-check" class="w-5 h-5"></i> <span class="hide-on-collapse">Verify Certificate</span>
-                </a>
 
 
 
@@ -4132,6 +4129,20 @@
                         <p class="text-xs text-slate-500 font-bold px-4">We've sent a recovery link to your email
                             address.</p>
                     </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="modal fade" id="onlineUsersModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered">
+            <div class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
+                <div class="modal-header border-0 p-6 pb-0">
+                    <h5 class="modal-title font-black text-lg text-slate-900 dark:text-slate-100 tracking-tight">Online Students</h5>
+                    <button type="button" class="btn-close dark:btn-close-white" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body p-6">
+                    <div id="online-users-list" class="space-y-3"></div>
                 </div>
             </div>
         </div>
