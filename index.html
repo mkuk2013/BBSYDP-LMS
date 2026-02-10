@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -189,6 +189,57 @@
             // Replace newlines with break tags
             processed = processed.replace(/\n/g, '<br>');
             return processed;
+        };
+
+        // Helper to format teacher hints (splits by emoji or newlines)
+        window.formatTeacherHints = (text) => {
+            if (!text) return "No Teacher Hints Provided.";
+            
+            // Regex to find emojis (bullets)
+            const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
+            
+            // If no emojis, check for newlines
+            if (!emojiRegex.test(text)) {
+                if (text.includes('\n')) {
+                    return text.split('\n').filter(line => line.trim()).map(line => 
+                        `<div class="mb-2 flex items-start gap-3">
+                            <div class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 mt-2"></div>
+                            <span class="leading-relaxed text-slate-700 dark:text-slate-300">${line.trim()}</span>
+                        </div>`
+                    ).join('');
+                }
+                return `<p class="leading-relaxed text-slate-700 dark:text-slate-300">${text}</p>`;
+            }
+
+            // Split by Emoji
+            const parts = text.split(emojiRegex);
+            let html = '<div class="space-y-4">'; // Increased spacing for cleaner look
+            
+            // Handle prefix
+            if (parts[0] && parts[0].trim()) {
+                html += `<div class="mb-3 text-slate-700 dark:text-slate-300 font-medium">${parts[0].trim()}</div>`;
+            }
+
+            for (let i = 1; i < parts.length; i += 2) {
+                const emoji = parts[i];
+                const content = parts[i+1] ? parts[i+1].trim() : "";
+                
+                if (emoji) {
+                    html += `
+                        <div class="flex gap-4 group">
+                            <div class="flex-shrink-0 w-10 h-10 rounded-xl bg-white dark:bg-slate-800 flex items-center justify-center text-xl shadow-sm border border-slate-100 dark:border-slate-700 group-hover:scale-110 transition-transform duration-300">
+                                ${emoji}
+                            </div>
+                            <div class="pt-1 flex-1">
+                                <p class="text-sm text-slate-600 dark:text-slate-300 leading-relaxed font-medium">
+                                    ${content}
+                                </p>
+                            </div>
+                        </div>`;
+                }
+            }
+            html += '</div>';
+            return html;
         };
 
         // UI Helpers (Inlined for reliability)
@@ -420,14 +471,14 @@
             display: flex;
             align-items: center;
             justify-content: flex-start;
-            width: 32px;
-            height: 32px;
+            width: 35px;
+            height: 35px;
             border: none;
             border-radius: 50%;
             cursor: pointer;
             position: relative;
             overflow: hidden;
-            transition-duration: .3s;
+            transition-duration: .4s;
             box-shadow: 2px 2px 10px rgba(0, 0, 0, 0.199);
             background-color: rgb(255, 65, 65);
         }
@@ -435,14 +486,15 @@
         /* plus sign */
         .sign {
             width: 100%;
-            transition-duration: .3s;
+            height: 100%;
+            transition-duration: .4s;
             display: flex;
             align-items: center;
             justify-content: center;
         }
 
         .sign svg {
-            width: 14px;
+            width: 16px;
         }
 
         .sign svg path {
@@ -456,30 +508,31 @@
             width: 0%;
             opacity: 0;
             color: white;
-            font-size: 10px;
+            font-size: 11px;
             font-weight: 700;
             text-transform: uppercase;
             letter-spacing: 0.05em;
-            transition-duration: .3s;
+            transition-duration: .4s;
         }
 
         /* hover effect on button width */
         .Btn:hover {
-            width: 90px;
+            width: 105px;
             border-radius: 40px;
-            transition-duration: .3s;
+            transition-duration: .4s;
+            background-color: #dc2626; /* Professional Red-600 */
         }
 
         /* OVERRIDE: Prevent expansion in Collapsed Mode */
         .sidebar.collapsed .Btn:hover {
-            width: 32px !important;
+            width: 35px !important;
             border-radius: 50% !important;
         }
 
         .Btn:hover .sign {
             width: 30%;
-            transition-duration: .3s;
-            padding-left: 15px;
+            transition-duration: .4s;
+            padding-left: 10px;
         }
 
         /* OVERRIDE: Keep sign centered in Collapsed Mode */
@@ -492,7 +545,7 @@
         .Btn:hover .text {
             opacity: 1;
             width: 70%;
-            transition-duration: .3s;
+            transition-duration: .4s;
             padding-right: 10px;
         }
 
@@ -1751,17 +1804,42 @@
 <body class="bg-slate-50 dark:bg-[#0b1120] text-slate-950 dark:text-slate-100 font-sans">
 
     <!-- GLOBAL LOADER -->
-    <div id="global-loader" class="fixed inset-0 z-[9999] bg-slate-50 dark:bg-[#0b1120] flex flex-col items-center justify-center transition-opacity duration-700">
-        <div class="relative flex flex-col items-center translate-y-16">
-            <!-- Logo with UpDown Animation -->
-            <div class="animate-updown -mb-5 relative">
-                 <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-32 h-32 object-contain relative z-10">
+    <div id="global-loader" class="fixed inset-0 z-[9999] bg-slate-50/95 dark:bg-[#0b1120]/95 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-700">
+        <style>
+            @keyframes reverse-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+            .animate-reverse-spin { animation: reverse-spin 3s linear infinite; }
+            @keyframes slide-bar { 0% { transform: translateX(-100%); } 50% { transform: translateX(100%); } 100% { transform: translateX(300%); } }
+            .animate-slide-bar { animation: slide-bar 2s ease-in-out infinite; }
+        </style>
+        
+        <div class="relative flex items-center justify-center mb-8">
+            <!-- Ambient Glow -->
+            <div class="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl animate-pulse"></div>
+
+            <!-- Outer Ring (Slow Reverse Spin) -->
+            <div class="w-28 h-28 rounded-full border border-slate-200 dark:border-slate-800 border-t-indigo-500/40 border-b-indigo-500/40 animate-reverse-spin"></div>
+            
+            <!-- Inner Ring (Fast Spin) -->
+            <div class="absolute inset-0 m-auto w-24 h-24 rounded-full border-2 border-transparent border-t-indigo-600 border-l-indigo-600/50 animate-spin"></div>
+            
+            <!-- Logo Centered with Glass Effect -->
+            <div class="absolute inset-0 flex items-center justify-center">
+                 <div class="bg-white/80 dark:bg-[#1e293b]/80 p-3 rounded-full backdrop-blur-sm shadow-lg ring-1 ring-white/20">
+                    <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-10 h-10 object-contain">
+                 </div>
+            </div>
+        </div>
+
+        <!-- Professional Text & Progress -->
+        <div class="flex flex-col items-center gap-4 z-10">
+            <h2 class="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">BBSHRRDB <span class="text-indigo-600">LMS</span></h2>
+            
+            <!-- Indeterminate Progress Bar -->
+            <div class="w-32 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
+                <div class="h-full bg-indigo-600 w-full animate-slide-bar"></div>
             </div>
             
-            <!-- Loading Text -->
-            <div class="flex flex-col items-center gap-2">
-                <span class="text-xs font-black text-indigo-600 dark:text-indigo-400 uppercase tracking-[0.3em] animate-pulse">Please wait loading...</span>
-            </div>
+            <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Initializing...</p>
         </div>
     </div>
     <!-- OLD LOADER REMOVED
@@ -4240,9 +4318,9 @@
                         <div class="space-y-1.5">
                             <label class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1">Hints
                                 (Optional)</label>
-                            <input type="text" id="new-task-hints"
-                                class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-[11px] font-semibold"
-                                placeholder="Helpful tips...">
+                            <textarea id="new-task-hints" rows="3"
+                                class="w-full p-3 bg-slate-50 dark:bg-slate-800 rounded-xl border border-slate-100 dark:border-slate-800 focus:ring-2 focus:ring-indigo-500 outline-none transition-all text-[11px] font-semibold resize-none"
+                                placeholder="Helpful tips..."></textarea>
                         </div>
                         <button type="submit" id="task-submit-btn" class="w-full btn-command mt-2">Create Task</button>
                     </form>
@@ -4287,8 +4365,8 @@
                                 <i data-lucide="lightbulb" class="w-4 h-4"></i>
                                 <span class="text-[10px] font-black uppercase tracking-widest">Teacher's Hint</span>
                             </div>
-                            <p class="text-xs text-amber-800 dark:text-amber-300 font-medium italic" id="detail-hints">
-                            </p>
+                            <div class="text-xs text-amber-800 dark:text-amber-300 font-medium italic" id="detail-hints">
+                            </div>
                         </div>
                     </div>
 
@@ -7070,7 +7148,7 @@
             } else {
                 $('#detail-tags').empty().addClass('hidden');
             }
-            $('#detail-hints').html((t.hints || "No Teacher Hints Provided.").replace(/\n/g, '<br>'));
+            $('#detail-hints').html(formatTeacherHints(t.hints));
 
             // SHOW LOADER IN FOOTER
             // This prevents the "New Form" from flashing or appearing falsely while we check the DataBase
