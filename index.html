@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8152,14 +8152,28 @@
 
         window.downloadReport = (taskId) => {
             const currentUser = window.userProfile;
-            if (!currentUser) return;
+            if (!currentUser) {
+                console.error("[PDF] No user profile found.");
+                return;
+            }
 
-            const sub = window.allSubmissions.find(s => s.task_id == taskId && s.student_id === (currentUser.uid || currentUser.id));
+            console.log("[PDF] Generating report for taskId:", taskId, "User:", currentUser.uid || currentUser.id);
+
+            const sub = window.allSubmissions.find(s => {
+                const sTaskId = String(s.task_id);
+                const targetTaskId = String(taskId);
+                const sStudentId = String(s.student_id);
+                const targetStudentId = String(currentUser.uid || currentUser.id);
+                return sTaskId === targetTaskId && sStudentId === targetStudentId;
+            });
 
             if (!sub) {
+                console.error("[PDF] Submission not found in window.allSubmissions. Submissions count:", window.allSubmissions.length);
                 showToast("Submission details not found.");
                 return;
             }
+
+            console.log("[PDF] Found submission:", sub);
 
             // Use html2canvas via jsPDF.html() to support emojis
             const { jsPDF } = window.jspdf;
@@ -8184,7 +8198,9 @@
             const titleColor = '#4f46e5'; // Indigo 600
             // Apply Mojibake Fix to Feedback and Title
             const feedbackText = sub.feedback ? window.fixEncoding(sub.feedback).replace(/\n/g, '<br>') : "No feedback provided.";
-            const taskTitle = window.fixEncoding(sub.task_title);
+            const taskTitle = window.fixEncoding(sub.task_title || "Untitled Task");
+
+            console.log("[PDF] Content prepared. Task:", taskTitle);
 
             reportContainer.innerHTML = `
                 <div style="text-align: center; margin-bottom: 20pt; border-bottom: 2pt solid #e2e8f0; padding-bottom: 10pt;">
@@ -8212,21 +8228,47 @@
                 </div>
             `;
 
+            // Add to body and ensure it's visible but off-screen
+            reportContainer.style.visibility = 'visible';
+            reportContainer.style.opacity = '1';
+            reportContainer.style.zIndex = '9999'; // Bring to front but we will hide it with left
+            reportContainer.style.left = '0'; // Temporarily bring to view for capture
+            reportContainer.style.top = '-10000px'; // Way above the viewport
             document.body.appendChild(reportContainer);
+            console.log("[PDF] reportContainer appended to body. Width:", reportContainer.offsetWidth);
 
-            doc.html(reportContainer, {
-                callback: function (doc) {
+            // Using html2canvas directly to get a canvas first, then adding to PDF
+            // This is more reliable than doc.html() which can fail silently
+            setTimeout(async () => {
+                console.log("[PDF] Starting html2canvas capture...");
+                try {
+                    const canvas = await html2canvas(reportContainer, {
+                        scale: 2,
+                        useCORS: true,
+                        logging: true,
+                        backgroundColor: '#ffffff',
+                        width: reportContainer.offsetWidth,
+                        height: reportContainer.offsetHeight,
+                        windowWidth: 800
+                    });
+
+                    console.log("[PDF] Canvas created. Width:", canvas.width, "Height:", canvas.height);
+                    
+                    const imgData = canvas.toDataURL('image/png');
+                    const imgWidth = 555; // pt
+                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+
+                    doc.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
                     doc.save(`Task_Report_${taskId}.pdf`);
+                    console.log("[PDF] PDF saved successfully.");
+
+                } catch (error) {
+                    console.error("[PDF] Generation failed:", error);
+                    showToast("Failed to generate PDF. Please try again.");
+                } finally {
                     document.body.removeChild(reportContainer);
-                },
-                x: 20,
-                y: 20,
-                width: 555, // Target width in PDF units (pt)
-                windowWidth: 800, // Virtual window width for rendering
-                html2canvas: {
-                    scale: 4 // High resolution for crisp text and emojis
                 }
-            });
+            }, 500);
         };
 
         function renderFeedbackTable(feedbackList) {
