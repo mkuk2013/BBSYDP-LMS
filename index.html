@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -8984,10 +8984,52 @@ CREATE POLICY "Admins can view all files" ON personal_storage
         let isRenderingDirectory = false;
         let globalFileStatsCache = null;
 
+        /**
+         * 🔒 PROTECTED STORAGE UI CONFIGURATION
+         * Yeh section storage ki UI settings ko handle karta hai.
+         * Isay edit karte waqt dhyan rakhein taaki persistence kharab na ho.
+         */
+        const STORAGE_CONFIG_KEY = 'lms_admin_storage_config_v1';
+        
+        window.getStorageUIConfig = () => {
+            const defaults = {
+                gridClass: 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 p-4',
+                cardPadding: 'p-3',
+                iconSize: 'w-12 h-12',
+                folderIconSize: 'w-8 h-8',
+                titleSize: 'text-[11px]',
+                subtextSize: 'text-[9px]',
+                sortBy: 'recent',
+                version: '1.0'
+            };
+            try {
+                const saved = localStorage.getItem(STORAGE_CONFIG_KEY);
+                if (!saved) {
+                    // Pehli baar defaults save karein
+                    window.saveStorageUIConfig(defaults);
+                    return defaults;
+                }
+                return { ...defaults, ...JSON.parse(saved) };
+            } catch (e) { 
+                console.warn("Storage Config Load Error, using defaults");
+                return defaults; 
+            }
+        };
+
+        window.saveStorageUIConfig = (config) => {
+            try {
+                localStorage.setItem(STORAGE_CONFIG_KEY, JSON.stringify(config));
+            } catch (e) { console.error("Failed to save storage config:", e); }
+        };
+
+        // Initialize/Sync Settings on Load
+        const currentStorageConfig = window.getStorageUIConfig();
+
         window.renderStudentDirectory = async (searchTerm = '') => {
             if (isRenderingDirectory) return;
             isRenderingDirectory = true;
 
+            const config = window.getStorageUIConfig();
             const container = $('#storage-list');
             const emptyState = $('#storage-empty');
 
@@ -9003,9 +9045,9 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                     await fetchUsers();
                 }
 
-                // FORCE SHOW CONTAINER and RESET CLASSES for Grid View
+                // Apply Configured Grid Layout
                 container.removeClass('hidden divide-y divide-slate-100 dark:divide-slate-800')
-                        .addClass('grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 p-4')
+                        .addClass(config.gridClass)
                         .show();
                 emptyState.addClass('hidden');
 
@@ -9087,15 +9129,17 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                 } else {
                     const statsMap = globalFileStatsCache ? globalFileStatsCache.mapping : {};
                     
-                    // SORT BY RECENT ACTIVITY (Priority)
-                    students.sort((a, b) => {
-                        const aStats = statsMap[a.uid || a.id];
-                        const bStats = statsMap[b.uid || b.id];
-                        if (!aStats && !bStats) return 0;
-                        if (!aStats) return 1;
-                        if (!bStats) return -1;
-                        return new Date(bStats.lastUpload) - new Date(aStats.lastUpload);
-                    });
+                    // Apply Configured Sorting
+                    if (config.sortBy === 'recent') {
+                        students.sort((a, b) => {
+                            const aStats = statsMap[a.uid || a.id];
+                            const bStats = statsMap[b.uid || b.id];
+                            if (!aStats && !bStats) return 0;
+                            if (!aStats) return 1;
+                            if (!bStats) return -1;
+                            return new Date(bStats.lastUpload) - new Date(aStats.lastUpload);
+                        });
+                    }
 
                     let html = '';
                     students.forEach(student => {
@@ -9104,19 +9148,19 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                         
                         html += `
                             <div onclick="loadUserFiles('${id}', '${student.name.replace(/'/g, "\\'")}')" 
-                                 class="group flex flex-col items-center text-center p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all cursor-pointer">
+                                 class="group flex flex-col items-center text-center ${config.cardPadding} bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all cursor-pointer">
                                 
-                                <!-- Compact Folder Icon -->
-                                <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center mb-2 group-hover:bg-amber-500 transition-colors">
-                                    <i data-lucide="folder" class="w-8 h-8 text-amber-500 group-hover:text-white transition-colors"></i>
+                                <!-- Configurable Folder Icon -->
+                                <div class="${config.iconSize} bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center mb-2 group-hover:bg-amber-500 transition-colors">
+                                    <i data-lucide="folder" class="${config.folderIconSize} text-amber-500 group-hover:text-white transition-colors"></i>
                                 </div>
 
                                 <!-- Core Details -->
                                 <div class="w-full">
-                                    <h4 class="text-[11px] font-bold text-slate-800 dark:text-white truncate leading-tight group-hover:text-indigo-600 transition-colors">
+                                    <h4 class="${config.titleSize} font-bold text-slate-800 dark:text-white truncate leading-tight group-hover:text-indigo-600 transition-colors">
                                         ${student.name}
                                     </h4>
-                                    <p class="text-[9px] font-medium text-slate-400 mt-0.5">
+                                    <p class="${config.subtextSize} font-medium text-slate-400 mt-0.5">
                                         ${stats.count} Files
                                     </p>
                                 </div>
@@ -9132,6 +9176,9 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                 isRenderingDirectory = false;
             }
         };
+
+        // Sync logic verification: Ensure defaults are preserved if corrupted
+        if (!currentStorageConfig.version) window.saveStorageUIConfig(currentStorageConfig);
 
         // Instant Search Debounce
         let directorySearchTimer;
