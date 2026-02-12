@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -3767,6 +3767,7 @@
 
                                 <div id="storage-upload-area" class="group border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-8 transition-all duration-300 cursor-pointer bg-slate-50/50 dark:bg-slate-900/50 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 text-center">
                                     <input type="file" id="storage-file-input" class="hidden" multiple>
+                                    <input type="file" id="storage-replace-input" class="hidden">
                                     
                                     <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
                                         <i data-lucide="cloud-upload" class="w-8 h-8 text-indigo-500 group-hover:text-indigo-600"></i>
@@ -3777,7 +3778,7 @@
                                         Supports PDF, Images, Zip, Code
                                     </p>
                                     
-                                    <button type="button" class="pointer-events-none px-5 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105 uppercase tracking-wider">
+                                    <button type="button" onclick="$('#storage-file-input').click()" class="px-5 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105 uppercase tracking-wider">
                                         Browse Files
                                     </button>
                                     
@@ -3885,7 +3886,7 @@
                                 <i data-lucide="layout-grid" class="w-4 h-4"></i>
                             </button>
                         </div>
-                        <button onclick="loadUserFiles()" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                        <button onclick="loadUserFiles(window.currentViewingStudentId)" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
                             <i data-lucide="refresh-cw" class="w-3 h-3"></i>
                         </button>
                     </div>
@@ -7449,13 +7450,18 @@
                 console.error("fetchUsers Error:", error);
                 showToast("Failed to fetch students. Check console.");
             } else {
+                window.allUsersCache = users || []; // Cache users IMMEDIATELY after fetch
                 const studentCount = users ? users.filter(u => u.role === 'student').length : 0;
                 console.log(`Fetched ${users ? users.length : 0} total users. ${studentCount} are students.`);
+                
+                // CRITICAL: Ensure student directory is updated if storage is open
+                if ($('#view-storage').is(':visible') && userProfile.role === 'admin' && !window.currentViewingStudentId) {
+                    renderStudentDirectory();
+                }
             }
 
             const { data: progress } = await client.from('user_arcade_progress').select('*');
 
-            window.allUsersCache = users || [];
             window.allArcadeProgress = progress || [];
             renderUsers(window.allUsersCache);
         }
@@ -7555,6 +7561,7 @@
                         </td>
                         <td class="px-6 py-4 text-right space-x-1 whitespace-nowrap flex justify-end gap-1">
                              ${status === 'pending' ? `<button onclick="approveUser('${userId}')" class="p-2 text-emerald-500 hover:bg-emerald-50 dark:hover:bg-emerald-500/10 rounded-lg transition-all"><i data-lucide="shield-check" class="w-4 h-4"></i></button>` : ''}
+                            <button onclick="window.viewStudentFiles('${userId}', '${(u.name || "").replace(/'/g, "\\'")}')" class="p-2 text-blue-500 hover:bg-blue-50 dark:hover:bg-blue-500/10 rounded-lg transition-all" title="View Student Files"><i data-lucide="folder-open" class="w-4 h-4"></i></button>
                             <button onclick="window.adminResetPassword('${userId}', '${(u.name || "").replace(/'/g, "\\'")}')" class="p-2 text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Reset Credentials"><i data-lucide="key-round" class="w-4 h-4"></i></button>
                             <button onclick="window.adminResetExam('${userId}', '${(u.name || "").replace(/'/g, "\\'")}')" class="p-2 text-amber-500 hover:bg-amber-50 dark:hover:bg-amber-500/10 rounded-lg transition-all" title="Reset Exam"><i data-lucide="rotate-ccw" class="w-4 h-4"></i></button>
                             <button onclick="generateResult('${userId}')" class="p-2 text-teal-500 hover:bg-teal-50 dark:hover:bg-teal-500/10 rounded-lg transition-all" title="Intelligence Report"><i data-lucide="file-bar-chart-2" class="w-4 h-4"></i></button>
@@ -8150,125 +8157,164 @@
             doc.save(`BBSHRRDB_Performance_Report_${sanitizedName}_${reportDate}.pdf`);
         };
 
-        window.downloadReport = (taskId) => {
+        window.downloadReport = async (taskId) => {
             const currentUser = window.userProfile;
             if (!currentUser) {
                 console.error("[PDF] No user profile found.");
+                showToast("Please login first.");
                 return;
             }
 
-            console.log("[PDF] Generating report for taskId:", taskId, "User:", currentUser.uid || currentUser.id);
+            showToast("Generating Report... Please wait.", "info");
+            console.log("[PDF] Generating report for taskId:", taskId);
 
-            const sub = window.allSubmissions.find(s => {
-                const sTaskId = String(s.task_id);
-                const targetTaskId = String(taskId);
-                const sStudentId = String(s.student_id);
-                const targetStudentId = String(currentUser.uid || currentUser.id);
-                return sTaskId === targetTaskId && sStudentId === targetStudentId;
-            });
+            const uid = currentUser.uid || currentUser.id;
+            
+            // 1. Find submission (Cache or DB)
+            let sub = window.allSubmissions?.find(s => 
+                String(s.task_id) === String(taskId) && 
+                String(s.student_id) === String(uid)
+            );
 
             if (!sub) {
-                console.error("[PDF] Submission not found in window.allSubmissions. Submissions count:", window.allSubmissions.length);
-                showToast("Submission details not found.");
+                console.log("[PDF] Not in cache, fetching from DB...");
+                try {
+                    const { data, error } = await client
+                        .from('submissions')
+                        .select('*')
+                        .eq('task_id', taskId)
+                        .eq('student_id', uid)
+                        .maybeSingle();
+                    
+                    if (error) throw error;
+                    sub = data;
+                } catch (e) {
+                    console.error("[PDF] DB Fetch Error:", e);
+                }
+            }
+
+            if (!sub) {
+                console.error("[PDF] Submission not found.");
+                showToast("Report data not found.");
                 return;
             }
 
             console.log("[PDF] Found submission:", sub);
 
-            // Use html2canvas via jsPDF.html() to support emojis
+            // 2. Prepare Container
             const { jsPDF } = window.jspdf;
-            // Use 'pt' units for easier HTML-to-PDF mapping
             const doc = new jsPDF('p', 'pt', 'a4');
 
-            // Create a temporary container for the report
             const reportContainer = document.createElement('div');
-            // A4 width is approx 595pt. We use slightly less for margins if needed, 
-            // but here we'll set a fixed width and let jsPDF scale it.
-            reportContainer.style.width = '550pt'; 
-            reportContainer.style.padding = '30pt';
-            reportContainer.style.backgroundColor = '#ffffff';
-            // Important: Use fonts that support emojis on the OS
-            reportContainer.style.fontFamily = "'Segoe UI Emoji', 'Apple Color Emoji', 'Noto Color Emoji', 'Outfit', sans-serif";
-            reportContainer.style.position = 'absolute';
-            reportContainer.style.left = '-9999px';
+            reportContainer.id = "temp-pdf-report";
+            reportContainer.style.width = '800px'; // Fixed width for better scaling
+            reportContainer.style.padding = '40px';
+            reportContainer.style.background = '#ffffff';
+            reportContainer.style.position = 'fixed';
             reportContainer.style.top = '0';
+            reportContainer.style.left = '0';
+            reportContainer.style.zIndex = '-1'; // Behind everything
+            reportContainer.style.opacity = '1'; // Must be 1 for capture
+            reportContainer.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
             
-            // Build HTML Content
-            const gradeColor = '#10b981'; // Emerald 500
-            const titleColor = '#4f46e5'; // Indigo 600
-            // Apply Mojibake Fix to Feedback and Title
             const feedbackText = sub.feedback ? window.fixEncoding(sub.feedback).replace(/\n/g, '<br>') : "No feedback provided.";
             const taskTitle = window.fixEncoding(sub.task_title || "Untitled Task");
+            
+            const fetchBase64 = async (url) => {
+                try {
+                    const response = await fetch(url);
+                    const blob = await response.blob();
+                    return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onloadend = () => resolve(reader.result);
+                        reader.readAsDataURL(blob);
+                    });
+                } catch (e) { return null; }
+            };
 
-            console.log("[PDF] Content prepared. Task:", taskTitle);
+            const logoBase64 = await fetchBase64('assets/bbsydp_logo.png');
 
             reportContainer.innerHTML = `
-                <div style="text-align: center; margin-bottom: 20pt; border-bottom: 2pt solid #e2e8f0; padding-bottom: 10pt;">
-                    <h1 style="color: ${titleColor}; font-size: 22pt; font-weight: bold; margin: 0;">Task Performance Report</h1>
-                </div>
+                <div style="border: 2px solid #f1f5f9; padding: 40px; border-radius: 15px; position: relative; overflow: hidden;">
+                    <!-- Header Decor -->
+                    <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(90deg, #4f46e5, #06b6d4);"></div>
+                    
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 40px;">
+                        <div style="display: flex; align-items: center; gap: 20px;">
+                            ${logoBase64 ? `<img src="${logoBase64}" style="height: 60px;">` : ''}
+                            <div>
+                                <h2 style="margin: 0; color: #1e293b; font-size: 18pt; font-weight: 900; letter-spacing: -1px;">BBSHRRDB LMS</h2>
+                                <p style="margin: 0; color: #64748b; font-size: 9pt; font-weight: 700; text-transform: uppercase;">Performance Record</p>
+                            </div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #4f46e5; font-weight: 900; font-size: 10pt;">OFFICIAL REPORT</div>
+                            <div style="color: #94a3b8; font-size: 8pt; font-weight: 600;">Date: ${new Date().toLocaleDateString()}</div>
+                        </div>
+                    </div>
 
-                <div style="margin-bottom: 20pt; font-size: 12pt; color: #1e293b; line-height: 1.6;">
-                    <p style="margin: 5pt 0;"><strong>Student:</strong> ${currentUser.name}</p>
-                    <p style="margin: 5pt 0;"><strong>Task:</strong> ${taskTitle}</p>
-                    <p style="margin: 5pt 0;"><strong>Date:</strong> ${new Date(sub.submitted_at).toLocaleDateString()}</p>
-                </div>
+                    <div style="margin-bottom: 40px;">
+                        <div style="color: #64748b; font-size: 10pt; font-weight: 800; text-transform: uppercase; margin-bottom: 5px;">Task Title</div>
+                        <h1 style="margin: 0; color: #1e293b; font-size: 26pt; font-weight: 900; line-height: 1.1;">${taskTitle}</h1>
+                    </div>
 
-                <div style="margin-bottom: 20pt;">
-                    <h2 style="font-size: 14pt; font-weight: bold; color: #1e293b; margin-bottom: 5pt;">Grade</h2>
-                    <div style="font-size: 28pt; font-weight: bold; color: ${gradeColor};">${sub.grade}/100</div>
-                </div>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-bottom: 40px;">
+                        <div style="background: #f8fafc; padding: 25px; border-radius: 20px; border: 1px solid #e2e8f0;">
+                            <div style="color: #64748b; font-size: 9pt; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;">Student Information</div>
+                            <div style="color: #1e293b; font-size: 14pt; font-weight: 800;">${currentUser.name}</div>
+                            <div style="color: #94a3b8; font-size: 9pt; font-weight: 600; margin-top: 5px;">ID: ${uid.substring(0, 8).toUpperCase()}</div>
+                        </div>
+                        <div style="background: #4f46e5; padding: 25px; border-radius: 20px; color: white;">
+                            <div style="opacity: 0.8; font-size: 9pt; font-weight: 800; text-transform: uppercase; margin-bottom: 10px;">Final Grade</div>
+                            <div style="font-size: 32pt; font-weight: 900;">${sub.grade}<span style="font-size: 16pt; opacity: 0.7;">/100</span></div>
+                        </div>
+                    </div>
 
-                <div>
-                    <h2 style="font-size: 14pt; font-weight: bold; color: #1e293b; margin-bottom: 10pt;">Feedback</h2>
-                    <div style="font-size: 11pt; color: #334155; line-height: 1.5; white-space: pre-wrap;">${feedbackText}</div>
-                </div>
-                
-                <div style="margin-top: 40pt; font-size: 9pt; color: #94a3b8; text-align: center; border-top: 1pt solid #e2e8f0; padding-top: 10pt;">
-                    Generated by BBSHRRDB LMS
+                    <div style="background: #ffffff; padding: 30px; border-radius: 20px; border: 2px solid #f1f5f9; margin-bottom: 40px;">
+                        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+                            <div style="width: 30px; height: 30px; background: #e0e7ff; color: #4f46e5; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-weight: 900;">i</div>
+                            <h3 style="margin: 0; color: #1e293b; font-size: 11pt; font-weight: 800; text-transform: uppercase;">Instructor Feedback</h3>
+                        </div>
+                        <div style="color: #475569; font-size: 12pt; line-height: 1.6; font-style: italic;">"${feedbackText}"</div>
+                    </div>
+
+                    <div style="display: flex; justify-content: space-between; align-items: flex-end; margin-top: 60px;">
+                        <div>
+                            <div style="color: #94a3b8; font-size: 8pt; font-weight: 600; margin-bottom: 4px;">VERIFICATION CODE</div>
+                            <div style="font-family: monospace; color: #1e293b; font-size: 9pt; font-weight: 800; background: #f1f5f9; padding: 4px 10px; border-radius: 5px;">${sub.id}</div>
+                        </div>
+                        <div style="text-align: right;">
+                            <div style="color: #cbd5e1; font-size: 8pt; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">BBSHRRDB LMS V2.0</div>
+                        </div>
+                    </div>
                 </div>
             `;
 
-            // Add to body and ensure it's visible but off-screen
-            reportContainer.style.visibility = 'visible';
-            reportContainer.style.opacity = '1';
-            reportContainer.style.zIndex = '9999'; // Bring to front but we will hide it with left
-            reportContainer.style.left = '0'; // Temporarily bring to view for capture
-            reportContainer.style.top = '-10000px'; // Way above the viewport
             document.body.appendChild(reportContainer);
-            console.log("[PDF] reportContainer appended to body. Width:", reportContainer.offsetWidth);
 
-            // Using html2canvas directly to get a canvas first, then adding to PDF
-            // This is more reliable than doc.html() which can fail silently
             setTimeout(async () => {
-                console.log("[PDF] Starting html2canvas capture...");
                 try {
                     const canvas = await html2canvas(reportContainer, {
                         scale: 2,
                         useCORS: true,
-                        logging: true,
-                        backgroundColor: '#ffffff',
-                        width: reportContainer.offsetWidth,
-                        height: reportContainer.offsetHeight,
-                        windowWidth: 800
+                        logging: false,
+                        backgroundColor: '#ffffff'
                     });
 
-                    console.log("[PDF] Canvas created. Width:", canvas.width, "Height:", canvas.height);
-                    
-                    const imgData = canvas.toDataURL('image/png');
-                    const imgWidth = 555; // pt
-                    const imgHeight = (canvas.height * imgWidth) / canvas.width;
+                    const imgData = canvas.toDataURL('image/jpeg', 0.95);
+                    const pdfWidth = doc.internal.pageSize.getWidth();
+                    const pdfHeight = (canvas.height * pdfWidth) / canvas.width;
 
-                    doc.addImage(imgData, 'PNG', 20, 20, imgWidth, imgHeight);
-                    doc.save(`Task_Report_${taskId}.pdf`);
-                    console.log("[PDF] PDF saved successfully.");
-
-                } catch (error) {
-                    console.error("[PDF] Generation failed:", error);
-                    showToast("Failed to generate PDF. Please try again.");
+                    doc.addImage(imgData, 'JPEG', 0, 0, pdfWidth, pdfHeight);
+                    doc.save(`Performance_Report_${taskId}.pdf`);
+                    showToast("Report downloaded successfully!", "success");
+                } catch (err) {
+                    console.error("[PDF] Error:", err);
+                    showToast("Failed to generate PDF.", "error");
                 } finally {
                     document.body.removeChild(reportContainer);
                 }
-            }, 500);
+            }, 800);
         };
 
         function renderFeedbackTable(feedbackList) {
@@ -8799,6 +8845,713 @@
 
             if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
         };
+
+        // --- PERSONAL STORAGE LOGIC (CLOUDINARY + SUPABASE METADATA) ---
+        window.userFiles = [];
+        window.storageView = 'list';
+        window.storageFilter = 'all';
+        window.storageSort = 'date_desc';
+        window.currentViewingStudentId = null;
+
+        window.loadUserFiles = async (targetUserId = null, studentName = null) => {
+            if (!userProfile) return;
+            
+            // If Admin and no target user, show Student Directory
+            if (userProfile.role === 'admin' && !targetUserId) {
+                renderStudentDirectory();
+                return;
+            }
+
+            const uid = targetUserId || userProfile.uid || userProfile.id;
+            window.currentViewingStudentId = targetUserId;
+            
+            console.log("Loading files for UID:", uid, "Is Student View:", !!targetUserId);
+            
+            // Show storage UI elements that might have been hidden by Directory view
+            $('#storage-files-container').find('.p-5.border-b, .px-5.py-3.border-b').removeClass('hidden');
+
+            // Update UI Title if viewing student
+            if (targetUserId) {
+                $('#storage-page-title').html(`
+                    <div class="flex items-center gap-4">
+                        <button onclick="loadUserFiles()" 
+                                class="p-3 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-2xl shadow-sm hover:bg-slate-50 dark:hover:bg-slate-700 transition-all group">
+                            <i data-lucide="arrow-left" class="w-5 h-5 text-slate-600 dark:text-slate-400 group-hover:-translate-x-1 transition-transform"></i>
+                        </button>
+                        <div>
+                            <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">${studentName}</h1>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Student Repository Access</p>
+                        </div>
+                    </div>
+                `);
+                $('#storage-page-subtitle').addClass('hidden');
+                $('#storage-top-grid').addClass('hidden');
+                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            } else {
+                $('#storage-page-title').html(`
+                    <div class="flex items-center gap-5">
+                        <div class="relative">
+                            <div class="absolute -inset-1 bg-gradient-to-r from-blue-600 to-indigo-600 rounded-2xl blur opacity-20"></div>
+                            <div class="relative p-3.5 bg-white dark:bg-slate-900 rounded-2xl shadow-sm ring-1 ring-slate-200/50 dark:ring-slate-700/50">
+                                <i data-lucide="cloud" class="w-6 h-6 text-blue-600 dark:text-blue-400"></i>
+                            </div>
+                        </div>
+                        <div>
+                            <h1 class="text-2xl font-black text-slate-800 dark:text-white tracking-tight">Personal Storage</h1>
+                            <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-0.5">Secure Asset Management</p>
+                        </div>
+                    </div>
+                `);
+                $('#storage-page-subtitle').addClass('hidden');
+                $('#storage-top-grid').removeClass('hidden');
+                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            }
+
+            try {
+                // Fetch file metadata from Supabase table 'personal_storage'
+                let query = client.from('personal_storage').select('*').order('created_at', { ascending: false });
+                
+                // CRITICAL FIX: Ensure correct UID filtering
+                // If targetUserId is provided (Admin viewing student), use that.
+                // Otherwise use the current user's ID.
+                const effectiveUid = targetUserId || userProfile.uid || userProfile.id;
+                
+                if (userProfile.role !== 'admin' || (targetUserId && targetUserId !== userProfile.uid)) {
+                    query = query.eq('user_id', effectiveUid);
+                }
+
+                console.log("Supabase Query for UID:", effectiveUid);
+                const { data, error, status } = await query;
+
+                if (error) {
+                    if (status === 404 || error.message.includes('relation "personal_storage" does not exist')) {
+                        console.warn("CRITICAL: Supabase table 'personal_storage' is missing.");
+                        showToast("Storage system not initialized. (Table 'personal_storage' missing)", "error");
+                        
+                        // Log the SQL needed for the user
+                        console.log("%c ACTION REQUIRED: Run this SQL in Supabase SQL Editor:", "background: #ef4444; color: white; font-weight: bold; padding: 4px;");
+                        console.log(`
+-- 1. Create Table
+CREATE TABLE IF NOT EXISTS personal_storage (
+  id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
+  user_id UUID REFERENCES auth.users(id),
+  name TEXT NOT NULL,
+  url TEXT NOT NULL,
+  public_id TEXT,
+  size BIGINT,
+  type TEXT,
+  format TEXT,
+  created_at TIMESTAMPTZ DEFAULT NOW()
+);
+
+-- 2. Enable RLS
+ALTER TABLE personal_storage ENABLE ROW LEVEL SECURITY;
+
+-- 3. Create Safe Admin Check Function (Prevents Recursion)
+CREATE OR REPLACE FUNCTION check_admin_access()
+RETURNS BOOLEAN AS $$
+BEGIN
+  RETURN EXISTS (
+    SELECT 1 FROM profiles
+    WHERE uid = auth.uid() AND role = 'admin'
+  );
+END;
+$$ LANGUAGE plpgsql SECURITY DEFINER;
+
+-- 4. Set Policies
+DROP POLICY IF EXISTS "Users can manage their own files" ON personal_storage;
+CREATE POLICY "Users can manage their own files" ON personal_storage
+  FOR ALL USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Admins can view all files" ON personal_storage;
+CREATE POLICY "Admins can view all files" ON personal_storage
+  FOR SELECT USING (check_admin_access());
+                        `);
+                    } else {
+                        throw error;
+                    }
+                }
+
+                window.userFiles = data || [];
+                renderStorageList(window.userFiles);
+                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            } catch (err) {
+                console.error("Storage Load Error:", err);
+                renderStorageList([]);
+            }
+        };
+
+        let isRenderingDirectory = false;
+        let globalFileStatsCache = null;
+
+        window.renderStudentDirectory = async (searchTerm = '') => {
+            if (isRenderingDirectory) return;
+            isRenderingDirectory = true;
+
+            const container = $('#storage-list');
+            const emptyState = $('#storage-empty');
+
+            try {
+                // Show Loading State if cache is empty
+                if (!window.allUsersCache || window.allUsersCache.length === 0) {
+                    container.html(`
+                        <div class="col-span-full flex flex-col items-center justify-center py-20">
+                            <div class="w-16 h-16 border-4 border-indigo-600/10 border-t-indigo-600 rounded-full animate-spin mb-6"></div>
+                            <p class="text-xs font-black text-slate-400 animate-pulse uppercase tracking-[0.3em]">Syncing Directory</p>
+                        </div>
+                    `).show();
+                    await fetchUsers();
+                }
+
+                // FORCE SHOW CONTAINER and RESET CLASSES for Grid View
+                container.removeClass('hidden divide-y divide-slate-100 dark:divide-slate-800')
+                        .addClass('grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 p-4')
+                        .show();
+                emptyState.addClass('hidden');
+
+                // Update Header with Ultra-Professional Look (Compact)
+                if ($('#directory-search').length === 0 || !searchTerm) {
+                    $('#storage-page-title').html(`
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 w-full">
+                            <div class="flex items-center gap-3">
+                                <div class="w-10 h-10 bg-slate-900 dark:bg-white rounded-lg flex items-center justify-center">
+                                    <i data-lucide="folder-tree" class="w-5 h-5 text-white dark:text-slate-900"></i>
+                                </div>
+                                <div>
+                                    <h1 class="text-lg font-bold text-slate-900 dark:text-white leading-none">Student Directory</h1>
+                                    <p class="text-[9px] font-medium text-slate-500 uppercase tracking-widest mt-1">Cloud Assets</p>
+                                </div>
+                            </div>
+                            
+                            <div class="relative group min-w-[280px]">
+                                <i data-lucide="search" class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400"></i>
+                                <input type="text" id="directory-search" placeholder="Search student..." 
+                                       value="${searchTerm || ''}"
+                                       class="w-full pl-9 pr-3 py-2 bg-slate-100 dark:bg-slate-800/50 border-none rounded-lg text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-slate-200 dark:focus:ring-slate-700 transition-all outline-none"
+                                       oninput="debounceRenderDirectory(this.value)">
+                            </div>
+                        </div>
+                    `);
+                    $('#storage-page-subtitle, #storage-top-grid').addClass('hidden');
+                    $('#storage-files-container').find('.p-5.border-b, .px-5.py-3.border-b').addClass('hidden');
+                }
+
+                // Stats Fetch Logic (Cached)
+                if (!globalFileStatsCache || !searchTerm) {
+                    try {
+                        const { data: files } = await client.from('personal_storage').select('user_id, created_at');
+                        if (files) {
+                            let stats = { mapping: {}, total: files.length, activeToday: 0 };
+                            const today = new Date().setHours(0,0,0,0);
+                            
+                            files.forEach(f => {
+                                const uid = f.user_id;
+                                if (uid) {
+                                    if (!stats.mapping[uid]) {
+                                        stats.mapping[uid] = { count: 0, lastUpload: f.created_at };
+                                        if (new Date(f.created_at) > today) stats.activeToday++;
+                                    }
+                                    stats.mapping[uid].count++;
+                                    if (new Date(f.created_at) > new Date(stats.mapping[uid].lastUpload)) {
+                                        stats.mapping[uid].lastUpload = f.created_at;
+                                    }
+                                }
+                            });
+                            globalFileStatsCache = stats;
+                        }
+                    } catch (e) { console.error("Stats Error:", e); }
+                }
+
+                // Filter and Deduplicate Students
+                let studentsRaw = window.allUsersCache ? window.allUsersCache.filter(u => u.role === 'student') : [];
+                const studentMap = new Map();
+                studentsRaw.forEach(u => {
+                    const id = u.uid || u.id;
+                    if (!id) return;
+                    const name = (u.name || "").toLowerCase();
+                    if (searchTerm) {
+                        const s = searchTerm.toLowerCase();
+                        if (!name.includes(s) && !id.includes(s)) return;
+                    }
+                    if (!studentMap.has(id)) studentMap.set(id, u);
+                });
+                let students = Array.from(studentMap.values());
+
+                if (students.length === 0) {
+                    container.html(`
+                        <div class="col-span-full flex flex-col items-center justify-center py-20 text-center opacity-50">
+                            <i data-lucide="folder-x" class="w-12 h-12 text-slate-400 mb-4"></i>
+                            <h4 class="text-sm font-medium text-slate-500">No folders found</h4>
+                        </div>
+                    `);
+                } else {
+                    const statsMap = globalFileStatsCache ? globalFileStatsCache.mapping : {};
+                    
+                    // SORT BY RECENT ACTIVITY (Priority)
+                    students.sort((a, b) => {
+                        const aStats = statsMap[a.uid || a.id];
+                        const bStats = statsMap[b.uid || b.id];
+                        if (!aStats && !bStats) return 0;
+                        if (!aStats) return 1;
+                        if (!bStats) return -1;
+                        return new Date(bStats.lastUpload) - new Date(aStats.lastUpload);
+                    });
+
+                    let html = '';
+                    students.forEach(student => {
+                        const id = student.uid || student.id;
+                        const stats = statsMap[id] || { count: 0 };
+                        
+                        html += `
+                            <div onclick="loadUserFiles('${id}', '${student.name.replace(/'/g, "\\'")}')" 
+                                 class="group flex flex-col items-center text-center p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all cursor-pointer">
+                                
+                                <!-- Compact Folder Icon -->
+                                <div class="w-12 h-12 bg-amber-50 dark:bg-amber-900/20 rounded-lg flex items-center justify-center mb-2 group-hover:bg-amber-500 transition-colors">
+                                    <i data-lucide="folder" class="w-8 h-8 text-amber-500 group-hover:text-white transition-colors"></i>
+                                </div>
+
+                                <!-- Core Details -->
+                                <div class="w-full">
+                                    <h4 class="text-[11px] font-bold text-slate-800 dark:text-white truncate leading-tight group-hover:text-indigo-600 transition-colors">
+                                        ${student.name}
+                                    </h4>
+                                    <p class="text-[9px] font-medium text-slate-400 mt-0.5">
+                                        ${stats.count} Files
+                                    </p>
+                                </div>
+                            </div>
+                        `;
+                    });
+                    container.html(html);
+                }
+                if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
+            } catch (err) {
+                console.error("Directory Error:", err);
+            } finally {
+                isRenderingDirectory = false;
+            }
+        };
+
+        // Instant Search Debounce
+        let directorySearchTimer;
+        window.debounceRenderDirectory = (val) => {
+            clearTimeout(directorySearchTimer);
+            directorySearchTimer = setTimeout(() => {
+                renderStudentDirectory(val);
+            }, 300);
+        };
+
+        window.viewStudentFiles = (studentId, studentName) => {
+            if (!userProfile || userProfile.role !== 'admin') return;
+            switchTab('storage');
+            loadUserFiles(studentId, studentName);
+        };
+
+        window.renameFile = async (fileId, currentName) => {
+            const newName = prompt("Enter new name for the file:", currentName);
+            if (!newName || newName === currentName) return;
+
+            try {
+                const { error } = await client
+                    .from('personal_storage')
+                    .update({ name: newName })
+                    .eq('id', fileId);
+
+                if (error) throw error;
+                showToast("File renamed successfully.");
+                loadUserFiles(window.currentViewingStudentId);
+            } catch (err) {
+                console.error("Rename Error:", err);
+                showToast("Failed to rename file.", "error");
+            }
+        };
+
+        window.replacingFileId = null;
+        window.replaceFile = (fileId) => {
+            window.replacingFileId = fileId;
+            $('#storage-replace-input').click();
+        };
+
+        window.handleReplaceUpload = async (fileId, file) => {
+            if (!file || !fileId) return;
+            if (!userProfile) return showToast("Please login.", "error");
+
+            const uid = userProfile.uid || userProfile.id;
+            const CLOUD_NAME = "dlm3iaqjn";
+            const UPLO_PRESET = "lms_assignments";
+
+            $('#storage-upload-progress').removeClass('hidden');
+            $('#storage-upload-percent').text(`0%`);
+            $('#storage-progress-bar').css('width', `0%`);
+
+            try {
+                // 1. Upload new file to Cloudinary
+                const formData = new FormData();
+                formData.append('file', file);
+                formData.append('upload_preset', UPLO_PRESET);
+                formData.append('folder', `personal_storage/${uid}`);
+
+                const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const cloudinaryData = await res.json();
+                if (cloudinaryData.error) throw new Error(cloudinaryData.error.message);
+
+                // 2. Update metadata in Supabase
+                const { error: dbError } = await client
+                    .from('personal_storage')
+                    .update({
+                        name: file.name,
+                        url: cloudinaryData.secure_url,
+                        size: file.size,
+                        type: file.type,
+                        created_at: new Date().toISOString()
+                    })
+                    .eq('id', fileId);
+
+                if (dbError) throw dbError;
+
+                showToast("File updated successfully!", "success");
+                loadUserFiles(window.currentViewingStudentId);
+            } catch (err) {
+                console.error("Replace Error:", err);
+                showToast(`Failed to update file: ${err.message}`, "error");
+            } finally {
+                $('#storage-upload-progress').addClass('hidden');
+                $('#storage-replace-input').val(''); // Reset input
+            }
+        };
+
+        window.uploadFile = async (files) => {
+            if (!files || files.length === 0) return;
+            if (!userProfile) return showToast("Please login to upload files.", "error");
+
+            const uid = userProfile.uid || userProfile.id;
+            const CLOUD_NAME = "dlm3iaqjn";
+            const UPLO_PRESET = "lms_assignments";
+
+            $('#storage-upload-progress').removeClass('hidden');
+            let successCount = 0;
+
+            for (let i = 0; i < files.length; i++) {
+                const file = files[i];
+                const percent = Math.round(((i) / files.length) * 100);
+                $('#storage-upload-percent').text(`${percent}%`);
+                $('#storage-progress-bar').css('width', `${percent}%`);
+
+                try {
+                    // 1. Upload to Cloudinary
+                    const formData = new FormData();
+                    formData.append('file', file);
+                    formData.append('upload_preset', UPLO_PRESET);
+                    formData.append('folder', `personal_storage/${uid}`);
+
+                    const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
+                        method: 'POST',
+                        body: formData
+                    });
+                    
+                    const cloudinaryData = await res.json();
+                    if (cloudinaryData.error) throw new Error(cloudinaryData.error.message);
+
+                    // 2. Save metadata to Supabase
+                    const { error: dbError, status: dbStatus } = await client
+                        .from('personal_storage')
+                        .insert([{
+                            user_id: uid,
+                            name: file.name,
+                            url: cloudinaryData.secure_url,
+                            size: file.size,
+                            type: file.type,
+                            created_at: new Date().toISOString()
+                        }]);
+
+                    if (dbError) {
+                        if (dbStatus === 404 || dbError.message.includes('relation "personal_storage" does not exist')) {
+                             showToast("Critical Error: Database table 'personal_storage' not found.", "error");
+                             throw new Error("Table 'personal_storage' missing. Check console for SQL setup.");
+                        }
+                        throw dbError;
+                    }
+                    successCount++;
+                } catch (err) {
+                    console.error("Upload Error:", err);
+                    showToast(`Failed to upload ${file.name}: ${err.message}`, "error");
+                }
+            }
+
+            $('#storage-upload-percent').text(`100%`);
+            $('#storage-progress-bar').css('width', `100%`);
+            
+            setTimeout(() => {
+                $('#storage-upload-progress').addClass('hidden');
+                $('#storage-progress-bar').css('width', `0%`);
+                if (successCount > 0) {
+                    showToast(`Successfully uploaded ${successCount} file(s)!`, "success");
+                    loadUserFiles(window.currentViewingStudentId);
+                }
+            }, 1000);
+        };
+
+        window.deleteFile = async (fileId) => {
+            if (!confirm("Are you sure you want to delete this file from your storage?")) return;
+            
+            try {
+                // Remove from Supabase (Metadata)
+                const { error } = await client
+                    .from('personal_storage')
+                    .delete()
+                    .eq('id', fileId);
+
+                if (error) throw error;
+                
+                showToast("File removed from storage.");
+                loadUserFiles(window.currentViewingStudentId);
+                
+                // Note: Deleting from Cloudinary requires a signed request or Admin API 
+                // which is usually handled via an Edge Function/Backend for security.
+                // For now, we remove the record from our database.
+            } catch (err) {
+                console.error("Delete Error:", err);
+                showToast("Failed to delete file.", "error");
+            }
+        };
+
+        window.downloadFile = (url) => {
+            window.open(url, '_blank');
+        };
+
+        window.renderStorageList = (files) => {
+            const container = $('#storage-list');
+            const emptyState = $('#storage-empty');
+            const countDisplay = $('#storage-count');
+            const usageBar = $('#storage-usage-bar');
+            const usageText = $('#storage-usage-text');
+            const usagePercentText = $('#storage-usage-percent');
+
+            container.empty();
+            countDisplay.text(files.length);
+
+            // Calculate usage (fake 100MB limit)
+            const totalSize = files.reduce((acc, f) => acc + (f.size || 0), 0);
+            const usagePercent = Math.min(Math.round((totalSize / (100 * 1024 * 1024)) * 100), 100);
+            usageBar.css('width', `${usagePercent}%`);
+            usagePercentText.text(`${usagePercent}%`);
+            usageText.text(`${formatBytes(totalSize)} of 100 MB Used`);
+
+            // Filter
+            let filtered = files;
+            if (window.storageFilter !== 'all') {
+                const types = {
+                    'image': ['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'],
+                    'document': ['pdf', 'doc', 'docx', 'txt', 'rtf', 'odt'],
+                    'archive': ['zip', 'rar', '7z', 'tar', 'gz'],
+                    'code': ['html', 'css', 'js', 'py', 'php', 'json', 'sql']
+                };
+                filtered = files.filter(f => {
+                    const ext = f.name.split('.').pop().toLowerCase();
+                    return types[window.storageFilter].includes(ext);
+                });
+            }
+
+            // Search
+            const query = $('#storage-search').val()?.toLowerCase();
+            if (query) {
+                filtered = filtered.filter(f => f.name.toLowerCase().includes(query));
+            }
+
+            // Sort
+            filtered.sort((a, b) => {
+                if (window.storageSort === 'date_desc') return new Date(b.created_at) - new Date(a.created_at);
+                if (window.storageSort === 'date_asc') return new Date(a.created_at) - new Date(b.created_at);
+                if (window.storageSort === 'name_asc') return a.name.localeCompare(b.name);
+                if (window.storageSort === 'size_desc') return (b.size || 0) - (a.size || 0);
+                return 0;
+            });
+
+            if (filtered.length === 0) {
+                emptyState.removeClass('hidden');
+                container.addClass('hidden');
+                
+                // Customize empty state message if viewing a student
+                if (window.currentViewingStudentId) {
+                    emptyState.find('h5').text('Student storage is empty');
+                    emptyState.find('p').text('This student has not uploaded any files yet.');
+                } else {
+                    emptyState.find('h5').text('Your personal storage is empty');
+                    emptyState.find('p').text('Upload your first file to get started.');
+                }
+                return;
+            }
+
+            emptyState.addClass('hidden');
+            container.removeClass('hidden');
+
+            if (window.storageView === 'grid') {
+                container.addClass('grid grid-cols-2 md:grid-cols-4 gap-4 p-5').removeClass('divide-y divide-slate-100 dark:divide-slate-800 lg:grid-cols-5 p-6');
+            } else {
+                container.removeClass('grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 p-5 p-6').addClass('divide-y divide-slate-100 dark:divide-slate-800');
+            }
+
+            filtered.forEach(file => {
+                const ext = file.name.split('.').pop().toLowerCase();
+                const size = formatBytes(file.size || 0);
+                const date = new Date(file.created_at).toLocaleDateString();
+                
+                let icon = 'file';
+                let color = 'text-slate-400';
+                
+                if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) { icon = 'image'; color = 'text-rose-500'; }
+                else if (['pdf'].includes(ext)) { icon = 'file-text'; color = 'text-red-500'; }
+                else if (['zip', 'rar', '7z'].includes(ext)) { icon = 'archive'; color = 'text-amber-500'; }
+                else if (['html', 'js', 'py', 'php'].includes(ext)) { icon = 'code'; color = 'text-indigo-500'; }
+
+                if (window.storageView === 'grid') {
+                    container.append(`
+                        <div class="group bg-white dark:bg-slate-800 p-4 rounded-2xl border border-slate-100 dark:border-slate-700 hover:border-indigo-500 transition-all shadow-sm flex flex-col">
+                            <div class="aspect-square rounded-xl bg-slate-50 dark:bg-slate-900/50 flex items-center justify-center mb-3 relative overflow-hidden">
+                                <i data-lucide="${icon}" class="w-10 h-10 ${color}"></i>
+                                <div class="absolute inset-0 bg-slate-900/40 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                    <span class="text-white text-[10px] font-bold uppercase tracking-wider">File Details</span>
+                                </div>
+                            </div>
+                            <h6 class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate mb-1" title="${file.name}">${file.name}</h6>
+                            <div class="flex justify-between items-center text-[10px] text-slate-400 font-medium mb-3">
+                                <span>${size}</span>
+                                <span>${date}</span>
+                            </div>
+                            <div class="flex items-center gap-1.5 pt-3 border-t border-slate-50 dark:border-slate-700/50 mt-auto">
+                                <button onclick="downloadFile('${file.url}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Download/View"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></button>
+                                ${!window.currentViewingStudentId || (userProfile && userProfile.role === 'admin') ? `
+                                    <button onclick="replaceFile('${file.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Update/Replace File"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
+                                    <button onclick="renameFile('${file.id}', '${file.name.replace(/'/g, "\\'")}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Rename"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
+                                    <button onclick="deleteFile('${file.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-rose-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Delete"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `);
+                } else {
+                    container.append(`
+                        <div class="flex items-center justify-between p-4 hover:bg-slate-50 dark:hover:bg-slate-800/50 transition-colors group">
+                            <div class="flex items-center gap-3 min-w-0 flex-1">
+                                <div class="w-10 h-10 rounded-lg bg-slate-100 dark:bg-slate-800 flex items-center justify-center flex-shrink-0">
+                                    <i data-lucide="${icon}" class="w-5 h-5 ${color}"></i>
+                                </div>
+                                <div class="min-w-0 flex-1">
+                                    <h6 class="text-xs font-bold text-slate-800 dark:text-slate-200 truncate" title="${file.name}">${file.name}</h6>
+                                    <p class="text-[10px] text-slate-400 font-medium">${size} • ${date}</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-2">
+                                <button onclick="downloadFile('${file.url}')" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Download/View"><i data-lucide="external-link" class="w-4 h-4"></i></button>
+                                ${!window.currentViewingStudentId || (userProfile && userProfile.role === 'admin') ? `
+                                    <button onclick="replaceFile('${file.id}')" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Update/Replace File"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
+                                    <button onclick="renameFile('${file.id}', '${file.name.replace(/'/g, "\\'")}')" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Rename"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
+                                    <button onclick="deleteFile('${file.id}')" class="p-2 text-slate-400 hover:text-rose-500 hover:bg-rose-50 dark:hover:bg-rose-500/10 rounded-lg transition-all" title="Delete"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+                                ` : ''}
+                            </div>
+                        </div>
+                    `);
+                }
+            });
+
+            lucide.createIcons();
+        };
+
+        window.handleStorageSearch = (val) => {
+            renderStorageList(window.userFiles);
+        };
+
+        window.filterStorage = (type) => {
+            window.storageFilter = type;
+            $('.filter-btn').removeClass('active bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/50 shadow-sm')
+                          .addClass('text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent');
+            $(`#filter-${type}`).addClass('active bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/50 shadow-sm')
+                                .removeClass('text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent');
+            renderStorageList(window.userFiles);
+        };
+
+        window.sortStorage = (criteria, e) => {
+            if (e) e.stopPropagation();
+            window.storageSort = criteria;
+            $('#sort-menu-dropdown').addClass('hidden');
+            
+            // Update active state in menu
+            $('#sort-menu-dropdown button').removeClass('text-indigo-600 dark:text-indigo-400 active-sort').addClass('text-slate-600 dark:text-slate-300');
+            $(e.target).closest('button').addClass('text-indigo-600 dark:text-indigo-400 active-sort').removeClass('text-slate-600 dark:text-slate-300');
+            
+            renderStorageList(window.userFiles);
+        };
+
+        window.toggleStorageView = (view) => {
+            window.storageView = view;
+            if (view === 'grid') {
+                $('#btn-view-grid').addClass('bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm').removeClass('text-slate-400');
+                $('#btn-view-list').removeClass('bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm').addClass('text-slate-400');
+            } else {
+                $('#btn-view-list').addClass('bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm').removeClass('text-slate-400');
+                $('#btn-view-grid').removeClass('bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm').addClass('text-slate-400');
+            }
+            renderStorageList(window.userFiles);
+        };
+
+        window.toggleSortMenu = (e) => {
+            e.stopPropagation();
+            $('#sort-menu-dropdown').toggleClass('hidden');
+        };
+
+        // Initialize drag & drop and file input listeners
+        $(document).ready(() => {
+            const dropZone = document.getElementById('storage-upload-area');
+            const fileInput = document.getElementById('storage-file-input');
+            const replaceInput = document.getElementById('storage-replace-input');
+
+            if (replaceInput) {
+                replaceInput.addEventListener('change', (e) => {
+                    if (e.target.files && e.target.files[0]) {
+                        handleReplaceUpload(window.replacingFileId, e.target.files[0]);
+                    }
+                });
+            }
+
+            if (dropZone && fileInput) {
+                fileInput.addEventListener('change', (e) => {
+                    uploadFile(e.target.files);
+                });
+
+                dropZone.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    dropZone.classList.add('border-indigo-500', 'bg-indigo-50/50', 'dark:bg-indigo-900/20');
+                });
+
+                ['dragleave', 'drop'].forEach(evt => {
+                    dropZone.addEventListener(evt, () => {
+                        dropZone.classList.remove('border-indigo-500', 'bg-indigo-50/50', 'dark:bg-indigo-900/20');
+                    });
+                });
+
+                dropZone.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    const files = e.dataTransfer.files;
+                    uploadFile(files);
+                });
+            }
+
+            // Close sort menu on click outside
+            $(document).on('click', () => $('#sort-menu-dropdown').addClass('hidden'));
+        });
+
+        function formatBytes(bytes, decimals = 2) {
+            if (bytes === 0) return '0 Bytes';
+            const k = 1024;
+            const dm = decimals < 0 ? 0 : decimals;
+            const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
+            const i = Math.floor(Math.log(bytes) / Math.log(k));
+            return parseFloat((bytes / Math.pow(k, i)).toFixed(dm)) + ' ' + sizes[i];
+        }
 
         window.deleteSubmission = async (id) => {
             if (!confirm('Are you sure you want to delete this submission?')) return;
