@@ -1,4 +1,4 @@
-﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿ ﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
@@ -414,10 +414,56 @@
             border-right: 1px solid rgba(226, 232, 240, 0.6);
             z-index: 1000;
             padding: 24px 12px;
+            display: flex;
+            flex-direction: column;
             overflow: visible !important;
             transition: width 0.4s cubic-bezier(0.25, 0.8, 0.25, 1), transform 0.4s cubic-bezier(0.25, 0.8, 0.25, 1);
             /* Bouncy Spring Effect */
             will-change: width;
+        }
+
+        .sidebar.collapsed {
+            overflow: visible !important;
+        }
+
+        .sidebar:not(.collapsed) {
+            overflow: visible !important;
+        }
+
+        .sidebar-nav {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            padding-right: 4px;
+            scrollbar-width: thin;
+            scrollbar-color: #cbd5e1 transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-track {
+            background: transparent;
+        }
+
+        .sidebar-nav::-webkit-scrollbar-thumb {
+            background: #cbd5e1;
+            border-radius: 10px;
+        }
+
+        .dark .sidebar-nav::-webkit-scrollbar-thumb {
+            background: #334155;
+        }
+
+        /* Ensure tooltips are not clipped when sidebar is NOT collapsed */
+        .sidebar:not(.collapsed) .sidebar-nav {
+            overflow-y: auto;
+        }
+
+        /* If collapsed, we might need to handle tooltips differently or accept clipping */
+        .sidebar.collapsed .sidebar-nav {
+            overflow: visible !important;
         }
 
         /* Core Utilities */
@@ -552,9 +598,87 @@
         /* OVERRIDE: Keep text hidden in Collapsed Mode */
         .sidebar.collapsed .Btn:hover .text {
             opacity: 0 !important;
-            width: 0% !important;
-            padding-right: 0 !important;
+            width: 0 !important;
         }
+
+        /* Fullscreen Preview Modal Styles */
+        #filePreviewModal .modal-content.is-fullscreen,
+        #filePreviewModal .modal-content:fullscreen {
+            height: 100vh !important;
+            width: 100vw !important;
+            max-width: 100vw !important;
+            border-radius: 0 !important;
+            margin: 0 !important;
+            background-color: #0b1120 !important; /* Force dark background in fullscreen */
+        }
+
+        #filePreviewModal .modal-content.is-fullscreen .modal-header,
+        #filePreviewModal .modal-content:fullscreen .modal-header {
+            position: fixed !important;
+            bottom: 20px !important;
+            top: auto !important;
+            left: 50% !important;
+            transform: translateX(-50%) translateY(150%) !important;
+            width: auto !important;
+            min-width: 350px !important;
+            border-radius: 24px !important;
+            background: rgba(15, 23, 42, 0.8) !important;
+            backdrop-filter: blur(12px) !important;
+            -webkit-backdrop-filter: blur(12px) !important;
+            border: 1px solid rgba(255, 255, 255, 0.1) !important;
+            box-shadow: 0 20px 50px rgba(0, 0, 0, 0.5) !important;
+            transition: all 0.5s cubic-bezier(0.4, 0, 0.2, 1) !important;
+            z-index: 99999 !important;
+            padding: 10px 20px !important;
+            display: flex !important;
+            justify-content: space-between !important;
+            opacity: 0 !important;
+        }
+
+        #filePreviewModal .modal-content.is-fullscreen:hover .modal-header,
+        #filePreviewModal .modal-content:fullscreen:hover .modal-header {
+            transform: translateX(-50%) translateY(0) !important;
+            opacity: 1 !important;
+            bottom: 30px !important;
+        }
+
+        #filePreviewModal .modal-content.is-fullscreen .modal-body,
+        #filePreviewModal .modal-content:fullscreen .modal-body {
+            height: 100vh !important;
+            padding-bottom: 0 !important;
+            background: #000 !important; /* Pure black background for media */
+        }
+
+        #filePreviewModal .modal-content.is-fullscreen #preview-content-area,
+        #filePreviewModal .modal-content:fullscreen #preview-content-area {
+            height: 100vh !important;
+            display: flex !important;
+            align-items: center !important;
+            justify-content: center !important;
+        }
+
+        /* Fullscreen Header Text Colors */
+        #filePreviewModal .modal-content.is-fullscreen .modal-header .modal-title,
+        #filePreviewModal .modal-content:fullscreen .modal-header .modal-title {
+            color: #ffffff !important;
+        }
+
+        #filePreviewModal .modal-content.is-fullscreen .modal-header #preview-filesize,
+        #filePreviewModal .modal-content:fullscreen .modal-header #preview-filesize {
+            color: rgba(255, 255, 255, 0.6) !important;
+        }
+
+        #filePreviewModal .modal-content.is-fullscreen .modal-header .text-slate-400,
+        #filePreviewModal .modal-content:fullscreen .modal-header .text-slate-400 {
+            color: rgba(255, 255, 255, 0.8) !important;
+        }
+
+        #filePreviewModal .modal-content.is-fullscreen .modal-header button:hover,
+         #filePreviewModal .modal-content:fullscreen .modal-header button:hover,
+         #filePreviewModal .modal-content.is-fullscreen .modal-header a:hover,
+         #filePreviewModal .modal-content:fullscreen .modal-header a:hover {
+             background-color: rgba(255, 255, 255, 0.1) !important;
+         }
 
         /* button click effect*/
         .Btn:active {
@@ -2035,7 +2159,7 @@
                 </button>
             </div>
 
-            <nav class="flex-1 space-y-1">
+            <nav class="sidebar-nav space-y-1">
                 <div
                     class="text-[9px] font-black text-slate-400 uppercase tracking-widest px-4 mb-2 mt-2 hide-on-collapse">
                     Menu</div>
@@ -4164,6 +4288,56 @@
                         class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-[1.02]">
                         Save Changes
                     </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- FILE PREVIEW MODAL -->
+    <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog modal-xl modal-dialog-centered">
+            <div class="modal-content border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#0b1120] rounded-3xl h-[85vh]">
+                <div class="modal-header border-b border-slate-100 dark:border-slate-800/50 p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+                    <div class="flex items-center gap-3">
+                        <div id="preview-icon-container" class="w-10 h-10 rounded-xl flex items-center justify-center">
+                            <i data-lucide="file" id="preview-icon" class="w-5 h-5"></i>
+                        </div>
+                        <div>
+                            <h5 class="modal-title font-bold text-sm text-slate-900 dark:text-white leading-none" id="preview-filename">File Preview</h5>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1.5" id="preview-filesize"></p>
+                        </div>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button id="preview-print-btn" onclick="window.printPreview()" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all hidden" title="Print">
+                            <i data-lucide="printer" class="w-5 h-5"></i>
+                        </button>
+                        <button onclick="window.toggleFullScreenPreview()" id="preview-fullscreen-btn" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all" title="Full Screen">
+                            <i data-lucide="maximize" id="preview-maximize-icon" class="w-5 h-5"></i>
+                        </button>
+                        <a id="preview-download-link" href="#" target="_blank" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all" title="Open Original">
+                            <i data-lucide="external-link" class="w-5 h-5"></i>
+                        </a>
+                        <button type="button" class="p-2.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl text-slate-400 hover:text-rose-500 transition-all" data-bs-dismiss="modal">
+                            <i data-lucide="x" class="w-5 h-5"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="modal-body p-0 bg-slate-50 dark:bg-slate-950 flex flex-col h-full overflow-hidden relative">
+                    <!-- Navigation Buttons -->
+                    <button id="preview-prev-btn" class="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all shadow-xl hidden">
+                        <i data-lucide="chevron-left" class="w-6 h-6"></i>
+                    </button>
+                    <button id="preview-next-btn" class="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all shadow-xl hidden">
+                        <i data-lucide="chevron-right" class="w-6 h-6"></i>
+                    </button>
+
+                    <div id="preview-loading" class="flex-1 flex flex-col items-center justify-center gap-4">
+                        <div class="w-12 h-12 border-4 border-indigo-600/10 border-t-indigo-600 rounded-full animate-spin"></div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Loading Asset...</p>
+                    </div>
+                    <div id="preview-content-area" class="flex-1 hidden h-full">
+                        <!-- Content will be injected here -->
+                    </div>
                 </div>
             </div>
         </div>
@@ -8657,6 +8831,9 @@
             }
 
             if (tabId === 'storage') {
+                 if (userProfile && userProfile.role === 'admin' && !window.currentViewingStudentId) {
+                     $('#storage-top-grid').addClass('hidden');
+                 }
                  if(typeof loadUserFiles === 'function') loadUserFiles();
             }
 
@@ -8964,8 +9141,9 @@ CREATE POLICY "Users can manage their own files" ON personal_storage
   FOR ALL USING (auth.uid() = user_id);
 
 DROP POLICY IF EXISTS "Admins can view all files" ON personal_storage;
-CREATE POLICY "Admins can view all files" ON personal_storage
-  FOR SELECT USING (check_admin_access());
+DROP POLICY IF EXISTS "Admins can manage all files" ON personal_storage;
+CREATE POLICY "Admins can manage all files" ON personal_storage
+  FOR ALL USING (check_admin_access());
                         `);
                     } else {
                         throw error;
@@ -9033,6 +9211,10 @@ CREATE POLICY "Admins can view all files" ON personal_storage
             const container = $('#storage-list');
             const emptyState = $('#storage-empty');
 
+            // IMMEDIATE CLEANUP: Hide student-side elements to prevent flicker
+            $('#storage-page-subtitle, #storage-top-grid').addClass('hidden');
+            $('#storage-files-container').find('.p-5.border-b, .px-5.py-3.border-b').addClass('hidden');
+
             try {
                 // Show Loading State if cache is empty
                 if (!window.allUsersCache || window.allUsersCache.length === 0) {
@@ -9074,8 +9256,6 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                             </div>
                         </div>
                     `);
-                    $('#storage-page-subtitle, #storage-top-grid').addClass('hidden');
-                    $('#storage-files-container').find('.p-5.border-b, .px-5.py-3.border-b').addClass('hidden');
                 }
 
                 // Stats Fetch Logic (Cached)
@@ -9216,12 +9396,16 @@ CREATE POLICY "Admins can view all files" ON personal_storage
 
         window.replacingFileId = null;
         window.replaceFile = (fileId) => {
+            console.log("? Replace Triggered for ID:", fileId);
             window.replacingFileId = fileId;
             $('#storage-replace-input').click();
         };
 
         window.handleReplaceUpload = async (fileId, file) => {
-            if (!file || !fileId) return;
+            if (!file || !fileId) {
+                console.error("Missing data for replace:", { fileId, file });
+                return showToast("Invalid request. Missing file ID.", "error");
+            }
             if (!userProfile) return showToast("Please login.", "error");
 
             const uid = userProfile.uid || userProfile.id;
@@ -9238,6 +9422,7 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                 formData.append('file', file);
                 formData.append('upload_preset', UPLO_PRESET);
                 formData.append('folder', `personal_storage/${uid}`);
+                formData.append('public_id', `${file.name.split('.')[0]}_${Date.now()}`);
 
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
                     method: 'POST',
@@ -9248,7 +9433,10 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                 if (cloudinaryData.error) throw new Error(cloudinaryData.error.message);
 
                 // 2. Update metadata in Supabase
-                const { error: dbError } = await client
+                // Convert fileId to Number if it's a numeric string (common issue in JS comparisons)
+                const targetId = isNaN(fileId) ? fileId : Number(fileId);
+
+                const { error: dbError, data: updatedData } = await client
                     .from('personal_storage')
                     .update({
                         name: file.name,
@@ -9257,12 +9445,47 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                         type: file.type,
                         created_at: new Date().toISOString()
                     })
-                    .eq('id', fileId);
+                    .eq('id', fileId)
+                    .select();
 
                 if (dbError) throw dbError;
+                
+                // If update failed, try one more time with number conversion
+                if (!updatedData || updatedData.length === 0) {
+                    console.log("? First Update Failed (String ID). Trying Number...");
+                    const targetId = Number(fileId);
+                    
+                    if (!isNaN(targetId)) {
+                        const { error: retryError, data: retryData } = await client
+                            .from('personal_storage')
+                            .update({
+                                name: file.name,
+                                url: cloudinaryData.secure_url,
+                                size: file.size,
+                                type: file.type,
+                                created_at: new Date().toISOString()
+                            })
+                            .eq('id', targetId)
+                            .select();
+                        
+                        if (retryError) throw retryError;
+                        if (retryData && retryData.length > 0) {
+                            console.log("? Fixed via Number conversion!");
+                        } else {
+                            throw new Error(`Record with ID ${fileId} was found but couldn't be updated. This is likely a permission issue (RLS). Please ensure you have run the latest SQL update for Admin permissions.`);
+                        }
+                    } else {
+                        throw new Error(`Record with ID ${fileId} not found or permission denied. If you are an Admin, please update your RLS policies.`);
+                    }
+                }
+
+                // 3. Clear global stats cache
+                if (window.globalFileStatsCache) delete window.globalFileStatsCache[window.currentViewingStudentId || uid];
 
                 showToast("File updated successfully!", "success");
-                loadUserFiles(window.currentViewingStudentId);
+                
+                // 4. Force immediate refresh
+                await loadUserFiles(window.currentViewingStudentId);
             } catch (err) {
                 console.error("Replace Error:", err);
                 showToast(`Failed to update file: ${err.message}`, "error");
@@ -9295,6 +9518,7 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                     formData.append('file', file);
                     formData.append('upload_preset', UPLO_PRESET);
                     formData.append('folder', `personal_storage/${uid}`);
+                    formData.append('public_id', `${file.name.split('.')[0]}_${Date.now()}`); // Allowed in unsigned upload
 
                     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
                         method: 'POST',
@@ -9367,8 +9591,245 @@ CREATE POLICY "Admins can view all files" ON personal_storage
             }
         };
 
-        window.downloadFile = (url) => {
-            window.open(url, '_blank');
+        window.downloadFile = (url, filename) => {
+            if (!filename) {
+                window.open(url, '_blank');
+                return;
+            }
+            
+            // Fetch the file and trigger download with original name
+            fetch(url)
+                .then(response => response.blob())
+                .then(blob => {
+                    const blobUrl = window.URL.createObjectURL(blob);
+                    const a = document.createElement('a');
+                    a.style.display = 'none';
+                    a.href = blobUrl;
+                    a.download = filename;
+                    document.body.appendChild(a);
+                    a.click();
+                    window.URL.revokeObjectURL(blobUrl);
+                    document.body.removeChild(a);
+                })
+                .catch(err => {
+                    console.error("Download error:", err);
+                    window.open(url, '_blank'); // Fallback
+                });
+        };
+
+        window.toggleFullScreenPreview = () => {
+            const modalContent = document.querySelector('#filePreviewModal .modal-content');
+            const icon = document.getElementById('preview-maximize-icon');
+            const btn = document.getElementById('preview-fullscreen-btn');
+            
+            if (!document.fullscreenElement) {
+                modalContent.requestFullscreen().then(() => {
+                    modalContent.classList.add('is-fullscreen');
+                    if (icon) {
+                        icon.setAttribute('data-lucide', 'minimize');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                    if (btn) btn.setAttribute('title', 'Exit Full Screen');
+                }).catch(err => {
+                    console.error(`Error attempting to enable full-screen mode: ${err.message}`);
+                    modalContent.classList.add('is-fullscreen');
+                    if (icon) {
+                        icon.setAttribute('data-lucide', 'minimize');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                    if (btn) btn.setAttribute('title', 'Exit Full Screen');
+                });
+            } else {
+                document.exitFullscreen().then(() => {
+                    modalContent.classList.remove('is-fullscreen');
+                    if (icon) {
+                        icon.setAttribute('data-lucide', 'maximize');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                    if (btn) btn.setAttribute('title', 'Full Screen');
+                }).catch(err => {
+                    console.error(`Error attempting to exit full-screen mode: ${err.message}`);
+                    modalContent.classList.remove('is-fullscreen');
+                    if (icon) {
+                        icon.setAttribute('data-lucide', 'maximize');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                    if (btn) btn.setAttribute('title', 'Full Screen');
+                });
+            }
+
+            document.onfullscreenchange = () => {
+                if (!document.fullscreenElement) {
+                    modalContent.classList.remove('is-fullscreen');
+                    if (icon) {
+                        icon.setAttribute('data-lucide', 'maximize');
+                        if (typeof lucide !== 'undefined') lucide.createIcons();
+                    }
+                    if (btn) btn.setAttribute('title', 'Full Screen');
+                }
+            };
+        };
+
+        window.printPreview = () => {
+            const contentArea = document.getElementById('preview-content-area');
+            const iframe = contentArea.querySelector('iframe');
+            if (iframe) {
+                iframe.contentWindow.print();
+            } else {
+                // Fallback for non-iframe content (like images or code view)
+                const printWindow = window.open('', '_blank');
+                printWindow.document.write('<html><head><title>Print Preview</title></head><body>');
+                printWindow.document.write(contentArea.innerHTML);
+                printWindow.document.write('<' + '/body><' + '/html>');
+                printWindow.document.close();
+                printWindow.print();
+            }
+        };
+
+        window.previewFile = async (url, name, size, type, fileList = [], currentIndex = -1) => {
+            const modalEl = document.getElementById('filePreviewModal');
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            const ext = name.split('.').pop().toLowerCase();
+            const isPdf = ext === 'pdf' || url.toLowerCase().includes('.pdf') || (type && type.includes('pdf'));
+            const filenameEl = $('#preview-filename');
+            const filesizeEl = $('#preview-filesize');
+            const iconEl = $('#preview-icon');
+            const iconContainer = $('#preview-icon-container');
+            const contentArea = $('#preview-content-area');
+            const loading = $('#preview-loading');
+            const downloadLink = $('#preview-download-link');
+            const printBtn = $('#preview-print-btn');
+            const prevBtn = $('#preview-prev-btn');
+            const nextBtn = $('#preview-next-btn');
+
+            // 🛠️ CLOUDINARY PREVIEW FIX
+            let previewUrl = url;
+            if (url.includes('cloudinary.com')) {
+                previewUrl = url.replace(/\/fl_attachment\//g, '/')
+                                .replace(/,fl_attachment/g, '')
+                                .replace(/fl_attachment,/g, '');
+                previewUrl = previewUrl.replace(/([^:])\/\//g, '$1/');
+            }
+
+            // Reset UI
+            filenameEl.text(name);
+            filesizeEl.text(size);
+            downloadLink.attr('href', url);
+            contentArea.empty().addClass('hidden');
+            loading.removeClass('hidden');
+            
+            // Print button visibility
+            if (isPdf || ['jpg', 'jpeg', 'png', 'txt', 'html'].includes(ext)) {
+                printBtn.removeClass('hidden');
+            } else {
+                printBtn.addClass('hidden');
+            }
+
+            // Navigation buttons
+            if (fileList.length > 1 && currentIndex !== -1) {
+                prevBtn.removeClass('hidden').off('click').on('click', () => {
+                    const prevIdx = (currentIndex - 1 + fileList.length) % fileList.length;
+                    const prevFile = fileList[prevIdx];
+                    window.previewFile(prevFile.url || prevFile.link, prevFile.name || prevFile.title, formatBytes(prevFile.size || 0), prevFile.type, fileList, prevIdx);
+                });
+                nextBtn.removeClass('hidden').off('click').on('click', () => {
+                    const nextIdx = (currentIndex + 1) % fileList.length;
+                    const nextFile = fileList[nextIdx];
+                    window.previewFile(nextFile.url || nextFile.link, nextFile.name || nextFile.title, formatBytes(nextFile.size || 0), nextFile.type, fileList, nextIdx);
+                });
+            } else {
+                prevBtn.addClass('hidden');
+                nextBtn.addClass('hidden');
+            }
+
+            // Set Icon/Color
+            let icon = 'file';
+            let colorClass = 'bg-slate-100 text-slate-500';
+            if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) { icon = 'image'; colorClass = 'bg-rose-50 text-rose-500'; }
+            else if (isPdf) { icon = 'file-text'; colorClass = 'bg-red-50 text-red-500'; }
+            else if (['zip', 'rar', '7z'].includes(ext)) { icon = 'archive'; colorClass = 'bg-amber-50 text-amber-500'; }
+            else if (['html', 'js', 'py', 'php', 'css', 'txt', 'sql', 'json'].includes(ext)) { icon = 'code'; colorClass = 'bg-indigo-50 text-indigo-500'; }
+            
+            iconContainer.attr('class', `w-10 h-10 rounded-xl flex items-center justify-center ${colorClass}`);
+            iconEl.attr('data-lucide', icon);
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+
+            modal.show();
+
+            try {
+                // Handle Preview Types
+                let previewHtml = '';
+                
+                // 📹 VIDEO HANDLING (YouTube/Vimeo)
+                const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
+                const isVimeo = url.includes('vimeo.com');
+
+                if (isYouTube || isVimeo) {
+                    let embedUrl = url;
+                    if (isYouTube) {
+                        const videoId = url.includes('v=') ? url.split('v=')[1].split('&')[0] : url.split('/').pop();
+                        embedUrl = `https://www.youtube.com/embed/${videoId}`;
+                    } else if (isVimeo) {
+                        const videoId = url.split('/').pop();
+                        embedUrl = `https://player.vimeo.com/video/${videoId}`;
+                    }
+                    previewHtml = `<iframe src="${embedUrl}" class="w-full h-full border-0 rounded-lg" allowfullscreen></iframe>`;
+                } else if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) {
+                    previewHtml = `<div class="flex-1 flex items-center justify-center p-8 h-full overflow-auto">
+                                    <img src="${previewUrl}" class="max-w-full max-h-full object-contain rounded-lg shadow-lg">
+                                   </div>`;
+                } else if (isPdf) {
+                    // 🛠️ USE GOOGLE DOCS VIEWER FOR RELIABLE PDF PREVIEW
+                    const gDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`;
+                    previewHtml = `<iframe src="${gDocsUrl}" class="w-full h-full border-0 bg-white rounded-lg"></iframe>`;
+                } else if (['html', 'txt', 'js', 'css', 'json', 'py', 'php', 'sql'].includes(ext)) {
+                    try {
+                        let response;
+                        try {
+                            response = await fetch(url);
+                        } catch (e) {
+                            response = await fetch(previewUrl);
+                        }
+
+                        if (!response.ok) throw new Error(`Failed to load: ${response.status} ${response.statusText}`);
+                        const text = await response.text();
+                        
+                        if (ext === 'html') {
+                            previewHtml = `<iframe srcdoc="${text.replace(/"/g, "&quot;")}" class="w-full h-full border-0 bg-white rounded-lg"></iframe>`;
+                        } else {
+                            const escapedText = text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                            previewHtml = `<div class="w-full h-full bg-[#0f172a] p-6 overflow-auto custom-scrollbar">
+                                            <pre class="text-slate-300 font-mono text-sm leading-relaxed whitespace-pre-wrap break-words"><code>${escapedText}</code></pre>
+                                           </div>`;
+                        }
+                    } catch (e) {
+                        console.error("Preview fetch error:", e);
+                        const gDocsUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(previewUrl)}&embedded=true`;
+                        previewHtml = `<iframe src="${gDocsUrl}" class="w-full h-full border-0 bg-white rounded-lg"></iframe>`;
+                    }
+                } else {
+                    previewHtml = `<div class="flex-1 flex flex-col items-center justify-center gap-6 h-full text-center p-10">
+                                    <div class="w-24 h-24 bg-slate-100 dark:bg-slate-900 rounded-3xl flex items-center justify-center">
+                                        <i data-lucide="eye-off" class="w-12 h-12 text-slate-400"></i>
+                                    </div>
+                                    <div>
+                                        <h4 class="text-lg font-bold text-slate-800 dark:text-white mb-2">No Preview Available</h4>
+                                        <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">This file type (${ext.toUpperCase()}) cannot be previewed directly.</p>
+                                    </div>
+                                    <a href="${url}" target="_blank" class="px-8 py-3 bg-indigo-600 text-white rounded-xl font-bold text-xs uppercase tracking-widest hover:bg-indigo-700 transition-all shadow-lg shadow-indigo-500/20">
+                                        Download to View
+                                    </a>
+                                   </div>`;
+                }
+
+                contentArea.html(previewHtml).removeClass('hidden');
+                loading.addClass('hidden');
+                if (typeof lucide !== 'undefined') lucide.createIcons();
+            } catch (err) {
+                console.error("Preview Render Error:", err);
+                contentArea.html(`<div class="p-10 text-center text-slate-500">Failed to load preview.</div>`).removeClass('hidden');
+                loading.addClass('hidden');
+            }
         };
 
         window.renderStorageList = (files) => {
@@ -9443,7 +9904,10 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                 container.removeClass('grid grid-cols-2 md:grid-cols-4 lg:grid-cols-5 gap-4 p-5 p-6').addClass('divide-y divide-slate-100 dark:divide-slate-800');
             }
 
-            filtered.forEach(file => {
+            // Store current files for preview navigation
+            window.currentStorageFiles = filtered;
+
+            filtered.forEach((file, index) => {
                 const ext = file.name.split('.').pop().toLowerCase();
                 const size = formatBytes(file.size || 0);
                 const date = new Date(file.created_at).toLocaleDateString();
@@ -9471,7 +9935,8 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                                 <span>${date}</span>
                             </div>
                             <div class="flex items-center gap-1.5 pt-3 border-t border-slate-50 dark:border-slate-700/50 mt-auto">
-                                <button onclick="downloadFile('${file.url}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Download/View"><i data-lucide="external-link" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="previewFile('${file.url}', '${file.name.replace(/'/g, "\\'")}', '${size}', '${ext}', window.currentStorageFiles, ${index})" class="p-1.5 bg-indigo-50 dark:bg-indigo-900/20 hover:bg-indigo-500 hover:text-white rounded-lg text-indigo-600 dark:text-indigo-400 transition-all" title="Preview File"><i data-lucide="eye" class="w-3.5 h-3.5"></i></button>
+                                <button onclick="downloadFile('${file.url}', '${file.name.replace(/'/g, "\\'")}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Download"><i data-lucide="download" class="w-3.5 h-3.5"></i></button>
                                 ${!window.currentViewingStudentId || (userProfile && userProfile.role === 'admin') ? `
                                     <button onclick="replaceFile('${file.id}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Update/Replace File"><i data-lucide="refresh-cw" class="w-3.5 h-3.5"></i></button>
                                     <button onclick="renameFile('${file.id}', '${file.name.replace(/'/g, "\\'")}')" class="p-1.5 bg-slate-100 dark:bg-slate-700 hover:bg-indigo-500 hover:text-white rounded-lg text-slate-500 dark:text-slate-400 transition-all" title="Rename"><i data-lucide="edit-3" class="w-3.5 h-3.5"></i></button>
@@ -9493,7 +9958,8 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                                 </div>
                             </div>
                             <div class="flex items-center gap-2">
-                                <button onclick="downloadFile('${file.url}')" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Download/View"><i data-lucide="external-link" class="w-4 h-4"></i></button>
+                                <button onclick="previewFile('${file.url}', '${file.name.replace(/'/g, "\\'")}', '${size}', '${ext}', window.currentStorageFiles, ${index})" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Preview File"><i data-lucide="eye" class="w-4 h-4"></i></button>
+                                <button onclick="downloadFile('${file.url}', '${file.name.replace(/'/g, "\\'")}')" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Download"><i data-lucide="download" class="w-4 h-4"></i></button>
                                 ${!window.currentViewingStudentId || (userProfile && userProfile.role === 'admin') ? `
                                     <button onclick="replaceFile('${file.id}')" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Update/Replace File"><i data-lucide="refresh-cw" class="w-4 h-4"></i></button>
                                     <button onclick="renameFile('${file.id}', '${file.name.replace(/'/g, "\\'")}')" class="p-2 text-slate-400 hover:text-indigo-500 hover:bg-indigo-50 dark:hover:bg-indigo-500/10 rounded-lg transition-all" title="Rename"><i data-lucide="edit-3" class="w-4 h-4"></i></button>
@@ -11088,7 +11554,7 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                 return;
             }
 
-            filtered.forEach(r => {
+            filtered.forEach((r, index) => {
                 let iconDisplay = `<i data-lucide="${r.icon}" class="w-5 h-5"></i>`;
 
                 // Dynamic PDF Fix for display
@@ -11101,7 +11567,7 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                 }
 
                 grid.append(`
-                    <div class="v-card p-5 group hover:scale-[1.02] transition-transform cursor-pointer">
+                    <div class="v-card p-5 group hover:scale-[1.02] transition-transform cursor-pointer" onclick="previewFile('${r.link}', '${r.title.replace(/'/g, "\\'")}', 'Learning Material', '${r.link.split('.').pop()}', window.learningResources, ${index})">
                         <div class="flex justify-between items-start mb-4">
                             <div class="w-10 h-10 bg-${r.color}-50 dark:bg-${r.color}-900/20 text-${r.color}-600 dark:text-${r.color}-400 rounded-xl flex items-center justify-center shadow-sm">
                                 ${iconDisplay}
@@ -11111,9 +11577,9 @@ CREATE POLICY "Admins can view all files" ON personal_storage
                         <h4 class="font-extrabold text-slate-900 dark:text-slate-200 text-sm mb-1 line-clamp-1">${r.title}</h4>
                         <p class="text-[10px] font-bold text-slate-400 uppercase tracking-wide mb-4">${r.subtitle || ''}</p>
                         
-                        <a href="${r.link}" target="_blank" class="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
+                        <button class="w-full flex items-center justify-center gap-2 py-2 rounded-lg bg-slate-50 dark:bg-slate-800 text-[10px] font-black uppercase tracking-wider text-slate-600 dark:text-slate-300 group-hover:bg-indigo-600 group-hover:text-white transition-colors">
                             Access Material <i data-lucide="arrow-right" class="w-3 h-3"></i>
-                        </a>
+                        </button>
                     </div>
                 `);
             });
