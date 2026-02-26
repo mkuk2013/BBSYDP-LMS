@@ -1,11 +1,11 @@
-﻿﻿<!DOCTYPE html>
+﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿﻿<!DOCTYPE html>
 <html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NAVTTC LMS v2.0 | Enterprise Learning System</title>
-    <link rel="icon" href="assets/logo.png" type="image/png">
+    <title>BBSHRRDB LMS v2.0 | Enterprise Learning System</title>
+    <link rel="icon" href="assets/bbsydp_logo.png" type="image/png">
 
     <!-- Core Libraries -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -36,8 +36,7 @@
         });
     </script>
 
-    <link
-        href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&family=Great+Vibes&display=swap"
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&family=Great+Vibes&display=swap"
         rel="stylesheet">
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
@@ -59,23 +58,23 @@
         window.jsPDF = window.jspdf ? window.jspdf.jsPDF : window.jsPDF;
     </script>
     <script src="signature.js"></script>
-
+    <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
 
     <script>
         // GLOBAL ERROR HANDLER (Must be first)
-        window.onerror = function (msg, url, line, col, error) {
+        window.onerror = function(msg, url, line, col, error) {
             console.error("Global Error Caught:", msg, url, line, col, error);
             // If global loader is visible, hide it to prevent freeze
             var loader = document.getElementById('global-loader');
             if (loader && getComputedStyle(loader).display !== 'none') {
                 console.warn("Error occurred while loader was visible. Force hiding loader.");
                 loader.style.display = 'none';
-
+                
                 // Show auth if nothing else visible
                 var dashboard = document.getElementById('dashboard-layout');
                 if (dashboard && dashboard.classList.contains('hidden')) {
-                    var auth = document.getElementById('auth-wrapper');
-                    if (auth) auth.classList.remove('hidden');
+                     var auth = document.getElementById('auth-wrapper');
+                     if(auth) auth.classList.remove('hidden');
                 }
             }
         };
@@ -84,7 +83,7 @@
         // Helper to fix corrupted UTF-16 surrogates (Mojibake)
         window.fixEncoding = (str) => {
             if (!str) return str;
-
+            
             let fixed = str;
             // console.log("FixEncoding Input:", str); // Debug
 
@@ -94,8 +93,8 @@
             // Ø=ÜM -> 👍 (Thumbs Up)
             fixed = fixed.replace(/Ø=ÜM/g, '\uD83D\uDC4D');
             // Ø<ß  -> 🎓 (Graduation Cap)
-            fixed = fixed.replace(/Ø<ß/g, '\uD83C\uDF93');
-
+            fixed = fixed.replace(/Ø<ß/g, '\uD83C\uDF93'); 
+            
             // 2. Generic Regex for "Double-Encoded" Surrogates
             // Pattern: High(D8-DB) Byte2 Low(DC-DF) Byte4
             fixed = fixed.replace(/([\u00D8-\u00DB])([\s\S])([\u00DC-\u00DF])([\s\S])/g, (match, h1, h2, l1, l2) => {
@@ -118,10 +117,10 @@
         window.textToImage = (text, fontSize, color, maxWidth, scaleFactor = 4, fontWeight = 'bold') => {
             const canvas = document.createElement('canvas');
             const ctx = canvas.getContext('2d');
-
+            
             const font = `${fontWeight} ${fontSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
             ctx.font = font;
-
+            
             // Text Wrapping Logic
             const words = text.split(' ');
             let lines = [];
@@ -151,15 +150,15 @@
             // Set High-DPI Canvas Size
             canvas.width = width * scaleFactor;
             canvas.height = height * scaleFactor;
-
+            
             // Scale Context
             ctx.scale(scaleFactor, scaleFactor);
-
+            
             // Render
             ctx.font = font;
             ctx.fillStyle = color || '#000000';
             ctx.textBaseline = 'middle';
-
+            
             lines.forEach((line, index) => {
                 ctx.fillText(line, 2, (index * lineHeight) + (lineHeight / 2));
             });
@@ -171,11 +170,11 @@
         window.processTextForReport = (text) => {
             if (!text) return '';
             let processed = window.fixEncoding(text);
-
+            
             // Regex for emojis (broad range to catch most emojis)
             // Uses unicode property escapes if supported, otherwise simple range
             const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
-
+            
             try {
                 processed = processed.replace(emojiRegex, (match) => {
                     // Generate image for the emoji
@@ -186,7 +185,7 @@
                 console.warn("Emoji replacement failed:", e);
                 // Fallback: return text with just encoding fixed
             }
-
+            
             // Replace newlines with break tags
             processed = processed.replace(/\n/g, '<br>');
             return processed;
@@ -195,14 +194,14 @@
         // Helper to format teacher hints (splits by emoji or newlines)
         window.formatTeacherHints = (text) => {
             if (!text) return "No Teacher Hints Provided.";
-
+            
             // Regex to find emojis (bullets)
             const emojiRegex = /(\p{Emoji_Presentation}|\p{Extended_Pictographic})/gu;
-
+            
             // If no emojis, check for newlines
             if (!emojiRegex.test(text)) {
                 if (text.includes('\n')) {
-                    return text.split('\n').filter(line => line.trim()).map(line =>
+                    return text.split('\n').filter(line => line.trim()).map(line => 
                         `<div class="mb-2 flex items-start gap-3">
                             <div class="flex-shrink-0 w-1.5 h-1.5 rounded-full bg-amber-400 mt-2"></div>
                             <span class="leading-relaxed text-slate-700 dark:text-slate-300">${line.trim()}</span>
@@ -215,7 +214,7 @@
             // Split by Emoji
             const parts = text.split(emojiRegex);
             let html = '<div class="space-y-4">'; // Increased spacing for cleaner look
-
+            
             // Handle prefix
             if (parts[0] && parts[0].trim()) {
                 html += `<div class="mb-3 text-slate-700 dark:text-slate-300 font-medium">${parts[0].trim()}</div>`;
@@ -223,8 +222,8 @@
 
             for (let i = 1; i < parts.length; i += 2) {
                 const emoji = parts[i];
-                const content = parts[i + 1] ? parts[i + 1].trim() : "";
-
+                const content = parts[i+1] ? parts[i+1].trim() : "";
+                
                 if (emoji) {
                     html += `
                         <div class="flex gap-4 group">
@@ -328,17 +327,9 @@
 
         /* UpDown Animation for Loader */
         @keyframes updown {
-
-            0%,
-            100% {
-                transform: translateY(0);
-            }
-
-            50% {
-                transform: translateY(-10px);
-            }
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
-
         .animate-updown {
             animation: updown 2.5s ease-in-out infinite;
         }
@@ -575,8 +566,7 @@
             width: 105px;
             border-radius: 40px;
             transition-duration: .4s;
-            background-color: #dc2626;
-            /* Professional Red-600 */
+            background-color: #dc2626; /* Professional Red-600 */
         }
 
         /* OVERRIDE: Prevent expansion in Collapsed Mode */
@@ -619,8 +609,7 @@
             max-width: 100vw !important;
             border-radius: 0 !important;
             margin: 0 !important;
-            background-color: #0b1120 !important;
-            /* Force dark background in fullscreen */
+            background-color: #0b1120 !important; /* Force dark background in fullscreen */
         }
 
         #filePreviewModal .modal-content.is-fullscreen .modal-header,
@@ -657,8 +646,7 @@
         #filePreviewModal .modal-content:fullscreen .modal-body {
             height: 100vh !important;
             padding-bottom: 0 !important;
-            background: #000 !important;
-            /* Pure black background for media */
+            background: #000 !important; /* Pure black background for media */
         }
 
         #filePreviewModal .modal-content.is-fullscreen #preview-content-area,
@@ -686,11 +674,11 @@
         }
 
         #filePreviewModal .modal-content.is-fullscreen .modal-header button:hover,
-        #filePreviewModal .modal-content:fullscreen .modal-header button:hover,
-        #filePreviewModal .modal-content.is-fullscreen .modal-header a:hover,
-        #filePreviewModal .modal-content:fullscreen .modal-header a:hover {
-            background-color: rgba(255, 255, 255, 0.1) !important;
-        }
+         #filePreviewModal .modal-content:fullscreen .modal-header button:hover,
+         #filePreviewModal .modal-content.is-fullscreen .modal-header a:hover,
+         #filePreviewModal .modal-content:fullscreen .modal-header a:hover {
+             background-color: rgba(255, 255, 255, 0.1) !important;
+         }
 
         /* button click effect*/
         .Btn:active {
@@ -1139,12 +1127,9 @@
         .no-scrollbar::-webkit-scrollbar {
             display: none;
         }
-
         .no-scrollbar {
-            -ms-overflow-style: none;
-            /* IE and Edge */
-            scrollbar-width: none;
-            /* Firefox */
+            -ms-overflow-style: none;  /* IE and Edge */
+            scrollbar-width: none;  /* Firefox */
         }
 
         /* Tabs Styling from Uiverse.io by Pradeepsaranbishnoi */
@@ -1789,36 +1774,19 @@
         .highlight-card {
             animation: pulse-border 2s infinite;
         }
-
         /* Animations */
         @keyframes slide-up {
-            0% {
-                opacity: 0;
-                transform: translateY(20px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            0% { opacity: 0; transform: translateY(20px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
-
         .animate-slide-up {
             animation: slide-up 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards;
         }
-
+        
         @keyframes fade-in-up {
-            0% {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-
-            100% {
-                opacity: 1;
-                transform: translateY(0);
-            }
+            0% { opacity: 0; transform: translateY(10px); }
+            100% { opacity: 1; transform: translateY(0); }
         }
-
         .animate-fade-in-up {
             animation: fade-in-up 0.4s ease-out forwards;
         }
@@ -1960,75 +1928,41 @@
 <body class="bg-slate-50 dark:bg-[#0b1120] text-slate-950 dark:text-slate-100 font-sans">
 
     <!-- GLOBAL LOADER -->
-    <div id="global-loader"
-        class="fixed inset-0 z-[9999] bg-slate-50/95 dark:bg-[#0b1120]/95 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-700">
+    <div id="global-loader" class="fixed inset-0 z-[9999] bg-slate-50/95 dark:bg-[#0b1120]/95 backdrop-blur-sm flex flex-col items-center justify-center transition-opacity duration-700">
         <style>
-            @keyframes reverse-spin {
-                from {
-                    transform: rotate(0deg);
-                }
-
-                to {
-                    transform: rotate(-360deg);
-                }
-            }
-
-            .animate-reverse-spin {
-                animation: reverse-spin 3s linear infinite;
-            }
-
-            @keyframes slide-bar {
-                0% {
-                    transform: translateX(-100%);
-                }
-
-                50% {
-                    transform: translateX(100%);
-                }
-
-                100% {
-                    transform: translateX(300%);
-                }
-            }
-
-            .animate-slide-bar {
-                animation: slide-bar 2s ease-in-out infinite;
-            }
+            @keyframes reverse-spin { from { transform: rotate(0deg); } to { transform: rotate(-360deg); } }
+            .animate-reverse-spin { animation: reverse-spin 3s linear infinite; }
+            @keyframes slide-bar { 0% { transform: translateX(-100%); } 50% { transform: translateX(100%); } 100% { transform: translateX(300%); } }
+            .animate-slide-bar { animation: slide-bar 2s ease-in-out infinite; }
         </style>
-
+        
         <div class="relative flex items-center justify-center mb-8">
             <!-- Ambient Glow -->
             <div class="absolute inset-0 bg-indigo-500/20 rounded-full blur-2xl animate-pulse"></div>
 
             <!-- Outer Ring (Slow Reverse Spin) -->
-            <div
-                class="w-28 h-28 rounded-full border border-slate-200 dark:border-slate-800 border-t-indigo-500/40 border-b-indigo-500/40 animate-reverse-spin">
-            </div>
-
+            <div class="w-28 h-28 rounded-full border border-slate-200 dark:border-slate-800 border-t-indigo-500/40 border-b-indigo-500/40 animate-reverse-spin"></div>
+            
             <!-- Inner Ring (Fast Spin) -->
-            <div
-                class="absolute inset-0 m-auto w-24 h-24 rounded-full border-2 border-transparent border-t-indigo-600 border-l-indigo-600/50 animate-spin">
-            </div>
-
+            <div class="absolute inset-0 m-auto w-24 h-24 rounded-full border-2 border-transparent border-t-indigo-600 border-l-indigo-600/50 animate-spin"></div>
+            
             <!-- Logo Centered with Glass Effect -->
             <div class="absolute inset-0 flex items-center justify-center">
-                <div
-                    class="bg-white/80 dark:bg-[#1e293b]/80 p-3 rounded-full backdrop-blur-sm shadow-lg ring-1 ring-white/20">
-                    <img src="assets/logo.png" alt="NAVTTC Logo" class="w-10 h-10 object-contain">
-                </div>
+                 <div class="bg-white/80 dark:bg-[#1e293b]/80 p-3 rounded-full backdrop-blur-sm shadow-lg ring-1 ring-white/20">
+                    <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-10 h-10 object-contain">
+                 </div>
             </div>
         </div>
 
         <!-- Professional Text & Progress -->
         <div class="flex flex-col items-center gap-4 z-10">
-            <h2 class="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">NAVTTC <span
-                    class="text-indigo-600">LMS</span></h2>
-
+            <h2 class="text-xl font-black text-slate-800 dark:text-slate-100 tracking-tight">BBSHRRDB <span class="text-indigo-600">LMS</span></h2>
+            
             <!-- Indeterminate Progress Bar -->
             <div class="w-32 h-1 bg-slate-200 dark:bg-slate-800 rounded-full overflow-hidden">
                 <div class="h-full bg-indigo-600 w-full animate-slide-bar"></div>
             </div>
-
+            
             <p class="text-[10px] font-bold text-slate-400 uppercase tracking-[0.3em]">Initializing...</p>
         </div>
     </div>
@@ -2093,10 +2027,10 @@
             class="v-card w-full max-w-[380px] px-8 pb-8 pt-2 shadow-2xl bg-white dark:bg-[#1e293b] animate-in fade-in zoom-in duration-500">
             <div class="text-center mb-6">
                 <div class="inline-flex items-center justify-center w-32 h-32 mt-10 mb-0">
-                    <img src="assets/logo.png" alt="NAVTTC Logo" class="w-full h-full object-contain">
+                    <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-full h-full object-contain">
                 </div>
                 <h1 class="font-black text-2xl tracking-tighter uppercase leading-none text-slate-800 dark:text-white">
-                    NAVTTC <span class="text-indigo-500">LMS</span> <sup
+                    BBSHRRDB <span class="text-indigo-500">LMS</span> <sup
                         class="text-[10px] text-indigo-500 bg-indigo-50 dark:bg-indigo-900/30 px-1.5 py-0.5 rounded-lg border border-indigo-100 dark:border-indigo-800 ml-1">v2.0</sup>
                 </h1>
                 <p class="text-slate-500 dark:text-slate-400 mt-2 font-bold uppercase tracking-widest text-[8px]">
@@ -2202,13 +2136,13 @@
                 <!-- Left: Logo & Text -->
                 <div class="flex items-center gap-3">
                     <div class="logo-container w-14 h-14 flex-shrink-0 flex items-center justify-center">
-                        <img src="assets/logo.png" alt="NAVTTC Logo" class="w-full h-full object-contain">
+                        <img src="assets/bbsydp_logo.png" alt="BBSHRRDB Logo" class="w-full h-full object-contain">
                     </div>
                     <div
                         class="hide-on-collapse flex flex-col justify-center overflow-hidden transition-all duration-300">
                         <h1
                             class="font-black text-lg tracking-tighter uppercase leading-none flex items-center gap-1 text-slate-800 dark:text-white">
-                            NAVTTC <span
+                            BBSHRRDB <span
                                 class="text-[8px] bg-indigo-600 text-white px-1 py-0.5 rounded ml-1 align-top">v2.0</span>
                         </h1>
                         <p
@@ -2354,8 +2288,8 @@
 
                     <!-- 2. Logo Container (Right of Button) -->
                     <div id="mobile-logo-container" class="flex items-center gap-3 transition-opacity duration-300">
-                        <img src="assets/logo.png" class="w-10 h-10 object-contain">
-                        <span class="font-black text-slate-800 dark:text-white uppercase tracking-tighter">NAVTTC
+                        <img src="assets/bbsydp_logo.png" class="w-10 h-10 object-contain">
+                        <span class="font-black text-slate-800 dark:text-white uppercase tracking-tighter">BBSHRRDB
                             v2.0</span>
                     </div>
                 </div>
@@ -2396,7 +2330,7 @@
                         <!-- Toggle for Desktop Sidebar -->
                         <!-- Logo for Desktop -->
                         <div class="flex items-center gap-3">
-                            <img src="assets/logo.png" alt="Logo" class="w-10 h-10 lg:hidden object-contain">
+                            <img src="assets/bbsydp_logo.png" alt="Logo" class="w-10 h-10 lg:hidden object-contain">
                             <div>
                                 <h2 class="text-xl md:text-2xl font-black tracking-tighter uppercase leading-none"
                                     id="page-title">
@@ -2540,8 +2474,7 @@
                                     Welcome Back
                                 </h2>
                                 <p class="text-xs text-[#e5e7eb] font-medium mt-2 max-w-md">Ready to build something
-                                    amazing today? Check your pending tasks regarding Advance Web Development. Guess
-                                    what? We fixed all Python related issues.</p>
+                                    amazing today? Check your pending tasks regarding Python & Web Development.</p>
                             </div>
                             <div class="text-center md:text-right w-full md:w-auto">
                                 <h3 class="text-2xl md:text-3xl font-black text-[#f9fafb] tracking-tight"
@@ -2603,29 +2536,23 @@
 
                     <!-- Admin Live Widget -->
                     <div id="admin-live-widget" class="hidden w-full mb-6 animate-in slide-in-from-top-5">
-                        <div class="v-card p-4 border-l-4 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10 flex items-center justify-between cursor-pointer hover:bg-emerald-100/50 transition-colors"
-                            onclick="showOnlineStudentsModal()">
-                            <div class="flex items-center gap-4">
-                                <div class="relative">
-                                    <span
-                                        class="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
-                                    <div
-                                        class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
-                                        <i data-lucide="users" class="w-5 h-5"></i>
-                                    </div>
-                                </div>
-                                <div>
-                                    <h4
-                                        class="text-sm font-black uppercase text-emerald-700 dark:text-emerald-400 tracking-wider">
-                                        Live Activity</h4>
-                                    <p class="text-xs font-bold text-emerald-600/80 dark:text-emerald-500/80"><span
-                                            id="dashboard-online-count">0</span> Students Online Now</p>
-                                </div>
-                            </div>
-                            <div class="text-emerald-500">
-                                <i data-lucide="chevron-right" class="w-5 h-5"></i>
-                            </div>
-                        </div>
+                         <div class="v-card p-4 border-l-4 border-emerald-500 bg-emerald-50/50 dark:bg-emerald-900/10 flex items-center justify-between cursor-pointer hover:bg-emerald-100/50 transition-colors" onclick="showOnlineStudentsModal()">
+                             <div class="flex items-center gap-4">
+                                 <div class="relative">
+                                     <span class="absolute top-0 right-0 w-3 h-3 bg-emerald-500 rounded-full animate-ping"></span>
+                                     <div class="w-10 h-10 rounded-full bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 flex items-center justify-center">
+                                         <i data-lucide="users" class="w-5 h-5"></i>
+                                     </div>
+                                 </div>
+                                 <div>
+                                     <h4 class="text-sm font-black uppercase text-emerald-700 dark:text-emerald-400 tracking-wider">Live Activity</h4>
+                                     <p class="text-xs font-bold text-emerald-600/80 dark:text-emerald-500/80"><span id="dashboard-online-count">0</span> Students Online Now</p>
+                                 </div>
+                             </div>
+                             <div class="text-emerald-500">
+                                 <i data-lucide="chevron-right" class="w-5 h-5"></i>
+                             </div>
+                         </div>
                     </div>
 
                     <!-- Stats Grid -->
@@ -3051,12 +2978,11 @@
                                     <i data-lucide="download" class="w-5 h-5"></i>
                                     <span>Download Professional Certificate</span>
                                 </button>
-
+                                
                                 <div id="verify-link-container" class="hidden w-full mb-4 text-center">
-                                    <p class="text-xs text-slate-500 mb-2">Want to verify the authenticity of this
-                                        certificate?</p>
-                                    <a href="verify.html" target="_blank"
-                                        class="text-xs font-bold text-indigo-500 hover:text-indigo-600 hover:underline flex items-center justify-center gap-1">
+                                    <p class="text-xs text-slate-500 mb-2">Want to verify the authenticity of this certificate?</p>
+                                    <a href="verify.html" target="_blank" 
+                                       class="text-xs font-bold text-indigo-500 hover:text-indigo-600 hover:underline flex items-center justify-center gap-1">
                                         <span>Verify Certificate Authenticity</span>
                                         <i data-lucide="external-link" class="w-3 h-3"></i>
                                     </a>
@@ -3067,9 +2993,8 @@
                                     <i data-lucide="list-ordered" class="w-4 h-4"></i>
                                     <span>Review Answers</span>
                                 </button>
-
-                                <div id="exam-review-container"
-                                    class="hidden text-left space-y-4 max-h-[420px] overflow-auto rounded-xl border border-slate-100 dark:border-slate-800 p-4 bg-slate-50 dark:bg-[#0f172a]">
+                                
+                                <div id="exam-review-container" class="hidden text-left space-y-4 max-h-[420px] overflow-auto rounded-xl border border-slate-100 dark:border-slate-800 p-4 bg-slate-50 dark:bg-[#0f172a]">
                                 </div>
 
                                 <button onclick="switchTab('dashboard')"
@@ -3082,110 +3007,8 @@
                     </div>
                 </div>
 
-                <div id="certificate-container" class="hidden">
-                    <div id="certificate-template"
-                        class="w-[1123px] h-[900px] bg-white relative text-slate-900 mx-auto overflow-hidden">
-                        <div class="absolute inset-0 bg-gradient-to-br from-slate-50 via-white to-slate-50"></div>
-                        <div class="absolute inset-3 border-[3px] border-slate-800">
-                            <div class="absolute inset-1 border-[2px] border-amber-500/40"></div>
-                        </div>
-                        <div class="relative z-10 h-full flex flex-col px-16 py-12">
-                            <div class="flex justify-between items-start pb-6 mb-8 border-b border-slate-200">
-                                <div class="flex items-center gap-6">
-                                    <img src="assets/logo.png" class="h-20 w-auto object-contain" alt="NAVTTC">
-                                    <div>
-                                        <h1 class="text-xl font-bold text-slate-900 tracking-[0.2em] uppercase">NAVTTC
-                                        </h1>
-                                        <p class="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em]">
-                                            Government of Sindh</p>
-                                    </div>
-                                </div>
-                                <div class="text-right">
-                                    <div class="flex flex-col items-end">
-                                        <h2
-                                            class="text-2xl font-black text-slate-800 uppercase tracking-widest leading-none mb-1">
-                                            Super Systech</h2>
-                                        <p class="text-xs font-bold text-amber-600 uppercase tracking-[0.3em] mb-3">
-                                            Computers Umerkot</p>
-                                        <div
-                                            class="inline-flex items-center gap-3 px-4 py-1.5 bg-slate-900 text-amber-500 rounded-sm">
-                                            <span class="text-[9px] font-bold uppercase tracking-widest">Certificate
-                                                ID</span>
-                                            <span id="cert-id"
-                                                class="text-xs font-mono font-bold text-white tracking-wider">BBS-HTML-2026-0000</span>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex-1 flex flex-col items-center justify-center text-center -mt-4">
-                                <h1 class="text-5xl font-black text-slate-900 uppercase tracking-[0.2em] mb-2">
-                                    Certificate
-                                </h1>
-                                <div class="flex items-center gap-4 mb-8">
-                                    <div class="h-px w-12 bg-amber-500"></div>
-                                    <span class="text-sm font-bold text-slate-500 uppercase tracking-[0.4em]">Of
-                                        Completion</span>
-                                    <div class="h-px w-12 bg-amber-500"></div>
-                                </div>
-                                <p class="text-lg text-slate-500 italic mb-6">This is to certify that</p>
-                                <div class="relative inline-block mb-8">
-                                    <h2 id="cert-student-name"
-                                        class="text-4xl md:text-5xl font-bold text-slate-900 italic px-12 py-2 min-w-[400px]">
-                                        Student Name
-                                    </h2>
-                                    <div
-                                        class="absolute bottom-0 left-0 w-full h-px bg-gradient-to-r from-transparent via-amber-500 to-transparent opacity-50">
-                                    </div>
-                                </div>
-                                <p class="text-lg text-slate-500 italic max-w-2xl mx-auto leading-relaxed mb-6">
-                                    has successfully completed the prescribed course of study and demonstrated
-                                    proficiency in
-                                </p>
-                                <div class="px-10 py-3 border border-slate-200 rounded-lg bg-slate-50/50 mb-8">
-                                    <h3 class="text-2xl font-bold text-slate-800 uppercase tracking-wider">
-                                        Web Development Fundamentals (HTML, CSS & JavaScript)
-                                    </h3>
-                                </div>
-                                <div class="flex flex-col md:flex-row items-center justify-center gap-10 mt-4">
-                                    <div class="text-left">
-                                        <div
-                                            class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                                            Final Score</div>
-                                        <div id="cert-score" class="text-3xl font-black text-emerald-600">0%</div>
-                                    </div>
-                                    <div class="text-left">
-                                        <div
-                                            class="text-[11px] font-bold text-slate-400 uppercase tracking-widest mb-1">
-                                            Date</div>
-                                        <div id="cert-date" class="text-sm font-semibold text-slate-700">January 1, 2026
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="flex justify-between items-end pt-8 mt-4 border-t border-slate-200">
-                                <div class="text-center w-56">
-                                    <div class="h-16 flex items-end justify-center mb-2">
-                                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e4/Signature_sample.svg"
-                                            class="h-12 opacity-70" alt="Director Sig">
-                                    </div>
-                                    <div class="h-px w-full bg-slate-800 mb-2"></div>
-                                    <p class="text-xs font-bold text-slate-900 uppercase tracking-widest">Director</p>
-                                    <p class="text-[9px] text-slate-500 uppercase tracking-wider">Academic Affairs</p>
-                                </div>
-                                <div class="text-center w-56">
-                                    <div class="h-16 flex items-end justify-center mb-2">
-                                        <img id="admin-sig-img" class="h-16 object-contain opacity-90 -rotate-2"
-                                            alt="Admin Sig">
-                                    </div>
-                                    <div class="h-px w-full bg-slate-800 mb-2"></div>
-                                    <p class="text-xs font-bold text-slate-900 uppercase tracking-widest">Administrator
-                                    </p>
-                                    <p class="text-[9px] text-slate-500 uppercase tracking-wider">System Verified</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+
+
 
                 <!-- 2. Tasks View -->
 
@@ -3674,9 +3497,7 @@
                                     class="w-full pl-10 pr-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/50 border border-slate-100 dark:border-slate-800/50 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-bold text-[10px] transition-all text-slate-900 dark:text-slate-100">
                             </div>
                             <div class="flex items-center gap-4">
-                                <span id="online-student-count"
-                                    class="text-[10px] font-black uppercase tracking-widest text-emerald-500 hidden sm:block cursor-pointer hover:underline"
-                                    onclick="showOnlineStudentsModal()">0 Online</span>
+                                <span id="online-student-count" class="text-[10px] font-black uppercase tracking-widest text-emerald-500 hidden sm:block cursor-pointer hover:underline" onclick="showOnlineStudentsModal()">0 Online</span>
                                 <span id="total-student-count"
                                     class="text-[10px] font-black uppercase tracking-widest text-slate-400 hidden sm:block">0
                                     Records</span>
@@ -3905,7 +3726,7 @@
                             <div>
                                 <h3 class="text-white font-bold text-sm tracking-tight leading-none"></h3>
                                 <div class="flex items-center gap-2 mt-1">
-                                    <span class="text-[10px] text-slate-400 font-medium">NAVTTC
+                                    <span class="text-[10px] text-slate-400 font-medium">BBSHRRDB
                                         Editor</span>
                                 </div>
                             </div>
@@ -3923,7 +3744,11 @@
                                 title="Toggle JS">
                                 <span class="text-white">JS</span>
                             </button>
-
+                            <button onclick="toggleEditorPanel('python')" id="btn-toggle-python"
+                                class="px-3 py-2 bg-[#2c303a] hover:bg-[#5a5f73] text-white rounded-[4px] font-bold text-[10px] transition-colors border border-[#444857] active:bg-[#306998]/20 opacity-50 grayscale"
+                                title="Toggle Python">
+                                <span class="text-white">PY</span>
+                            </button>
                             <div class="h-4 w-px bg-[#444857] mx-1"></div>
                             <button onclick="runCode()" id="btn-run"
                                 class="hidden px-3 py-2 bg-[#22c55e] hover:bg-[#16a34a] text-white rounded-[4px] font-bold text-[10px] transition-colors items-center gap-1.5 shadow-sm shadow-green-500/10"
@@ -3945,8 +3770,7 @@
 
                         <!-- Top Half: Editors (CodePen Panel Style) -->
                         <div id="editor-container"
-                            class="flex-none flex flex-col lg:flex-row bg-[#131417] overflow-y-auto lg:overflow-visible"
-                            style="height: 50%;">
+                            class="flex-none flex flex-col lg:flex-row bg-[#131417] overflow-y-auto lg:overflow-visible" style="height: 50%;">
 
                             <!-- HTML Panel -->
                             <div id="panel-html"
@@ -3998,7 +3822,19 @@
                                     spellcheck="false" placeholder="// Write JS here"></textarea>
                             </div>
 
-
+                            <!-- Python Panel -->
+                            <div id="panel-python" class="flex-1 flex flex-col min-h-0 transition-all duration-300 hidden">
+                                <div
+                                    class="bg-[#1e1f26] border-b border-[#2c303a] py-2 px-3 flex items-center justify-between select-none h-9">
+                                    <span
+                                        class="text-[11px] font-black text-[#aaaaaa] uppercase tracking-wide flex items-center gap-2">
+                                        <div class="w-3 h-3 bg-[#306998] rounded-[2px] shadow-sm"></div> Python
+                                    </span>
+                                </div>
+                                <textarea id="code-python" oninput="runCodeDebounced()"
+                                    class="flex-1 w-full bg-[#131417] text-gray-300 p-3 font-mono text-[13px] leading-relaxed resize-none outline-none focus:bg-[#16171b] transition-colors min-h-[120px] lg:min-h-0"
+                                    spellcheck="false" placeholder="# Write Python code here\nprint('Hello, Python!')"></textarea>
+                            </div>
                         </div>
 
                         <!-- Resizer Handle (Visual only for now) -->
@@ -4009,9 +3845,9 @@
 
                         <!-- Bottom Half: Preview -->
                         <div id="output-container" class="flex-1 bg-white relative flex flex-col min-h-0">
-                            <iframe id="code-preview"
-                                class="absolute inset-0 w-full h-full border-0 transition-opacity duration-300"></iframe>
-
+                            <iframe id="code-preview" class="absolute inset-0 w-full h-full border-0 transition-opacity duration-300"></iframe>
+                            <!-- Python Output Panel (Hidden by default) -->
+                            <pre id="python-output-panel" class="absolute inset-0 w-full h-full bg-[#1e1e1e] text-green-400 p-4 font-mono overflow-auto hidden z-20 border-t border-[#333] text-sm leading-relaxed"></pre>
                         </div>
                     </div>
 
@@ -4023,258 +3859,192 @@
                 </div>
 
                 <!-- STORAGE VIEW -->
-                <div id="view-storage" class="content-view hidden animate-in fade-in zoom-in-95 duration-300">
-                    <div class="max-w-6xl mx-auto space-y-8">
+    <div id="view-storage" class="content-view hidden animate-in fade-in zoom-in-95 duration-300">
+        <div class="max-w-6xl mx-auto space-y-8">
+            
+            <!-- Header Section -->
+            <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
+                <div>
+                    <h2 id="storage-page-title" class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Personal Cloud Storage</h2>
+                    <p id="storage-page-subtitle" class="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Manage your documents and resources securely.</p>
+                </div>
+                <div class="flex items-center gap-2">
+                     <span class="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/30">
+                        Encrypted
+                     </span>
+                </div>
+            </div>
 
-                        <!-- Header Section -->
-                        <div class="flex flex-col md:flex-row justify-between items-start md:items-end gap-4">
-                            <div>
-                                <h2 id="storage-page-title"
-                                    class="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Personal
-                                    Cloud Storage</h2>
-                                <p id="storage-page-subtitle"
-                                    class="text-sm text-slate-500 dark:text-slate-400 font-medium mt-1">Manage your
-                                    documents and resources securely.</p>
-                            </div>
-                            <div class="flex items-center gap-2">
-                                <span
-                                    class="px-3 py-1 rounded-full bg-emerald-50 dark:bg-emerald-900/20 text-emerald-600 dark:text-emerald-400 text-[10px] font-black uppercase tracking-widest border border-emerald-100 dark:border-emerald-900/30">
-                                    Encrypted
-                                </span>
-                            </div>
-                        </div>
+            <div id="storage-top-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Upload Area (Main Focus) -->
+                <div class="lg:col-span-2" id="storage-upload-container">
+                    <div class="h-full p-1 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg shadow-indigo-500/10">
+                        <div class="h-full bg-white dark:bg-[#1e293b] rounded-xl p-6 md:p-8 flex flex-col justify-center relative overflow-hidden">
+                            <!-- Background Decoration -->
+                            <div class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none"></div>
+                            
+                            <div class="relative z-10">
+                                <h3 class="font-bold text-lg text-slate-900 dark:text-white mb-1 flex items-center gap-2">
+                                    <i data-lucide="upload-cloud" class="w-5 h-5 text-indigo-500"></i> Upload New File
+                                </h3>
+                                <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Drag and drop your files here or browse to upload.</p>
 
-                        <div id="storage-top-grid" class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-                            <!-- Upload Area (Main Focus) -->
-                            <div class="lg:col-span-2" id="storage-upload-container">
-                                <div
-                                    class="h-full p-1 bg-gradient-to-br from-indigo-500 via-purple-500 to-pink-500 rounded-2xl shadow-lg shadow-indigo-500/10">
-                                    <div
-                                        class="h-full bg-white dark:bg-[#1e293b] rounded-xl p-6 md:p-8 flex flex-col justify-center relative overflow-hidden">
-                                        <!-- Background Decoration -->
-                                        <div
-                                            class="absolute top-0 right-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -mr-16 -mt-16 pointer-events-none">
-                                        </div>
-
-                                        <div class="relative z-10">
-                                            <h3
-                                                class="font-bold text-lg text-slate-900 dark:text-white mb-1 flex items-center gap-2">
-                                                <i data-lucide="upload-cloud" class="w-5 h-5 text-indigo-500"></i>
-                                                Upload New File
-                                            </h3>
-                                            <p class="text-xs text-slate-500 dark:text-slate-400 mb-6">Drag and drop
-                                                your files here or browse to upload.</p>
-
-                                            <div id="storage-upload-area"
-                                                class="group border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-8 transition-all duration-300 cursor-pointer bg-slate-50/50 dark:bg-slate-900/50 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 text-center">
-                                                <input type="file" id="storage-file-input" class="hidden" multiple>
-                                                <input type="file" id="storage-replace-input" class="hidden">
-
-                                                <div
-                                                    class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
-                                                    <i data-lucide="cloud-upload"
-                                                        class="w-8 h-8 text-indigo-500 group-hover:text-indigo-600"></i>
-                                                </div>
-
-                                                <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Drag &
-                                                    Drop files here</h4>
-                                                <p class="text-[10px] text-slate-400 mb-6 font-medium">
-                                                    Supports PDF, Images, Zip, Code
-                                                </p>
-
-                                                <button type="button" onclick="$('#storage-file-input').click()"
-                                                    class="px-5 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105 uppercase tracking-wider">
-                                                    Browse Files
-                                                </button>
-
-                                                <!-- Progress -->
-                                                <div id="storage-upload-progress" class="hidden mt-6 max-w-xs mx-auto">
-                                                    <div
-                                                        class="flex justify-between text-[10px] font-bold text-slate-500 mb-1.5">
-                                                        <span>Uploading...</span>
-                                                        <span id="storage-upload-percent">0%</span>
-                                                    </div>
-                                                    <div
-                                                        class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                                        <div id="storage-progress-bar"
-                                                            class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300"
-                                                            style="width: 0%"></div>
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
+                                <div id="storage-upload-area" class="group border-2 border-dashed border-slate-200 dark:border-slate-700 hover:border-indigo-500 dark:hover:border-indigo-400 rounded-2xl p-8 transition-all duration-300 cursor-pointer bg-slate-50/50 dark:bg-slate-900/50 hover:bg-indigo-50/30 dark:hover:bg-indigo-900/10 text-center">
+                                    <input type="file" id="storage-file-input" class="hidden" multiple>
+                                    <input type="file" id="storage-replace-input" class="hidden">
+                                    
+                                    <div class="w-16 h-16 bg-white dark:bg-slate-800 rounded-2xl shadow-sm border border-slate-100 dark:border-slate-700 flex items-center justify-center mx-auto mb-4 group-hover:scale-110 transition-transform duration-300">
+                                        <i data-lucide="cloud-upload" class="w-8 h-8 text-indigo-500 group-hover:text-indigo-600"></i>
                                     </div>
-                                </div>
-                            </div>
-
-                            <!-- Stats & Info -->
-                            <div class="space-y-6" id="storage-stats-container">
-                                <!-- Usage Card -->
-                                <div
-                                    class="bg-white dark:bg-[#1e293b] rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
-                                    <div class="flex items-start justify-between mb-6">
-                                        <div>
-                                            <p
-                                                class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">
-                                                Total Files</p>
-                                            <h3 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight"
-                                                id="storage-count">0</h3>
-                                        </div>
-                                        <div
-                                            class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-500 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
-                                            <i data-lucide="database" class="w-6 h-6"></i>
-                                        </div>
-                                    </div>
-
-                                    <!-- Fake Storage Usage Visual -->
-                                    <div>
-                                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-2">
-                                            <span>Storage Usage</span>
-                                            <span id="storage-usage-percent-text"><span class="text-indigo-500"
-                                                    id="storage-usage-percent">0%</span> used</span>
-                                        </div>
-                                        <div
-                                            class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
-                                            <!-- Fixed 12% width for visual appeal since we don't have real quota data -->
-                                            <div id="storage-usage-bar"
-                                                class="h-full bg-slate-300 dark:bg-slate-700 rounded-full w-[0%] transition-all duration-500">
-                                            </div>
-                                        </div>
-                                        <p id="storage-usage-text" class="text-[9px] text-slate-400 mt-2 font-medium">0
-                                            MB of 100 MB Used</p>
-                                    </div>
-                                </div>
-
-                                <!-- Quick Tips or Info -->
-                                <div class="bg-indigo-900 rounded-2xl p-6 relative overflow-hidden text-white">
-                                    <div
-                                        class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl">
-                                    </div>
-                                    <div class="relative z-10">
-                                        <div
-                                            class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center mb-4 backdrop-blur-sm border border-white/10">
-                                            <i data-lucide="shield" class="w-5 h-5 text-indigo-200"></i>
-                                        </div>
-                                        <h4 class="font-bold text-lg mb-1">Secure & Private</h4>
-                                        <p class="text-xs text-indigo-200 leading-relaxed opacity-90">
-                                            Your files are encrypted and stored securely. Only you have access to your
-                                            personal cloud storage.
-                                        </p>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-
-                        <!-- File List Section -->
-                        <div id="storage-files-container"
-                            class="bg-white dark:bg-[#1e293b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col">
-                            <div
-                                class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-20">
-                                <div class="flex items-center gap-2">
-                                    <span class="text-xs font-medium text-slate-400">Cloud</span>
-                                    <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300"></i>
-                                    <h4 id="storage-files-header-text"
-                                        class="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
-                                        <i data-lucide="folder-open" class="w-4 h-4 text-amber-500"></i>
-                                        My Files
-                                    </h4>
-                                </div>
-                                <div class="flex items-center gap-2">
-                                    <!-- Search Input -->
-                                    <div class="relative hidden md:block">
-                                        <input type="text" id="storage-search" onkeyup="handleStorageSearch(this.value)"
-                                            placeholder="Search files..."
-                                            class="pl-8 pr-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 border-none rounded-lg w-40 focus:w-56 transition-all focus:ring-2 focus:ring-indigo-500/50 text-slate-600 dark:text-slate-300 placeholder:text-slate-400">
-                                        <i data-lucide="search"
-                                            class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
-                                    </div>
-
-                                    <!-- Sort Dropdown (Custom Implementation) -->
-                                    <div class="relative">
-                                        <button onclick="toggleSortMenu(event)" id="sort-menu-btn"
-                                            class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-500 transition-colors"
-                                            title="Sort by">
-                                            <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
-                                        </button>
-                                        <div id="sort-menu-dropdown"
-                                            class="hidden absolute right-0 top-full mt-2 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden">
-                                            <ul class="p-1 text-xs font-medium space-y-0.5">
-                                                <li><button onclick="sortStorage('date_desc', event)"
-                                                        class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-indigo-600 dark:text-indigo-400 active-sort flex items-center gap-2"><i
-                                                            data-lucide="calendar" class="w-3 h-3"></i> Newest
-                                                        First</button></li>
-                                                <li><button onclick="sortStorage('date_asc', event)"
-                                                        class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-2"><i
-                                                            data-lucide="calendar-clock" class="w-3 h-3"></i> Oldest
-                                                        First</button></li>
-                                                <li><button onclick="sortStorage('name_asc', event)"
-                                                        class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-2"><i
-                                                            data-lucide="arrow-down-a-z" class="w-3 h-3"></i> Name
-                                                        (A-Z)</button></li>
-                                                <li><button onclick="sortStorage('size_desc', event)"
-                                                        class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-2"><i
-                                                            data-lucide="hard-drive" class="w-3 h-3"></i> Size
-                                                        (Largest)</button></li>
-                                            </ul>
-                                        </div>
-                                    </div>
-
-                                    <div class="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
-
-                                    <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex items-center gap-1">
-                                        <button onclick="toggleStorageView('list')" id="btn-view-list"
-                                            class="p-1.5 rounded-md bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition-all">
-                                            <i data-lucide="list" class="w-4 h-4"></i>
-                                        </button>
-                                        <button onclick="toggleStorageView('grid')" id="btn-view-grid"
-                                            class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all">
-                                            <i data-lucide="layout-grid" class="w-4 h-4"></i>
-                                        </button>
-                                    </div>
-                                    <button onclick="loadUserFiles(window.currentViewingStudentId)"
-                                        class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
-                                        <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                                    
+                                    <h4 class="text-sm font-bold text-slate-900 dark:text-white mb-2">Drag & Drop files here</h4>
+                                    <p class="text-[10px] text-slate-400 mb-6 font-medium">
+                                        Supports PDF, Images, Zip, Code
+                                    </p>
+                                    
+                                    <button type="button" onclick="$('#storage-file-input').click()" class="px-5 py-2.5 bg-indigo-600 text-white text-xs font-bold rounded-xl shadow-lg shadow-indigo-500/30 transition-transform group-hover:scale-105 uppercase tracking-wider">
+                                        Browse Files
                                     </button>
+                                    
+                                    <!-- Progress -->
+                                    <div id="storage-upload-progress" class="hidden mt-6 max-w-xs mx-auto">
+                                        <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-1.5">
+                                            <span>Uploading...</span>
+                                            <span id="storage-upload-percent">0%</span>
+                                        </div>
+                                        <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                            <div id="storage-progress-bar" class="h-full bg-gradient-to-r from-indigo-500 to-purple-500 rounded-full transition-all duration-300" style="width: 0%"></div>
+                                        </div>
+                                    </div>
                                 </div>
-                            </div>
-
-                            <!-- Filter Tabs -->
-                            <div
-                                class="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto no-scrollbar">
-                                <button onclick="filterStorage('all')" id="filter-all"
-                                    class="filter-btn active px-3 py-1.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 transition-all whitespace-nowrap shadow-sm">All
-                                    Files</button>
-                                <button onclick="filterStorage('image')" id="filter-image"
-                                    class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Images</button>
-                                <button onclick="filterStorage('document')" id="filter-document"
-                                    class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Documents</button>
-                                <button onclick="filterStorage('archive')" id="filter-archive"
-                                    class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Archives</button>
-                                <button onclick="filterStorage('code')" id="filter-code"
-                                    class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Code</button>
-                            </div>
-
-                            <!-- Empty State -->
-                            <div id="storage-empty" class="hidden py-16 text-center">
-                                <div
-                                    class="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-700">
-                                    <i data-lucide="folder" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i>
-                                </div>
-                                <h5 class="text-sm font-bold text-slate-900 dark:text-white mb-1">No files found</h5>
-                                <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
-                                    Your personal storage is empty. Upload your first file to get started.
-                                </p>
-                            </div>
-
-                            <!-- List Container -->
-                            <div id="storage-list" class="divide-y divide-slate-100 dark:divide-slate-800">
-                                <!-- Items injected via JS -->
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- Global Footer -->
+                <!-- Stats & Info -->
+                <div class="space-y-6" id="storage-stats-container">
+                    <!-- Usage Card -->
+                    <div class="bg-white dark:bg-[#1e293b] rounded-2xl p-6 shadow-sm border border-slate-100 dark:border-slate-800 relative overflow-hidden">
+                        <div class="flex items-start justify-between mb-6">
+                            <div>
+                                <p class="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">Total Files</p>
+                                <h3 class="text-4xl font-black text-slate-900 dark:text-white tracking-tight" id="storage-count">0</h3>
+                            </div>
+                            <div class="w-12 h-12 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl flex items-center justify-center text-emerald-500 dark:text-emerald-400 border border-emerald-100 dark:border-emerald-900/30">
+                                <i data-lucide="database" class="w-6 h-6"></i>
+                            </div>
+                        </div>
+                        
+                        <!-- Fake Storage Usage Visual -->
+                        <div>
+                             <div class="flex justify-between text-[10px] font-bold text-slate-500 mb-2">
+                                <span>Storage Usage</span>
+                                <span id="storage-usage-percent-text"><span class="text-indigo-500" id="storage-usage-percent">0%</span> used</span>
+                            </div>
+                            <div class="h-2 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden">
+                                 <!-- Fixed 12% width for visual appeal since we don't have real quota data -->
+                                <div id="storage-usage-bar" class="h-full bg-slate-300 dark:bg-slate-700 rounded-full w-[0%] transition-all duration-500"></div>
+                            </div>
+                            <p id="storage-usage-text" class="text-[9px] text-slate-400 mt-2 font-medium">0 MB of 100 MB Used</p>
+                        </div>
+                    </div>
+
+                    <!-- Quick Tips or Info -->
+                    <div class="bg-indigo-900 rounded-2xl p-6 relative overflow-hidden text-white">
+                        <div class="absolute top-0 right-0 w-32 h-32 bg-white/10 rounded-full -mr-10 -mt-10 blur-2xl"></div>
+                        <div class="relative z-10">
+                            <div class="w-10 h-10 bg-white/10 rounded-lg flex items-center justify-center mb-4 backdrop-blur-sm border border-white/10">
+                                <i data-lucide="shield" class="w-5 h-5 text-indigo-200"></i>
+                            </div>
+                            <h4 class="font-bold text-lg mb-1">Secure & Private</h4>
+                            <p class="text-xs text-indigo-200 leading-relaxed opacity-90">
+                                Your files are encrypted and stored securely. Only you have access to your personal cloud storage.
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- File List Section -->
+            <div id="storage-files-container" class="bg-white dark:bg-[#1e293b] rounded-2xl shadow-sm border border-slate-100 dark:border-slate-800 overflow-hidden flex flex-col">
+                <div class="p-5 border-b border-slate-100 dark:border-slate-800 flex justify-between items-center bg-slate-50/50 dark:bg-slate-900/50 backdrop-blur-sm sticky top-0 z-20">
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs font-medium text-slate-400">Cloud</span>
+                        <i data-lucide="chevron-right" class="w-3 h-3 text-slate-300"></i>
+                        <h4 id="storage-files-header-text" class="font-bold text-sm text-slate-800 dark:text-slate-200 flex items-center gap-2">
+                            <i data-lucide="folder-open" class="w-4 h-4 text-amber-500"></i> 
+                            My Files
+                        </h4>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <!-- Search Input -->
+                        <div class="relative hidden md:block">
+                            <input type="text" id="storage-search" onkeyup="handleStorageSearch(this.value)" placeholder="Search files..." 
+                                class="pl-8 pr-3 py-1.5 text-xs font-medium bg-slate-100 dark:bg-slate-800 border-none rounded-lg w-40 focus:w-56 transition-all focus:ring-2 focus:ring-indigo-500/50 text-slate-600 dark:text-slate-300 placeholder:text-slate-400">
+                            <i data-lucide="search" class="w-3.5 h-3.5 text-slate-400 absolute left-2.5 top-1/2 -translate-y-1/2"></i>
+                        </div>
+
+                        <!-- Sort Dropdown (Custom Implementation) -->
+                        <div class="relative">
+                            <button onclick="toggleSortMenu(event)" id="sort-menu-btn" class="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 hover:text-indigo-500 transition-colors" title="Sort by">
+                                <i data-lucide="arrow-up-down" class="w-4 h-4"></i>
+                            </button>
+                            <div id="sort-menu-dropdown" class="hidden absolute right-0 top-full mt-2 w-40 bg-white dark:bg-slate-800 rounded-xl shadow-xl border border-slate-100 dark:border-slate-700 z-50 overflow-hidden">
+                                <ul class="p-1 text-xs font-medium space-y-0.5">
+                                    <li><button onclick="sortStorage('date_desc', event)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-indigo-600 dark:text-indigo-400 active-sort flex items-center gap-2"><i data-lucide="calendar" class="w-3 h-3"></i> Newest First</button></li>
+                                    <li><button onclick="sortStorage('date_asc', event)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-2"><i data-lucide="calendar-clock" class="w-3 h-3"></i> Oldest First</button></li>
+                                    <li><button onclick="sortStorage('name_asc', event)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-2"><i data-lucide="arrow-down-a-z" class="w-3 h-3"></i> Name (A-Z)</button></li>
+                                    <li><button onclick="sortStorage('size_desc', event)" class="w-full text-left px-3 py-2 hover:bg-slate-50 dark:hover:bg-slate-700/50 rounded-lg text-slate-600 dark:text-slate-300 flex items-center gap-2"><i data-lucide="hard-drive" class="w-3 h-3"></i> Size (Largest)</button></li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="h-4 w-px bg-slate-200 dark:bg-slate-700 mx-1"></div>
+
+                        <div class="bg-slate-100 dark:bg-slate-800 p-1 rounded-lg flex items-center gap-1">
+                            <button onclick="toggleStorageView('list')" id="btn-view-list" class="p-1.5 rounded-md bg-white dark:bg-slate-700 text-indigo-600 dark:text-indigo-400 shadow-sm transition-all">
+                                <i data-lucide="list" class="w-4 h-4"></i>
+                            </button>
+                            <button onclick="toggleStorageView('grid')" id="btn-view-grid" class="p-1.5 rounded-md text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 transition-all">
+                                <i data-lucide="layout-grid" class="w-4 h-4"></i>
+                            </button>
+                        </div>
+                        <button onclick="loadUserFiles(window.currentViewingStudentId)" class="text-xs font-bold text-indigo-600 dark:text-indigo-400 hover:bg-indigo-50 dark:hover:bg-indigo-900/30 px-3 py-1.5 rounded-lg transition-colors flex items-center gap-1.5">
+                            <i data-lucide="refresh-cw" class="w-3 h-3"></i>
+                        </button>
+                    </div>
+                </div>
+                
+                <!-- Filter Tabs -->
+                <div class="px-5 py-3 border-b border-slate-100 dark:border-slate-800 flex gap-2 overflow-x-auto no-scrollbar">
+                    <button onclick="filterStorage('all')" id="filter-all" class="filter-btn active px-3 py-1.5 rounded-full text-[10px] font-bold bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border border-indigo-100 dark:border-indigo-900/50 transition-all whitespace-nowrap shadow-sm">All Files</button>
+                    <button onclick="filterStorage('image')" id="filter-image" class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Images</button>
+                    <button onclick="filterStorage('document')" id="filter-document" class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Documents</button>
+                    <button onclick="filterStorage('archive')" id="filter-archive" class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Archives</button>
+                    <button onclick="filterStorage('code')" id="filter-code" class="filter-btn px-3 py-1.5 rounded-full text-[10px] font-bold text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 transition-all border border-transparent whitespace-nowrap">Code</button>
+                </div>
+                
+                <!-- Empty State -->
+                <div id="storage-empty" class="hidden py-16 text-center">
+                    <div class="w-20 h-20 bg-slate-50 dark:bg-slate-800 rounded-full flex items-center justify-center mx-auto mb-4 border border-slate-100 dark:border-slate-700">
+                        <i data-lucide="folder" class="w-10 h-10 text-slate-300 dark:text-slate-600"></i>
+                    </div>
+                    <h5 class="text-sm font-bold text-slate-900 dark:text-white mb-1">No files found</h5>
+                    <p class="text-xs text-slate-500 dark:text-slate-400 max-w-xs mx-auto">
+                        Your personal storage is empty. Upload your first file to get started.
+                    </p>
+                </div>
+
+                <!-- List Container -->
+                <div id="storage-list" class="divide-y divide-slate-100 dark:divide-slate-800">
+                    <!-- Items injected via JS -->
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Global Footer -->
                 <!-- Premium Footer -->
                 <footer class="mt-auto py-6 px-4 md:px-8">
                     <div
@@ -4289,11 +4059,11 @@
                         <div class="flex items-center gap-3">
                             <div
                                 class="w-10 h-10 rounded-xl bg-indigo-50 dark:bg-indigo-900/20 flex items-center justify-center p-2 border border-indigo-100 dark:border-indigo-900/30">
-                                <img src="assets/logo.png" class="w-full h-full object-contain">
+                                <img src="assets/bbsydp_logo.png" class="w-full h-full object-contain">
                             </div>
                             <div class="flex flex-col">
                                 <span
-                                    class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-none mb-1">NAVTTC
+                                    class="text-xs font-black text-slate-800 dark:text-slate-100 uppercase tracking-tight leading-none mb-1">BBSHRRDB
                                     LMS <span class="text-indigo-500 text-[10px] ml-1">v2.0</span></span>
                                 <span
                                     class="text-[9px] font-bold text-slate-400 uppercase tracking-wider leading-none">©
@@ -4501,22 +4271,20 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
                 <div class="modal-header border-0 p-6 pb-0">
-                    <h5 class="modal-title font-black text-lg text-slate-900 dark:text-white tracking-tight">Rename File
-                    </h5>
+                    <h5 class="modal-title font-black text-lg text-slate-900 dark:text-white tracking-tight">Rename File</h5>
                     <button type="button" class="btn-close dark:btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-6 space-y-4">
                     <input type="hidden" id="rename-file-id">
                     <div>
-                        <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">New
-                            Filename</label>
-                        <input type="text" id="rename-file-name"
+                        <label class="text-[9px] font-black uppercase tracking-widest text-slate-400 ml-1">New Filename</label>
+                        <input type="text" id="rename-file-name" 
                             class="w-full p-3 bg-slate-50 dark:bg-[#0b1120] border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-bold focus:ring-2 focus:ring-indigo-500 outline-none text-slate-900 dark:text-white"
                             placeholder="e.g. Project-Final.pdf">
                     </div>
                 </div>
                 <div class="modal-footer border-0 p-6 pt-0">
-                    <button type="button" id="rename-save-btn" onclick="submitRename()"
+                    <button type="button" id="rename-save-btn" onclick="submitRename()" 
                         class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold uppercase tracking-widest shadow-lg shadow-indigo-500/20 transition-all transform hover:scale-[1.02]">
                         Save Changes
                     </button>
@@ -4528,61 +4296,44 @@
     <!-- FILE PREVIEW MODAL -->
     <div class="modal fade" id="filePreviewModal" tabindex="-1" aria-hidden="true">
         <div class="modal-dialog modal-xl modal-dialog-centered">
-            <div
-                class="modal-content border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#0b1120] rounded-3xl h-[85vh]">
-                <div
-                    class="modal-header border-b border-slate-100 dark:border-slate-800/50 p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
+            <div class="modal-content border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#0b1120] rounded-3xl h-[85vh]">
+                <div class="modal-header border-b border-slate-100 dark:border-slate-800/50 p-4 bg-white/50 dark:bg-slate-900/50 backdrop-blur-md sticky top-0 z-50">
                     <div class="flex items-center gap-3">
                         <div id="preview-icon-container" class="w-10 h-10 rounded-xl flex items-center justify-center">
                             <i data-lucide="file" id="preview-icon" class="w-5 h-5"></i>
                         </div>
                         <div>
-                            <h5 class="modal-title font-bold text-sm text-slate-900 dark:text-white leading-none"
-                                id="preview-filename">File Preview</h5>
-                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1.5"
-                                id="preview-filesize"></p>
+                            <h5 class="modal-title font-bold text-sm text-slate-900 dark:text-white leading-none" id="preview-filename">File Preview</h5>
+                            <p class="text-[10px] text-slate-400 font-bold uppercase tracking-widest mt-1.5" id="preview-filesize"></p>
                         </div>
                     </div>
                     <div class="flex items-center gap-2">
-                        <button id="preview-print-btn" onclick="window.printPreview()"
-                            class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all hidden"
-                            title="Print">
+                        <button id="preview-print-btn" onclick="window.printPreview()" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all hidden" title="Print">
                             <i data-lucide="printer" class="w-5 h-5"></i>
                         </button>
-                        <button onclick="window.toggleFullScreenPreview()" id="preview-fullscreen-btn"
-                            class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all"
-                            title="Full Screen">
+                        <button onclick="window.toggleFullScreenPreview()" id="preview-fullscreen-btn" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all" title="Full Screen">
                             <i data-lucide="maximize" id="preview-maximize-icon" class="w-5 h-5"></i>
                         </button>
-                        <a id="preview-download-link" href="#" target="_blank"
-                            class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all"
-                            title="Open Original">
+                        <a id="preview-download-link" href="#" target="_blank" class="p-2.5 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-xl text-slate-400 hover:text-indigo-500 transition-all" title="Open Original">
                             <i data-lucide="external-link" class="w-5 h-5"></i>
                         </a>
-                        <button type="button"
-                            class="p-2.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl text-slate-400 hover:text-rose-500 transition-all"
-                            data-bs-dismiss="modal">
+                        <button type="button" class="p-2.5 hover:bg-rose-50 dark:hover:bg-rose-900/20 rounded-xl text-slate-400 hover:text-rose-500 transition-all" data-bs-dismiss="modal">
                             <i data-lucide="x" class="w-5 h-5"></i>
                         </button>
                     </div>
                 </div>
                 <div class="modal-body p-0 bg-slate-50 dark:bg-slate-950 flex flex-col h-full overflow-hidden relative">
                     <!-- Navigation Buttons -->
-                    <button id="preview-prev-btn"
-                        class="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all shadow-xl hidden">
+                    <button id="preview-prev-btn" class="absolute left-4 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all shadow-xl hidden">
                         <i data-lucide="chevron-left" class="w-6 h-6"></i>
                     </button>
-                    <button id="preview-next-btn"
-                        class="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all shadow-xl hidden">
+                    <button id="preview-next-btn" class="absolute right-4 top-1/2 -translate-y-1/2 z-[60] w-12 h-12 bg-white/80 dark:bg-slate-900/80 backdrop-blur-sm border border-slate-200 dark:border-slate-700 rounded-full flex items-center justify-center text-slate-600 dark:text-slate-300 hover:bg-indigo-600 hover:text-white transition-all shadow-xl hidden">
                         <i data-lucide="chevron-right" class="w-6 h-6"></i>
                     </button>
 
                     <div id="preview-loading" class="flex-1 flex flex-col items-center justify-center gap-4">
-                        <div
-                            class="w-12 h-12 border-4 border-indigo-600/10 border-t-indigo-600 rounded-full animate-spin">
-                        </div>
-                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Loading
-                            Asset...</p>
+                        <div class="w-12 h-12 border-4 border-indigo-600/10 border-t-indigo-600 rounded-full animate-spin"></div>
+                        <p class="text-[10px] font-black text-slate-400 uppercase tracking-widest animate-pulse">Loading Asset...</p>
                     </div>
                     <div id="preview-content-area" class="flex-1 hidden h-full">
                         <!-- Content will be injected here -->
@@ -4640,8 +4391,7 @@
         <div class="modal-dialog modal-dialog-centered">
             <div class="modal-content v-card border-0 shadow-2xl overflow-hidden bg-white dark:bg-[#1e293b]">
                 <div class="modal-header border-0 p-6 pb-0">
-                    <h5 class="modal-title font-black text-lg text-slate-900 dark:text-slate-100 tracking-tight">Online
-                        Students</h5>
+                    <h5 class="modal-title font-black text-lg text-slate-900 dark:text-slate-100 tracking-tight">Online Students</h5>
                     <button type="button" class="btn-close dark:btn-close-white" data-bs-dismiss="modal"></button>
                 </div>
                 <div class="modal-body p-6">
@@ -4790,8 +4540,7 @@
                                 <i data-lucide="lightbulb" class="w-4 h-4"></i>
                                 <span class="text-[10px] font-black uppercase tracking-widest">Teacher's Hint</span>
                             </div>
-                            <div class="text-xs text-amber-800 dark:text-amber-300 font-medium italic"
-                                id="detail-hints">
+                            <div class="text-xs text-amber-800 dark:text-amber-300 font-medium italic" id="detail-hints">
                             </div>
                         </div>
                     </div>
@@ -4908,8 +4657,8 @@
             }
         };
 
-        const SUPABASE_URL = "YOUR_SUPABASE_URL_HERE";
-        const SUPABASE_KEY = "YOUR_SUPABASE_KEY_HERE";
+        const SUPABASE_URL = "https://oaycnrsbrgancgrxhztd.supabase.co";
+        const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9heWNucnNicmdhbmNncnhoenRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNjIyMzIsImV4cCI6MjA4MTczODIzMn0.Md8TTNA7nY504_STka-04BM9WAoVZ32J_-JCirAGgC4";
         // Initialize Supabase Client
         let client; // Renamed from 'supabase' to 'client' to match original usage
         window.SUPABASE_AVAILABLE = false;
@@ -5008,30 +4757,30 @@
             }
 
             try {
-                // Robust Session Check with Timeout
-                const sessionPromise = client.auth.getSession();
-                const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Session Check Timeout")), 5000)
-                );
+        // Robust Session Check with Timeout
+        const sessionPromise = client.auth.getSession();
+        const timeoutPromise = new Promise((_, reject) => 
+            setTimeout(() => reject(new Error("Session Check Timeout")), 5000)
+        );
 
-                const { data } = await Promise.race([sessionPromise, timeoutPromise]);
-                const session = data?.session;
+        const { data } = await Promise.race([sessionPromise, timeoutPromise]);
+        const session = data?.session;
 
-                if (session) {
-                    await handleUserSession(session.user);
-                } else {
-                    console.log("No active session found.");
-                    finishInitialization(false);
-                }
-            } catch (err) {
-                // Handle AbortError and Timeout gracefully
-                if (err.name === 'AbortError' || err.message?.includes('aborted')) {
-                    console.warn("Session check aborted (likely due to navigation or timeout). Treating as logged out.");
-                } else {
-                    console.error("Session check failed:", err);
-                }
-                finishInitialization(false);
-            }
+        if (session) {
+            await handleUserSession(session.user);
+        } else {
+            console.log("No active session found.");
+            finishInitialization(false);
+        }
+    } catch (err) {
+        // Handle AbortError and Timeout gracefully
+        if (err.name === 'AbortError' || err.message?.includes('aborted')) {
+            console.warn("Session check aborted (likely due to navigation or timeout). Treating as logged out.");
+        } else {
+            console.error("Session check failed:", err);
+        }
+        finishInitialization(false);
+    }
         }
 
         async function handleUserSession(user) {
@@ -5395,7 +5144,7 @@
                     $('#exam-start-screen').addClass('hidden');
                     // Ensure result card is shown if not already
                     if ($('#exam-result-card').hasClass('hidden')) {
-                        showExamResult(window.existingAttempt.score, window.existingAttempt.total_marks, true);
+                         showExamResult(window.existingAttempt.score, window.existingAttempt.total_marks, true);
                     }
                     return;
                 }
@@ -5485,17 +5234,17 @@
                         .order('created_at', { ascending: false })
                         .limit(1)
                         .maybeSingle();
-
+                    
                     // If not found, try looser match (handle spaces/case if possible via wildcard)
                     if (!byName) {
-                        const { data: byLike } = await window.client
+                         const { data: byLike } = await window.client
                             .from('exam_results')
                             .select('id, score, total_marks, status, certificate_id, created_at, student_id, student_name')
                             .ilike('student_name', `%${safeName}%`)
                             .order('created_at', { ascending: false })
                             .limit(1)
                             .maybeSingle();
-                        byName = byLike;
+                         byName = byLike;
                     }
                     data = byName;
                 } catch (e) {
@@ -5527,7 +5276,7 @@
                         if (ls) {
                             const parsed = JSON.parse(ls);
                             window.previousReviewSnapshot = parsed; // Use local immediately
-
+                            
                             // Background sync to server (DISABLED until columns added to DB)
                             /*
                             window.client.from('exam_results')
@@ -5559,7 +5308,7 @@
                     if (ls) {
                         window.previousReviewSnapshot = JSON.parse(ls);
                     }
-                } catch { }
+                } catch {}
             }
             return data;
         }
@@ -5831,8 +5580,8 @@
             // Generate unique Certificate ID if passed
             let certId = null;
             if (passed) {
-                const randomPart = Math.floor(1000 + Math.random() * 9000); // 4 digit
-                certId = "BBS-HTML-" + new Date().getFullYear() + "-" + randomPart;
+                 const randomPart = Math.floor(1000 + Math.random() * 9000); // 4 digit
+                 certId = "BBS-HTML-" + new Date().getFullYear() + "-" + randomPart;
             }
 
             if (window.client && currentUser && userProfile) {
@@ -5841,11 +5590,11 @@
                     questions: examQuestions.map(q => ({ q: q.q, options: q.options, correct: q.correct })),
                     answers: userAnswers
                 };
-
+                
                 // Save to localStorage as a backup (for same-device review)
                 try {
                     localStorage.setItem(`exam_review_${currentUser.id}`, JSON.stringify(reviewSnapshot));
-                } catch { }
+                } catch {}
 
                 // OFFLINE SUPPORT: Create a pending payload
                 const payload = {
@@ -5866,8 +5615,8 @@
                 try {
                     const { error } = await window.client.from('exam_results').insert(payload);
                     if (error) {
-                        console.warn("Upload failed, saved offline:", error);
-                        showToast("You are offline. Result saved locally and will sync when online.", "warning");
+                         console.warn("Upload failed, saved offline:", error);
+                         showToast("You are offline. Result saved locally and will sync when online.", "warning");
                     } else {
                         // Success! Remove pending sync
                         localStorage.removeItem(`pending_exam_sync_${currentUser.id}`);
@@ -5916,8 +5665,10 @@
             const name = (userProfile && userProfile.name) ? userProfile.name : "Student Name";
             const score = $('#result-score').text();
             const date = new Date().toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+            // Generate a random ID for "authenticity"
             const certId = "BBS-HTML-" + new Date().getFullYear() + "-" + Math.floor(1000 + Math.random() * 9000);
 
+            // Populate Data
             $('#cert-student-name').text(name);
             $('#cert-score').text(score);
             $('#cert-date').text(date);
@@ -5925,13 +5676,12 @@
 
             showToast("Generating Certificate... Please wait.", "info");
 
+            // Create a clone of the certificate for capture
+            // This avoids issues with hidden elements or existing transforms
             const originalElement = document.getElementById('certificate-template');
-            if (!originalElement) {
-                showToast("Certificate template not found. Pehle certificate generate karein.", "error");
-                return;
-            }
             const clone = originalElement.cloneNode(true);
 
+            // Setup clone for perfect capture
             clone.id = 'certificate-template-clone';
             clone.style.position = 'absolute';
             clone.style.top = '0';
@@ -5942,6 +5692,8 @@
             clone.style.width = '1123px';
             clone.style.height = '900px';
 
+            // Important: Ensure images in clone are loaded or have correct src
+            // The cloneNode(true) copies attributes, but we need to ensure the signature image source is set if it was set via JS
             const originalSig = originalElement.querySelector('#admin-sig-img');
             const cloneSig = clone.querySelector('#admin-sig-img');
             if (originalSig && cloneSig) {
@@ -5950,15 +5702,17 @@
 
             document.body.appendChild(clone);
 
+            // Lock body scroll
             const bodyOverflow = document.body.style.overflow;
             document.body.style.overflow = 'hidden';
             window.scrollTo(0, 0);
 
             try {
+                // Wait for render (fonts, images)
                 await new Promise(r => setTimeout(r, 1000));
 
                 const canvas = await html2canvas(clone, {
-                    scale: 3,
+                    scale: 3, // Higher quality
                     useCORS: true,
                     logging: false,
                     backgroundColor: '#ffffff',
@@ -5971,6 +5725,8 @@
                 });
 
                 const { jsPDF } = window.jspdf;
+                // Create PDF with custom dimensions matching the captured canvas aspect ratio
+                // Use pixels (or points) to match canvas dimensions 1:1 to avoid cropping
                 const pdf = new jsPDF('l', 'px', [1123, 900]);
 
                 const pdfWidth = pdf.internal.pageSize.getWidth();
@@ -5986,6 +5742,7 @@
                 console.error("Certificate Generation Error:", err);
                 showToast("Failed to generate certificate.", "error");
             } finally {
+                // Remove clone and restore body
                 if (clone && clone.parentNode) {
                     clone.parentNode.removeChild(clone);
                 }
@@ -6118,10 +5875,27 @@
             errorElement.addClass('hidden').text('');
             btn.prop('disabled', true).find('span').text('Verifying...');
 
-            if (!client || SUPABASE_URL === "YOUR_SUPABASE_URL_HERE") {
-                console.error("Supabase not configured.");
-                errorElement.removeClass('hidden').text("Database Configuration Missing: Please set your Supabase credentials in index.html to enable login.");
-                btn.prop('disabled', false).find('span').text(originalText);
+            if (!client) {
+                // OFFLINE LOGIN BYPASS
+                console.warn("Offline Mode: Attempting local login bypass.");
+                const role = localStorage.getItem('last_auth_tab') || 'student';
+                const mockUser = { id: 'offline-user-id', email: email || 'offline@local' };
+                const mockProfile = {
+                    uid: 'offline-user-id',
+                    name: name || 'Guest User',
+                    email: email || 'offline@local',
+                    role: role,
+                    status: 'approved',
+                    avatar_url: null
+                };
+
+                // Inject into cache so handleUserSession picks it up
+                localStorage.setItem('supabase_profile_cache', JSON.stringify(mockProfile));
+
+                showToast("Login Successful!", "success");
+                await handleUserSession(mockUser);
+                finishInitialization(true); // Force UI switch
+                isInitializing = false;
                 return;
             }
 
@@ -7152,8 +6926,8 @@
 
                 // FIX: Filter only ACTIVE tasks (not expired) for the count
                 const activeTasksCount = tasks.filter(t => {
-                    // Active = No deadline OR Deadline is in the future
-                    return !t.deadline || new Date(t.deadline) > new Date();
+                     // Active = No deadline OR Deadline is in the future
+                     return !t.deadline || new Date(t.deadline) > new Date();
                 }).length;
 
                 $('#stat-label-1').text("Active Tasks"); $('#stat-active').text(activeTasksCount);
@@ -7554,7 +7328,7 @@
             // SHOW LOADER IN FOOTER
             // This prevents the "New Form" from flashing or appearing falsely while we check the DataBase
             const footer = $('#submission-section');
-
+            
             // TRACKING: Update Activity
             if (typeof window.updateActivity === 'function') {
                 const taskTitle = t.title ? t.title.substring(0, 15) + (t.title.length > 15 ? '...' : '') : 'Task';
@@ -7853,7 +7627,7 @@
                 window.allUsersCache = users || []; // Cache users IMMEDIATELY after fetch
                 const studentCount = users ? users.filter(u => u.role === 'student').length : 0;
                 console.log(`Fetched ${users ? users.length : 0} total users. ${studentCount} are students.`);
-
+                
                 // CRITICAL: Ensure student directory is updated if storage is open
                 if ($('#view-storage').is(':visible') && userProfile.role === 'admin' && !window.currentViewingStudentId) {
                     renderStudentDirectory();
@@ -8062,7 +7836,7 @@
             try {
                 // If it's already base64, return it
                 if (url.startsWith('data:')) return url;
-
+                
                 const response = await fetch(url);
                 const blob = await response.blob();
                 return new Promise((resolve) => {
@@ -8087,18 +7861,18 @@
             if (profileUrl) {
                 try {
                     profileImgData = await fetchImage(profileUrl);
-                } catch (e) { console.warn("Profile image fetch failed", e); }
+                } catch(e) { console.warn("Profile image fetch failed", e); }
             }
 
             // Deduplicate submissions (keep highest grade) and filter valid grades
             const rawSubmissions = window.allSubmissions.filter(s => s.student_id === userId && s.status === 'graded' && s.grade != null && s.grade !== '');
             const uniqueTasksMap = new Map();
-
+            
             rawSubmissions.forEach(s => {
                 const existing = uniqueTasksMap.get(s.task_id);
                 const sGrade = parseFloat(s.grade) || 0;
                 const existingGrade = existing ? (parseFloat(existing.grade) || 0) : -1;
-
+                
                 if (!existing || sGrade > existingGrade) {
                     uniqueTasksMap.set(s.task_id, s);
                 }
@@ -8138,24 +7912,24 @@
                     // Reduced to 18mm height for subtle professional look
                     // Auto-width (0) preserves aspect ratio
                     const logoH = 18;
-
+                    
                     // Vertically centered in 50px header: (50 - 18) / 2 = 16
-                    doc.addImage(window.bbsydpLogo, 'PNG', 14, 16, 0, logoH);
-                } catch (e) {
-                    console.warn("Logo error", e);
+                    doc.addImage(window.bbsydpLogo, 'PNG', 14, 16, 0, logoH); 
+                } catch (e) { 
+                    console.warn("Logo error", e); 
                     doc.addImage(window.bbsydpLogo, 'PNG', 14, 16, 18, 18);
                 }
             }
 
             // Organization Text (Right of logo)
             const textX = 55; // Moved right to prevent overlap with wide logo
-
+            
             // Line 1: Organization Prefix
             doc.setFont("helvetica", "bold");
             doc.setFontSize(10);
             doc.setTextColor(71, 85, 105); // Slate 600
             doc.text("BENAZIR BHUTTO SHAHEED", textX, 19); // Shifted down for centering
-
+            
             // Line 2: Main Board Name
             doc.setFontSize(14);
             doc.setTextColor(15, 23, 42); // Slate 900
@@ -8349,30 +8123,30 @@
                     4: { cellWidth: 'auto', halign: 'left' }
                 },
                 margin: { top: 20, left: 14, right: 14 },
-
+                
                 // HOOKS FOR EMOJI RENDERING
-                didParseCell: function (data) {
+                didParseCell: function(data) {
                     // Check Body Cells in Title (0) and Feedback (4) columns
                     if (data.section === 'body' && (data.column.index === 0 || data.column.index === 4)) {
                         const text = Array.isArray(data.cell.text) ? data.cell.text.join(' ') : data.cell.text;
-
+                        
                         // Check for Emojis (Surrogates) or Non-ASCII
                         if (/[\uD800-\uDBFF][\uDC00-\uDFFF]/.test(text) || /[^\x00-\x7F]/.test(text)) {
                             data.cell.customText = text;
-
+                            
                             // Hide the original text by setting color to match background (or transparent-ish)
                             // Note: We keep the text so autoTable calculates row height correctly!
-                            data.cell.styles.textColor = data.cell.styles.fillColor || [255, 255, 255];
+                            data.cell.styles.textColor = data.cell.styles.fillColor || [255, 255, 255]; 
                         }
                     }
                 },
-                didDrawCell: function (data) {
+                didDrawCell: function(data) {
                     if (data.cell.customText) {
                         try {
                             const text = data.cell.customText;
                             const ptSize = data.cell.styles.fontSize;
                             const pxSize = ptSize * 1.333; // Convert pt to px
-
+                            
                             // Get color (force dark slate for readability)
                             // We ignore the hidden text color and use our own
                             const colorStyle = '#334155';
@@ -8387,24 +8161,24 @@
                             // We use the pixel width calculated from mm to ensure 1:1 visual scaling
                             let weight = data.cell.styles.fontStyle || 'normal';
                             if (weight === 'bolditalic') weight = 'italic bold';
-
+                            
                             const imgObj = window.textToImage(text, pxSize, colorStyle, cellWidthPx, 4, weight);
-
+                            
                             // Dimensions for PDF (mm)
                             // We want to fill the available width in the cell
-
+                            
                             // Calculate height based on aspect ratio
                             const ratio = imgObj.height / imgObj.width;
                             const drawHeight = availableWidthMm * ratio;
-
+                            
                             // Position
                             const x = data.cell.x + data.cell.padding('left');
                             const y = data.cell.y + data.cell.padding('top'); // Align top
-
+                            
                             // Draw Image
                             data.doc.addImage(imgObj.dataUrl, 'PNG', x, y, availableWidthMm, drawHeight);
-
-                        } catch (e) {
+                            
+                        } catch(e) {
                             console.error("Error rendering emoji cell", e);
                         }
                     }
@@ -8450,48 +8224,48 @@
 
             // Render Remarks as Image (for Emoji support)
             try {
-                const pxSize = 9 * 1.333; // 9pt to px
-                const colorStyle = '#5C4033'; // Amber 900
-                const maxWidthMm = pageWidth - 40; // 210 - 40 = 170mm approx
-                const maxWidthPx = maxWidthMm * 3.78; // mm to px
+                 const pxSize = 9 * 1.333; // 9pt to px
+                 const colorStyle = '#5C4033'; // Amber 900
+                 const maxWidthMm = pageWidth - 40; // 210 - 40 = 170mm approx
+                 const maxWidthPx = maxWidthMm * 3.78; // mm to px
 
-                // Generate High-Res Image of Text
-                const imgObj = window.textToImage(instructorRemarks, pxSize, colorStyle, maxWidthPx, 4, 'normal');
+                 // Generate High-Res Image of Text
+                 const imgObj = window.textToImage(instructorRemarks, pxSize, colorStyle, maxWidthPx, 4, 'normal');
+                 
+                 // Calculate dimensions
+                 const ratio = imgObj.height / imgObj.width;
+                 const drawHeight = maxWidthMm * ratio;
+                 const remarksBoxHeight = Math.max(25, drawHeight + 10);
 
-                // Calculate dimensions
-                const ratio = imgObj.height / imgObj.width;
-                const drawHeight = maxWidthMm * ratio;
-                const remarksBoxHeight = Math.max(25, drawHeight + 10);
+                 // Remarks Box with light background
+                 doc.setFillColor(254, 252, 232); // Amber 50
+                 doc.setDrawColor(251, 191, 36); // Amber 400
+                 doc.setLineWidth(0.5);
+                 doc.roundedRect(14, remarksY, pageWidth - 28, remarksBoxHeight, 2, 2, 'FD');
 
-                // Remarks Box with light background
-                doc.setFillColor(254, 252, 232); // Amber 50
-                doc.setDrawColor(251, 191, 36); // Amber 400
-                doc.setLineWidth(0.5);
-                doc.roundedRect(14, remarksY, pageWidth - 28, remarksBoxHeight, 2, 2, 'FD');
+                 // Draw Image
+                 doc.addImage(imgObj.dataUrl, 'PNG', 18, remarksY + 5, maxWidthMm, drawHeight);
 
-                // Draw Image
-                doc.addImage(imgObj.dataUrl, 'PNG', 18, remarksY + 5, maxWidthMm, drawHeight);
+                 remarksY += remarksBoxHeight + 5;
 
-                remarksY += remarksBoxHeight + 5;
+            } catch(e) {
+                 console.error("Remarks rendering failed", e);
+                 // Fallback to text (No Emojis)
+                 doc.setFont("helvetica", "normal");
+                 doc.setFontSize(9);
+                 const remarksLines = doc.splitTextToSize(instructorRemarks.replace(/[^\x00-\x7F]/g, ""), pageWidth - 40); // Strip emojis for fallback
+                 const remarksBoxHeight = Math.max(25, (remarksLines.length * 4) + 10);
 
-            } catch (e) {
-                console.error("Remarks rendering failed", e);
-                // Fallback to text (No Emojis)
-                doc.setFont("helvetica", "normal");
-                doc.setFontSize(9);
-                const remarksLines = doc.splitTextToSize(instructorRemarks.replace(/[^\x00-\x7F]/g, ""), pageWidth - 40); // Strip emojis for fallback
-                const remarksBoxHeight = Math.max(25, (remarksLines.length * 4) + 10);
+                 doc.setFillColor(254, 252, 232); // Amber 50
+                 doc.setDrawColor(251, 191, 36); // Amber 400
+                 doc.setLineWidth(0.5);
+                 doc.roundedRect(14, remarksY, pageWidth - 28, remarksBoxHeight, 2, 2, 'FD');
 
-                doc.setFillColor(254, 252, 232); // Amber 50
-                doc.setDrawColor(251, 191, 36); // Amber 400
-                doc.setLineWidth(0.5);
-                doc.roundedRect(14, remarksY, pageWidth - 28, remarksBoxHeight, 2, 2, 'FD');
+                 // Draw remarks text with proper wrapping
+                 doc.setTextColor(92, 64, 51); // Amber 900
+                 doc.text(remarksLines, 18, remarksY + 6);
 
-                // Draw remarks text with proper wrapping
-                doc.setTextColor(92, 64, 51); // Amber 900
-                doc.text(remarksLines, 18, remarksY + 6);
-
-                remarksY += remarksBoxHeight + 5;
+                 remarksY += remarksBoxHeight + 5;
             }
 
             // --- 5. FOOTER & SIGNATURE ---
@@ -8527,7 +8301,7 @@
                     doc.setFontSize(7);
                     doc.setTextColor(100, 116, 139); // Slate 500
                     doc.setFont("helvetica", "normal");
-                    doc.text("NAVTTC Administration", pageWidth - 40, finalY + 36, { align: "center" });
+                    doc.text("BBSHRRDB Administration", pageWidth - 40, finalY + 36, { align: "center" });
                 } catch (e) { console.warn("Signature error", e); }
             }
 
@@ -8537,7 +8311,7 @@
             doc.setFont("helvetica", "normal");
             doc.text("Document ID: " + Date.now().toString(36).toUpperCase(), 14, finalY + 15);
             doc.text("Generated: " + new Date().toLocaleString('en-US'), 14, finalY + 20);
-            doc.text("System: NAVTTC LMS v2.0", 14, finalY + 25);
+            doc.text("System: BBSHRRDB LMS v2.0", 14, finalY + 25);
 
             finalY += 50;
 
@@ -8549,12 +8323,12 @@
             doc.setTextColor(100, 116, 139); // Slate 500
             doc.setFont("helvetica", "italic");
             doc.text("This document is electronically generated and serves as an official performance record.", pageWidth / 2, finalY + 5, { align: "center" });
-            doc.text("For verification, please contact NAVTTC Administration.", pageWidth / 2, finalY + 9, { align: "center" });
+            doc.text("For verification, please contact BBSHRRDB Administration.", pageWidth / 2, finalY + 9, { align: "center" });
 
             // Generate filename with date
             const reportDate = new Date().toISOString().split('T')[0]; // YYYY-MM-DD format
             const sanitizedName = user.name.replace(/\s+/g, '_');
-            doc.save(`NAVTTC_Performance_Report_${sanitizedName}_${reportDate}.pdf`);
+            doc.save(`BBSHRRDB_Performance_Report_${sanitizedName}_${reportDate}.pdf`);
         };
 
         window.downloadReport = async (taskId) => {
@@ -8569,10 +8343,10 @@
             console.log("[PDF] Generating report for taskId:", taskId);
 
             const uid = currentUser.uid || currentUser.id;
-
+            
             // 1. Find submission (Cache or DB)
-            let sub = window.allSubmissions?.find(s =>
-                String(s.task_id) === String(taskId) &&
+            let sub = window.allSubmissions?.find(s => 
+                String(s.task_id) === String(taskId) && 
                 String(s.student_id) === String(uid)
             );
 
@@ -8585,7 +8359,7 @@
                         .eq('task_id', taskId)
                         .eq('student_id', uid)
                         .maybeSingle();
-
+                    
                     if (error) throw error;
                     sub = data;
                 } catch (e) {
@@ -8616,10 +8390,10 @@
             reportContainer.style.zIndex = '-1'; // Behind everything
             reportContainer.style.opacity = '1'; // Must be 1 for capture
             reportContainer.style.fontFamily = "'Segoe UI', Tahoma, Geneva, Verdana, sans-serif";
-
+            
             const feedbackText = sub.feedback ? window.fixEncoding(sub.feedback).replace(/\n/g, '<br>') : "No feedback provided.";
             const taskTitle = window.fixEncoding(sub.task_title || "Untitled Task");
-
+            
             const fetchBase64 = async (url) => {
                 try {
                     const response = await fetch(url);
@@ -8632,7 +8406,7 @@
                 } catch (e) { return null; }
             };
 
-            const logoBase64 = await fetchBase64('assets/logo.png');
+            const logoBase64 = await fetchBase64('assets/bbsydp_logo.png');
 
             reportContainer.innerHTML = `
                 <div style="border: 2px solid #f1f5f9; padding: 40px; border-radius: 15px; position: relative; overflow: hidden;">
@@ -8643,7 +8417,7 @@
                         <div style="display: flex; align-items: center; gap: 20px;">
                             ${logoBase64 ? `<img src="${logoBase64}" style="height: 60px;">` : ''}
                             <div>
-                                <h2 style="margin: 0; color: #1e293b; font-size: 18pt; font-weight: 900; letter-spacing: -1px;">NAVTTC LMS</h2>
+                                <h2 style="margin: 0; color: #1e293b; font-size: 18pt; font-weight: 900; letter-spacing: -1px;">BBSHRRDB LMS</h2>
                                 <p style="margin: 0; color: #64748b; font-size: 9pt; font-weight: 700; text-transform: uppercase;">Performance Record</p>
                             </div>
                         </div>
@@ -8684,7 +8458,7 @@
                             <div style="font-family: monospace; color: #1e293b; font-size: 9pt; font-weight: 800; background: #f1f5f9; padding: 4px 10px; border-radius: 5px;">${sub.id}</div>
                         </div>
                         <div style="text-align: right;">
-                            <div style="color: #cbd5e1; font-size: 8pt; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">NAVTTC LMS V2.0</div>
+                            <div style="color: #cbd5e1; font-size: 8pt; font-weight: 900; letter-spacing: 2px; text-transform: uppercase;">BBSHRRDB LMS V2.0</div>
                         </div>
                     </div>
                 </div>
@@ -9057,10 +8831,10 @@
             }
 
             if (tabId === 'storage') {
-                if (userProfile && userProfile.role === 'admin' && !window.currentViewingStudentId) {
-                    $('#storage-top-grid').addClass('hidden');
-                }
-                if (typeof loadUserFiles === 'function') loadUserFiles();
+                 if (userProfile && userProfile.role === 'admin' && !window.currentViewingStudentId) {
+                     $('#storage-top-grid').addClass('hidden');
+                 }
+                 if(typeof loadUserFiles === 'function') loadUserFiles();
             }
 
             // --- 4. TITLE UPDATES ---
@@ -9079,7 +8853,7 @@
                 'exam': 'Online Examination',
                 'storage': 'My Personal Storage'
             };
-            $('#page-title').text(titles[tabId] || 'NAVTTC LMS');
+            $('#page-title').text(titles[tabId] || 'BBSHRRDB LMS');
 
             // --- 5. MOBILE SIDEBAR HANDLING ---
             if (window.innerWidth < 1024) {
@@ -9258,7 +9032,7 @@
 
         window.loadUserFiles = async (targetUserId = null, studentName = null) => {
             if (!userProfile) return;
-
+            
             // If Admin and no target user, show Student Directory
             if (userProfile.role === 'admin' && !targetUserId) {
                 renderStudentDirectory();
@@ -9267,9 +9041,9 @@
 
             const uid = targetUserId || userProfile.uid || userProfile.id;
             window.currentViewingStudentId = targetUserId;
-
+            
             console.log("Loading files for UID:", uid, "Is Student View:", !!targetUserId);
-
+            
             // Show storage UI elements that might have been hidden by Directory view
             $('#storage-files-container').find('.p-5.border-b, .px-5.py-3.border-b').removeClass('hidden');
 
@@ -9313,12 +9087,12 @@
             try {
                 // Fetch file metadata from Supabase table 'personal_storage'
                 let query = client.from('personal_storage').select('*').order('created_at', { ascending: false });
-
+                
                 // CRITICAL FIX: Ensure correct UID filtering
                 // If targetUserId is provided (Admin viewing student), use that.
                 // Otherwise use the current user's ID.
                 const effectiveUid = targetUserId || userProfile.uid || userProfile.id;
-
+                
                 if (userProfile.role !== 'admin' || (targetUserId && targetUserId !== userProfile.uid)) {
                     query = query.eq('user_id', effectiveUid);
                 }
@@ -9330,7 +9104,7 @@
                     if (status === 404 || error.message.includes('relation "personal_storage" does not exist')) {
                         console.warn("CRITICAL: Supabase table 'personal_storage' is missing.");
                         showToast("Storage system not initialized. (Table 'personal_storage' missing)", "error");
-
+                        
                         // Log the SQL needed for the user
                         console.log("%c ACTION REQUIRED: Run this SQL in Supabase SQL Editor:", "background: #ef4444; color: white; font-weight: bold; padding: 4px;");
                         console.log(`
@@ -9394,7 +9168,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
          * Isay edit karte waqt dhyan rakhein taaki persistence kharab na ho.
          */
         const STORAGE_CONFIG_KEY = 'lms_admin_storage_config_v1';
-
+        
         window.getStorageUIConfig = () => {
             const defaults = {
                 gridClass: 'grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-3 p-4',
@@ -9414,9 +9188,9 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     return defaults;
                 }
                 return { ...defaults, ...JSON.parse(saved) };
-            } catch (e) {
+            } catch (e) { 
                 console.warn("Storage Config Load Error, using defaults");
-                return defaults;
+                return defaults; 
             }
         };
 
@@ -9455,8 +9229,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
                 // Apply Configured Grid Layout
                 container.removeClass('hidden divide-y divide-slate-100 dark:divide-slate-800')
-                    .addClass(config.gridClass)
-                    .show();
+                        .addClass(config.gridClass)
+                        .show();
                 emptyState.addClass('hidden');
 
                 // Update Header with Ultra-Professional Look (Compact)
@@ -9490,8 +9264,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                         const { data: files } = await client.from('personal_storage').select('user_id, created_at');
                         if (files) {
                             let stats = { mapping: {}, total: files.length, activeToday: 0 };
-                            const today = new Date().setHours(0, 0, 0, 0);
-
+                            const today = new Date().setHours(0,0,0,0);
+                            
                             files.forEach(f => {
                                 const uid = f.user_id;
                                 if (uid) {
@@ -9534,7 +9308,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     `);
                 } else {
                     const statsMap = globalFileStatsCache ? globalFileStatsCache.mapping : {};
-
+                    
                     // Apply Configured Sorting
                     if (config.sortBy === 'recent') {
                         students.sort((a, b) => {
@@ -9551,7 +9325,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     students.forEach(student => {
                         const id = student.uid || student.id;
                         const stats = statsMap[id] || { count: 0 };
-
+                        
                         html += `
                             <div onclick="loadUserFiles('${id}', '${student.name.replace(/'/g, "\\'")}')" 
                                  class="group flex flex-col items-center text-center ${config.cardPadding} bg-white dark:bg-slate-800 rounded-lg border border-slate-100 dark:border-slate-700/50 hover:bg-slate-50 dark:hover:bg-slate-700/30 transition-all cursor-pointer">
@@ -9635,8 +9409,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             if (!userProfile) return showToast("Please login.", "error");
 
             const uid = userProfile.uid || userProfile.id;
-            const CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME_HERE";
-            const UPLO_PRESET = "YOUR_CLOUDINARY_UPLOAD_PRESET_HERE";
+            const CLOUD_NAME = "dlm3iaqjn";
+            const UPLO_PRESET = "lms_assignments";
 
             $('#storage-upload-progress').removeClass('hidden');
             $('#storage-upload-percent').text(`0%`);
@@ -9654,7 +9428,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     method: 'POST',
                     body: formData
                 });
-
+                
                 const cloudinaryData = await res.json();
                 if (cloudinaryData.error) throw new Error(cloudinaryData.error.message);
 
@@ -9675,12 +9449,12 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     .select();
 
                 if (dbError) throw dbError;
-
+                
                 // If update failed, try one more time with number conversion
                 if (!updatedData || updatedData.length === 0) {
                     console.log("? First Update Failed (String ID). Trying Number...");
                     const targetId = Number(fileId);
-
+                    
                     if (!isNaN(targetId)) {
                         const { error: retryError, data: retryData } = await client
                             .from('personal_storage')
@@ -9693,7 +9467,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                             })
                             .eq('id', targetId)
                             .select();
-
+                        
                         if (retryError) throw retryError;
                         if (retryData && retryData.length > 0) {
                             console.log("? Fixed via Number conversion!");
@@ -9709,7 +9483,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 if (window.globalFileStatsCache) delete window.globalFileStatsCache[window.currentViewingStudentId || uid];
 
                 showToast("File updated successfully!", "success");
-
+                
                 // 4. Force immediate refresh
                 await loadUserFiles(window.currentViewingStudentId);
             } catch (err) {
@@ -9726,8 +9500,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             if (!userProfile) return showToast("Please login to upload files.", "error");
 
             const uid = userProfile.uid || userProfile.id;
-            const CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME_HERE";
-            const UPLO_PRESET = "YOUR_CLOUDINARY_UPLOAD_PRESET_HERE";
+            const CLOUD_NAME = "dlm3iaqjn";
+            const UPLO_PRESET = "lms_assignments";
 
             $('#storage-upload-progress').removeClass('hidden');
             let successCount = 0;
@@ -9750,7 +9524,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                         method: 'POST',
                         body: formData
                     });
-
+                    
                     const cloudinaryData = await res.json();
                     if (cloudinaryData.error) throw new Error(cloudinaryData.error.message);
 
@@ -9768,8 +9542,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
                     if (dbError) {
                         if (dbStatus === 404 || dbError.message.includes('relation "personal_storage" does not exist')) {
-                            showToast("Critical Error: Database table 'personal_storage' not found.", "error");
-                            throw new Error("Table 'personal_storage' missing. Check console for SQL setup.");
+                             showToast("Critical Error: Database table 'personal_storage' not found.", "error");
+                             throw new Error("Table 'personal_storage' missing. Check console for SQL setup.");
                         }
                         throw dbError;
                     }
@@ -9782,7 +9556,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
             $('#storage-upload-percent').text(`100%`);
             $('#storage-progress-bar').css('width', `100%`);
-
+            
             setTimeout(() => {
                 $('#storage-upload-progress').addClass('hidden');
                 $('#storage-progress-bar').css('width', `0%`);
@@ -9795,7 +9569,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
         window.deleteFile = async (fileId) => {
             if (!confirm("Are you sure you want to delete this file from your storage?")) return;
-
+            
             try {
                 // Remove from Supabase (Metadata)
                 const { error } = await client
@@ -9804,10 +9578,10 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     .eq('id', fileId);
 
                 if (error) throw error;
-
+                
                 showToast("File removed from storage.");
                 loadUserFiles(window.currentViewingStudentId);
-
+                
                 // Note: Deleting from Cloudinary requires a signed request or Admin API 
                 // which is usually handled via an Edge Function/Backend for security.
                 // For now, we remove the record from our database.
@@ -9822,7 +9596,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 window.open(url, '_blank');
                 return;
             }
-
+            
             // Fetch the file and trigger download with original name
             fetch(url)
                 .then(response => response.blob())
@@ -9847,7 +9621,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             const modalContent = document.querySelector('#filePreviewModal .modal-content');
             const icon = document.getElementById('preview-maximize-icon');
             const btn = document.getElementById('preview-fullscreen-btn');
-
+            
             if (!document.fullscreenElement) {
                 modalContent.requestFullscreen().then(() => {
                     modalContent.classList.add('is-fullscreen');
@@ -9932,8 +9706,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             let previewUrl = url;
             if (url.includes('cloudinary.com')) {
                 previewUrl = url.replace(/\/fl_attachment\//g, '/')
-                    .replace(/,fl_attachment/g, '')
-                    .replace(/fl_attachment,/g, '');
+                                .replace(/,fl_attachment/g, '')
+                                .replace(/fl_attachment,/g, '');
                 previewUrl = previewUrl.replace(/([^:])\/\//g, '$1/');
             }
 
@@ -9943,7 +9717,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             downloadLink.attr('href', url);
             contentArea.empty().addClass('hidden');
             loading.removeClass('hidden');
-
+            
             // Print button visibility
             if (isPdf || ['jpg', 'jpeg', 'png', 'txt', 'html'].includes(ext)) {
                 printBtn.removeClass('hidden');
@@ -9975,7 +9749,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             else if (isPdf) { icon = 'file-text'; colorClass = 'bg-red-50 text-red-500'; }
             else if (['zip', 'rar', '7z'].includes(ext)) { icon = 'archive'; colorClass = 'bg-amber-50 text-amber-500'; }
             else if (['html', 'js', 'py', 'php', 'css', 'txt', 'sql', 'json'].includes(ext)) { icon = 'code'; colorClass = 'bg-indigo-50 text-indigo-500'; }
-
+            
             iconContainer.attr('class', `w-10 h-10 rounded-xl flex items-center justify-center ${colorClass}`);
             iconEl.attr('data-lucide', icon);
             if (typeof lucide !== 'undefined') lucide.createIcons();
@@ -9985,7 +9759,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             try {
                 // Handle Preview Types
                 let previewHtml = '';
-
+                
                 // 📹 VIDEO HANDLING (YouTube/Vimeo)
                 const isYouTube = url.includes('youtube.com') || url.includes('youtu.be');
                 const isVimeo = url.includes('vimeo.com');
@@ -10019,7 +9793,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
                         if (!response.ok) throw new Error(`Failed to load: ${response.status} ${response.statusText}`);
                         const text = await response.text();
-
+                        
                         if (ext === 'html') {
                             previewHtml = `<iframe srcdoc="${text.replace(/"/g, "&quot;")}" class="w-full h-full border-0 bg-white rounded-lg"></iframe>`;
                         } else {
@@ -10109,7 +9883,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             if (filtered.length === 0) {
                 emptyState.removeClass('hidden');
                 container.addClass('hidden');
-
+                
                 // Customize empty state message if viewing a student
                 if (window.currentViewingStudentId) {
                     emptyState.find('h5').text('Student storage is empty');
@@ -10137,10 +9911,10 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 const ext = file.name.split('.').pop().toLowerCase();
                 const size = formatBytes(file.size || 0);
                 const date = new Date(file.created_at).toLocaleDateString();
-
+                
                 let icon = 'file';
                 let color = 'text-slate-400';
-
+                
                 if (['jpg', 'jpeg', 'png', 'gif', 'svg', 'webp'].includes(ext)) { icon = 'image'; color = 'text-rose-500'; }
                 else if (['pdf'].includes(ext)) { icon = 'file-text'; color = 'text-red-500'; }
                 else if (['zip', 'rar', '7z'].includes(ext)) { icon = 'archive'; color = 'text-amber-500'; }
@@ -10207,9 +9981,9 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
         window.filterStorage = (type) => {
             window.storageFilter = type;
             $('.filter-btn').removeClass('active bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/50 shadow-sm')
-                .addClass('text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent');
+                          .addClass('text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent');
             $(`#filter-${type}`).addClass('active bg-indigo-50 dark:bg-indigo-900/30 text-indigo-600 dark:text-indigo-400 border-indigo-100 dark:border-indigo-900/50 shadow-sm')
-                .removeClass('text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent');
+                                .removeClass('text-slate-500 dark:text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 border-transparent');
             renderStorageList(window.userFiles);
         };
 
@@ -10217,11 +9991,11 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             if (e) e.stopPropagation();
             window.storageSort = criteria;
             $('#sort-menu-dropdown').addClass('hidden');
-
+            
             // Update active state in menu
             $('#sort-menu-dropdown button').removeClass('text-indigo-600 dark:text-indigo-400 active-sort').addClass('text-slate-600 dark:text-slate-300');
             $(e.target).closest('button').addClass('text-indigo-600 dark:text-indigo-400 active-sort').removeClass('text-slate-600 dark:text-slate-300');
-
+            
             renderStorageList(window.userFiles);
         };
 
@@ -10323,9 +10097,9 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
                 try {
                     // Try RPC call first (Requires 'admin_reset_password' function in DB)
-                    const { error } = await client.rpc('admin_reset_password', {
-                        target_user_id: uid,
-                        new_password: newPass
+                    const { error } = await client.rpc('admin_reset_password', { 
+                        target_user_id: uid, 
+                        new_password: newPass 
                     });
 
                     if (error) {
@@ -10383,7 +10157,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
             // --- PRESENCE (Enhanced for Online Tracking) ---
             const presenceChannel = client.channel('online-users', {
-                config: {
+                config: { 
                     presence: { key: currentUser.id },
                     broadcast: { self: true } // Allow receiving own broadcasts for testing if needed
                 }
@@ -10393,7 +10167,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             let lastActive = Date.now();
             let currentStatus = 'online'; // online, idle
             let currentActivity = 'Dashboard'; // Dashboard, Viewing Task X, etc.
-
+            
             // Sync Helper
             const syncPresence = async () => {
                 const newState = {
@@ -10457,11 +10231,11 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 });
 
                 window.onlineUsers = Array.from(uniqueUsersMap.values());
-
+                
                 // Admin Update Logic
                 if (userProfile.role === 'admin') {
                     const students = window.onlineUsers.filter(u => u.role === 'student');
-
+                    
                     // Update User List Count
                     const countEl = document.getElementById('online-student-count');
                     if (countEl) {
@@ -10475,18 +10249,18 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                         dashCount.innerText = students.length;
                         $('#admin-live-widget').removeClass('hidden');
                     }
-
+                        
                     // Initial Notification
                     if (!window.hasShownOnlineNotif && students.length > 0) {
-                        window.hasShownOnlineNotif = true;
-                        showToast(`${students.length} Students are currently Online`, 'success');
+                         window.hasShownOnlineNotif = true;
+                         showToast(`${students.length} Students are currently Online`, 'success');
                     }
 
                     // Refresh Table to show Online indicators
                     if (window.allUsersCache) {
                         renderUsers(window.allUsersCache);
                     }
-
+                    
                     // Live Update Modal if Open
                     if ($('#onlineUsersModal').hasClass('show')) {
                         window.showOnlineStudentsModal();
@@ -10505,8 +10279,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 if (payload.target_id === currentUser.id) {
                     // Play Alert Sound
                     const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2869/2869-preview.mp3');
-                    audio.play().catch(e => { });
-
+                    audio.play().catch(e => {});
+                    
                     // Show SweetAlert
                     Swal.fire({
                         title: '👋 Admin Nudge!',
@@ -10519,15 +10293,15 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     }).then((result) => {
                         // Ack by resetting idle
                         resetIdleTimer();
-
+                        
                         // Send Acknowledgement to Admin
                         if (result.isConfirmed) {
-                            presenceChannel.send({
+                             presenceChannel.send({
                                 type: 'broadcast',
                                 event: 'nudge-ack',
-                                payload: {
+                                payload: { 
                                     user_name: userProfile.name,
-                                    user_id: currentUser.id
+                                    user_id: currentUser.id 
                                 }
                             });
                         }
@@ -10537,14 +10311,14 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
             // Nudge Acknowledgement Listener (For Admin)
             presenceChannel.on('broadcast', { event: 'nudge-ack' }, ({ payload }) => {
-                if (userProfile.role === 'admin') {
-                    // Play subtle sound
-                    const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3'); // Ping sound
-                    audio.volume = 0.5;
-                    audio.play().catch(e => { });
+                 if (userProfile.role === 'admin') {
+                      // Play subtle sound
+                      const audio = new Audio('https://assets.mixkit.co/active_storage/sfx/2578/2578-preview.mp3'); // Ping sound
+                      audio.volume = 0.5;
+                      audio.play().catch(e => {});
 
-                    showToast(`✅ ${payload.user_name} acknowledged your nudge!`, 'success');
-                }
+                      showToast(`✅ ${payload.user_name} acknowledged your nudge!`, 'success');
+                 }
             });
 
             // Typing Indicators (Broadcast) - Only for Task Hub now
@@ -10657,15 +10431,15 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
         window.showOnlineStudentsModal = () => {
             const students = window.onlineUsers ? window.onlineUsers.filter(u => u.role === 'student') : [];
             const list = $('#online-users-list').empty();
-
+            
             if (students.length === 0) {
                 list.html('<div class="text-center py-8 text-slate-400 font-bold uppercase tracking-widest text-xs">No students currently online</div>');
             } else {
                 students.forEach(s => {
-                    const onlineSince = s.online_at ? new Date(s.online_at).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : 'Just now';
+                    const onlineSince = s.online_at ? new Date(s.online_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'}) : 'Just now';
                     const isIdle = s.status === 'idle';
                     const activity = s.activity || 'Dashboard';
-
+                    
                     list.append(`
                         <div class="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
                             <div class="relative w-8 h-8 rounded-full ${isIdle ? 'bg-amber-500/10 text-amber-500' : 'bg-emerald-500/10 text-emerald-500'} flex items-center justify-center">
@@ -10687,7 +10461,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     `);
                 });
             }
-
+            
             lucide.createIcons();
             // Only show if not already shown (to avoid flicker during re-render)
             if (!$('#onlineUsersModal').hasClass('show')) {
@@ -10698,7 +10472,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
         window.nudgeStudent = async (uid, name) => {
             const client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
             const channel = client.channel('online-users');
-
+            
             // Send Broadcast
             await channel.send({
                 type: 'broadcast',
@@ -11000,8 +10774,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
             try {
                 let cloudFileUrl = null;
-                const CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME_HERE";
-                const UPLO_PRESET = "YOUR_CLOUDINARY_UPLOAD_PRESET_HERE";
+                const CLOUD_NAME = "dlm3iaqjn";
+                const UPLO_PRESET = "lms_assignments";
 
                 if (file) {
                     const formData = new FormData();
@@ -11137,8 +10911,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             }).toBlob(async (blob) => {
                 if (!blob) return;
 
-                const CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME_HERE";
-                const UPLO_PRESET = "YOUR_CLOUDINARY_UPLOAD_PRESET_HERE";
+                const CLOUD_NAME = "dlm3iaqjn";
+                const UPLO_PRESET = "lms_assignments";
                 const formData = new FormData();
                 formData.append('file', blob, 'avatar.png');
                 formData.append('upload_preset', UPLO_PRESET);
@@ -11273,8 +11047,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
             if (refFile) {
                 try {
-                    const CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME_HERE";
-                    const UPLO_PRESET = "YOUR_CLOUDINARY_UPLOAD_PRESET_HERE";
+                    const CLOUD_NAME = "dlm3iaqjn";
+                    const UPLO_PRESET = "lms_assignments";
                     const formData = new FormData();
                     formData.append('file', refFile);
                     formData.append('upload_preset', UPLO_PRESET);
@@ -11701,8 +11475,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
                 // Upload to Cloudinary if file present
                 if (file) {
-                    const CLOUD_NAME = "YOUR_CLOUDINARY_CLOUD_NAME_HERE";
-                    const UPLO_PRESET = "YOUR_CLOUDINARY_UPLOAD_PRESET_HERE";
+                    const CLOUD_NAME = "dlm3iaqjn";
+                    const UPLO_PRESET = "lms_assignments";
                     const formData = new FormData();
                     formData.append('file', file);
                     formData.append('upload_preset', UPLO_PRESET);
@@ -11869,7 +11643,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             // Filter pending submissions
             const uniquePendingMap = new Map();
             const submissions = window.allSubmissions || [];
-
+            
             submissions.forEach(s => {
                 if (!s || !s.student_id || !s.task_id) return;
                 // Use concatenation to avoid potential template literal parsing issues with weird characters
@@ -13225,7 +12999,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 return pyodide;
             }
             if (pyodideLoadingPromise) return pyodideLoadingPromise;
-
+            
             if (window.loadPyodide) {
                 try {
                     console.log("Starting Pyodide Load...");
@@ -13251,6 +13025,323 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             }, 800);
         };
 
+        window.printToOutput = (text, type = 'stdout') => {
+            const output = document.getElementById('python-output-panel');
+            if (!output) return;
+
+            // Create text node (preserves newlines via CSS whitespace: pre-wrap)
+            const span = document.createElement('span');
+            span.textContent = text;
+            if (type === 'stderr') {
+                span.style.color = '#ef4444'; // Red for errors
+            }
+            output.appendChild(span);
+            output.scrollTop = output.scrollHeight;
+        };
+
+        // Python Terminal State
+        window.pythonTerminalInitialized = false;
+        window.pythonREPLActive = false;
+        
+        // Helper to scroll to bottom
+        function scrollToBottom() {
+            const output = document.getElementById('python-output-panel');
+            if (output) output.scrollTop = output.scrollHeight;
+        }
+
+        // Helper to clear pending input if any
+        function clearPendingInput() {
+            // Abort any pending Promise
+            if (window.currentInputResolve) {
+                window.currentInputResolve(null);
+                window.currentInputResolve = null;
+            }
+            // Remove the DOM element if it exists
+            if (window.currentInputWrapper && window.currentInputWrapper.parentNode) {
+                window.currentInputWrapper.remove();
+            }
+            window.currentInputWrapper = null;
+
+            // Legacy cleanup (fallback)
+            const output = document.getElementById('python-output-panel');
+            if (output) {
+                const inputs = output.querySelectorAll('textarea, input');
+                inputs.forEach(el => {
+                    const wrapper = el.closest('div');
+                    if (wrapper) wrapper.remove();
+                });
+            }
+        }
+
+        // Start REPL Loop
+        window.startPythonREPL = async () => {
+            if (window.pythonREPLActive) return;
+            window.pythonREPLActive = true;
+            
+            const output = document.getElementById('python-output-panel');
+            
+            // Ensure Pyodide is loaded
+            if (!window.pyodide) {
+                window.printToOutput("Initializing Python Environment...\n", 'stdout');
+                try {
+                    window.pyodide = await loadPyodideEngine();
+                } catch (e) {
+                    window.printToOutput("Failed to initialize Python: " + e.message + "\n", 'stderr');
+                    window.pythonREPLActive = false;
+                    return;
+                }
+            }
+
+            // Define Helpers (Completeness + Async Input Support)
+            try {
+                await window.pyodide.runPythonAsync(`
+import code
+import sys
+import js
+import ast
+import asyncio
+import builtins
+
+# Custom Stream to Redirect to JS DOM
+class JSOutputStream:
+    def __init__(self, stream_type='stdout'):
+        self.stream_type = stream_type
+
+    def write(self, text):
+        js.printToOutput(text, self.stream_type)
+
+    def flush(self):
+        pass
+
+# Reset streams to Custom Stream
+sys.stdout = JSOutputStream('stdout')
+sys.stderr = JSOutputStream('stderr')
+
+# Async Input Shim (Calls JS Async Input)
+async def _async_input_shim(prompt=""):
+    return await js.getCustomInput(prompt)
+
+# Fail-safe for synchronous input (Prevents Popups if transform fails)
+def _sync_input_fail(prompt=""):
+    print(f"\\nInput Error: synchronous input('{prompt}') called.", file=sys.stderr)
+    print("This usually means the code complexity prevented automatic async conversion.", file=sys.stderr)
+    return ""
+
+# Override built-in input to prevent browser popups
+builtins.input = _sync_input_fail
+
+# AST Transformer to convert input() -> await _async_input_shim()
+class InputTransformer(ast.NodeTransformer):
+    def visit_Call(self, node):
+        self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == 'input':
+            new_func = ast.Name(id='_async_input_shim', ctx=ast.Load())
+            new_call = ast.Call(func=new_func, args=node.args, keywords=node.keywords)
+            return ast.Await(value=new_call)
+        return node
+
+def _check_and_transform(source):
+    # 1. Check completeness using compile_command (default 'single' mode)
+    try:
+        res = code.compile_command(source)
+        if res is None:
+            return ["incomplete", ""]
+    except (SyntaxError, ValueError, OverflowError):
+        # Might be valid 'exec' code (multi-line paste), so we continue to ast.parse
+        pass
+    except Exception:
+        pass
+
+    # 2. Parse as Module (exec mode) -> Validates syntax & prepares for transform
+    try:
+        tree = ast.parse(source)
+    except SyntaxError:
+        return ["invalid", source]
+    except Exception:
+        return ["invalid", source]
+
+    # 3. Transform
+    try:
+        transformer = InputTransformer()
+        new_tree = transformer.visit(tree)
+        ast.fix_missing_locations(new_tree)
+        return ["complete", ast.unparse(new_tree)]
+    except Exception as e:
+        print(f"REPL AST Error: {e}", file=sys.stderr)
+        # If transform fails, return source (will hit _sync_input_fail if input used)
+        return ["complete", source]
+`);
+            } catch (e) {
+                console.warn("Failed to load REPL helpers:", e);
+                window.printToOutput("System Error: Failed to load Python helpers.\n", 'stderr');
+            }
+
+            let buffer = "";
+
+            // Loop forever (unless stopped)
+            while (window.pythonREPLActive) {
+                try {
+                    // 1. Get Input
+                    const prompt = buffer ? '... ' : '>>> ';
+                    const line = await window.getCustomInput(prompt);
+                    
+                    if (line === null || line === undefined) {
+                         await new Promise(r => setTimeout(r, 100));
+                         continue;
+                    }
+
+                    // Handle CLS command (Clear Screen)
+                    if (buffer === "" && line.trim().toLowerCase() === "cls") {
+                        $('#python-output-panel').empty();
+                        // Reprint welcome message (optional, but good for context)
+                        window.printToOutput("Python 3.10 (Pyodide) Interactive Shell\nType code below.\n", 'stdout');
+                        continue;
+                    }
+
+                    // 2. Append to Buffer
+                    const isNewCommand = (buffer === "");
+                    if (line.trim() === "" && isNewCommand) {
+                        continue;
+                    }
+                    
+                    const tempBuffer = buffer + line + "\n";
+                    
+                    // 3. Check Completeness & Transform
+                    let status = "complete";
+                    let codeToRun = tempBuffer;
+
+                    if (line.trim() === "" && !isNewCommand) {
+                        // Empty line in continuation -> Force complete
+                        status = "complete";
+                    } else {
+                        try {
+                            const result = await window.pyodide.runPythonAsync(`_check_and_transform(${JSON.stringify(tempBuffer)})`);
+                            // result is a JS proxy of Python list? Or converted?
+                            // runPythonAsync returns JS result if possible.
+                            // Python list -> JS Array.
+                            const resArray = result.toJs ? result.toJs() : result;
+                            status = resArray[0];
+                            codeToRun = resArray[1];
+                        } catch (e) {
+                            status = "invalid";
+                        }
+                    }
+
+                    if (status === "incomplete") {
+                        buffer = tempBuffer;
+                        continue;
+                    }
+
+                    // Complete or Invalid -> Execute
+                    buffer = ""; // Reset
+                    
+                    // If invalid, codeToRun is original source (which will throw error when run)
+                    // If complete, codeToRun is transformed source (async input)
+
+                    if (codeToRun && codeToRun.trim()) {
+                        try {
+                            let result = await window.pyodide.runPythonAsync(codeToRun);
+                            if (result !== undefined) {
+                                window.printToOutput(String(result) + '\n');
+                            }
+                        } catch (e) {
+                             let msg = e.toString();
+                             if (msg.includes('PythonError:')) {
+                                 msg = msg.split('PythonError:')[1];
+                             }
+                             window.printToOutput(msg + '\n', 'stderr');
+                        }
+                    }
+                } catch (e) {
+                    console.error("REPL Error:", e);
+                    break; // Break loop on system error
+                }
+            }
+        };
+
+        window.getCustomInput = (prompt) => {
+            return new Promise((resolve) => {
+                const output = document.getElementById('python-output-panel');
+                
+                // 1. Create Wrapper (use items-start for multiline alignment)
+                const wrapper = document.createElement('div');
+                wrapper.className = 'flex flex-wrap items-start animate-in fade-in duration-200';
+                
+                // 2. Add Prompt Text (if any)
+                if (prompt) {
+                    const promptSpan = document.createElement('span');
+                    promptSpan.textContent = prompt;
+                    promptSpan.className = 'mr-2 whitespace-pre-wrap text-blue-400 font-bold select-none pt-[1px]'; // align with textarea text
+                    wrapper.appendChild(promptSpan);
+                }
+                
+                // 3. Create Textarea Field (for multiline support)
+                const input = document.createElement('textarea');
+                input.className = 'flex-1 bg-transparent border-none outline-none text-inherit font-mono caret-white min-w-[50px] resize-none overflow-hidden';
+                input.style.boxShadow = 'none';
+                input.rows = 1;
+                input.spellcheck = false;
+                
+                // Auto-grow logic
+                const adjustHeight = () => {
+                    input.style.height = 'auto';
+                    input.style.height = input.scrollHeight + 'px';
+                };
+                input.addEventListener('input', adjustHeight);
+                
+                wrapper.appendChild(input);
+                output.appendChild(wrapper);
+                
+                // 4. Focus and Scroll
+                input.focus();
+                output.scrollTop = output.scrollHeight;
+                
+                // 5. Handle Input
+                let resolved = false;
+                const finish = () => {
+                    if (resolved) return;
+                    resolved = true;
+                    const val = input.value;
+                    
+                    // Replace input with static text
+                    const textNode = document.createElement('span');
+                    textNode.textContent = val + '\n';
+                    textNode.className = 'whitespace-pre-wrap flex-1'; // preserve formatting
+                    wrapper.replaceChild(textNode, input);
+                    
+                    resolve(val);
+                };
+                
+                input.addEventListener('keydown', (e) => {
+                    if (e.key === 'Enter') {
+                        if (e.shiftKey) {
+                            // Shift+Enter: Allow default newline behavior
+                            // Trigger resize after a tiny delay
+                            setTimeout(adjustHeight, 0);
+                        } else {
+                            // Enter: Submit
+                            e.preventDefault();
+                            finish();
+                        }
+                    }
+                });
+                
+                // Keep focus
+                output.addEventListener('click', () => {
+                    if (!resolved && document.body.contains(input)) {
+                         input.focus();
+                         // Move cursor to end
+                         const len = input.value.length;
+                         input.setSelectionRange(len, len);
+                    }
+                });
+                
+                // Save reference
+                window.currentInputResolve = resolve;
+                window.currentInputWrapper = wrapper;
+            });
+        };
+
         window.openLiveEditor = () => {
             switchTab('playground');
 
@@ -13262,30 +13353,219 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             if (preview.length && (preview.attr('srcdoc') === undefined || preview.attr('srcdoc') === '')) {
                 window.runCode();
             }
+            
+            // Start loading Pyodide in background
+            loadPyodideEngine();
         };
 
         window.runCode = async () => {
             if (window.awardBadge) window.awardBadge('code_runner');
-
+            
+            // Check active mode (Python takes precedence if visible)
+            const isPython = !$('#panel-python').hasClass('hidden');
             const preview = document.getElementById('code-preview');
             const previewDoc = preview.contentDocument || preview.contentWindow.document;
 
-            // WEB MODE (HTML/CSS/JS)
-            const htmlVal = $('#code-html').val() || '';
-            const cssVal = $('#code-css').val() || '';
-            const jsVal = $('#code-js').val() || '';
+            if (isPython) {
+                // PYTHON MODE
+                const pyCode = $('#code-python').val();
+                const output = document.getElementById('python-output-panel');
+                
+                // Ensure correct visibility (Sync with toggleEditorPanel)
+                $('#code-preview').addClass('hidden');
+                $('#python-output-panel').removeClass('hidden');
 
-            const css = '<style>' + cssVal + '</style>';
-            // Safe JS Injection using string concatenation
-            const js = '\n<script>\ntry {\n' + jsVal + '\n} catch(err) { console.error(err); }\n' + '<' + '/script>';
+                // output.textContent = "Running Python..."; // REMOVED: Do not clear history
+                
+                // Add Separator
+                const separator = document.createElement('div');
+                separator.className = 'text-gray-500 text-xs my-2 border-t border-gray-700 pt-1 select-none';
+                separator.textContent = '--- Running Script ---';
+                output.appendChild(separator);
+                
+                // Clear any pending REPL input
+                clearPendingInput();
+                // If a promise was waiting, we might need to reject it or handle it? 
+                // Ideally, we just remove the DOM element. The Promise will hang forever or we can ignore it.
+                // Since we are running new code, the REPL loop might get confused if we don't restart it or pause it.
+                // Simpler: Just run the code. If REPL comes back, it comes back.
 
-            // document.write is blocked by Chrome in some cases. Use innerHTML.
-            if (previewDoc.documentElement) {
-                previewDoc.documentElement.innerHTML = htmlVal + css + js;
+                // Sync with global instance if available
+                if (!window.pyodide && window.pyodideGlobal) {
+                    window.pyodide = window.pyodideGlobal;
+                }
+
+                // Try Init
+                if (!window.pyodide) {
+                     output.textContent = "Initializing Python Engine (Pyodide)...";
+                     try {
+                        window.pyodide = await loadPyodideEngine();
+                     } catch (e) {
+                        output.textContent = "Failed to load Python Engine: " + e.message;
+                        return;
+                     }
+                }
+
+                if (!window.pyodide) {
+                    output.textContent = "Error: Python Engine could not be loaded. Please check internet connection.";
+                    return;
+                }
+
+                try {
+                    // 1. Redirect stdout/stderr & Setup Custom Input & Transformer
+                    await window.pyodide.runPythonAsync(`
+import sys
+import io
+import js
+import asyncio
+import ast
+import builtins
+
+# Custom Stream to Redirect to JS DOM
+class JSOutputStream:
+    def __init__(self, stream_type='stdout'):
+        self.stream_type = stream_type
+
+    def write(self, text):
+        js.printToOutput(text, self.stream_type)
+
+    def flush(self):
+        pass
+
+# Reset streams to Custom Stream
+sys.stdout = JSOutputStream('stdout')
+sys.stderr = JSOutputStream('stderr')
+
+# Async Input Shim (Calls JS Async Input)
+async def _async_input_shim(prompt=""):
+    return await js.getCustomInput(prompt)
+
+# Fail-safe for synchronous input (Prevents Popups)
+def _sync_input_fail(prompt=""):
+    print(f"\\nInput Error: synchronous input('{prompt}') called.", file=sys.stderr)
+    print("This usually means the code complexity prevented automatic async conversion.", file=sys.stderr)
+    return ""
+
+# Override built-in input
+builtins.input = _sync_input_fail
+
+# AST Transformer to convert input() -> await _async_input_shim()
+class InputTransformer(ast.NodeTransformer):
+    def visit_Call(self, node):
+        self.generic_visit(node)
+        if isinstance(node.func, ast.Name) and node.func.id == 'input':
+            new_func = ast.Name(id='_async_input_shim', ctx=ast.Load())
+            new_call = ast.Call(func=new_func, args=node.args, keywords=node.keywords)
+            return ast.Await(value=new_call)
+        return node
+
+def transform_code_to_async(source):
+    try:
+        tree = ast.parse(source)
+        transformer = InputTransformer()
+        new_tree = transformer.visit(tree)
+        ast.fix_missing_locations(new_tree)
+        # unparse available in 3.9+ (Pyodide uses 3.10+)
+        return ast.unparse(new_tree)
+    except Exception as e:
+        print(f"RunCode AST Error: {e}", file=sys.stderr)
+        return None
+`);
+
+                    // 2. Transform User Code (Auto-Async Wrapper)
+                    let processedCode = pyCode;
+                    let transformSuccess = false;
+
+                    try {
+                        // Use Python AST to transform code safely
+                        const transformed = await window.pyodide.runPythonAsync(`transform_code_to_async(${JSON.stringify(pyCode)})`);
+                        if (transformed) {
+                            processedCode = transformed;
+                            transformSuccess = true;
+                        }
+                    } catch (e) {
+                        console.warn("AST Transformation failed:", e);
+                    }
+                    
+                    // If transformation failed, we might just run original code (which uses sync input)
+                    // But if it succeeded, we wrap it in async def
+                    
+                    const asyncCode = transformSuccess ? `
+async def __main_wrapper__():
+    global input
+    pass
+${processedCode.replace(/^/gm, '    ')}
+
+await __main_wrapper__()
+` : null;
+
+                    let execError = null;
+                    
+                    if (transformSuccess && asyncCode) {
+                        try {
+                            // TRY ASYNC MODE
+                            await window.pyodide.loadPackagesFromImports(pyCode); 
+                            await window.pyodide.runPythonAsync(asyncCode);
+                        } catch (err) {
+                            // If runtime error, show it
+                            // If SyntaxError in wrapper? Unlikely if AST worked.
+                            console.warn("Async execution failed:", err);
+                            execError = err;
+                        }
+                    } else {
+                        // FALLBACK: Run Original Code (Sync Input)
+                        try {
+                            await window.pyodide.loadPackagesFromImports(pyCode);
+                            await window.pyodide.runPythonAsync(pyCode);
+                        } catch (retryErr) {
+                            execError = retryErr;
+                        }
+                    }
+
+                    if (execError) {
+                         window.printToOutput('\nTraceback (most recent call last):\n' + execError.toString(), 'stderr');
+                    }
+                    
+                    // RE-ENABLE REPL
+                    setTimeout(() => {
+                        window.startPythonREPL();
+                    }, 500);
+                    
+                    // 3. Output is already streamed via JSOutputStream.
+                    // We only need to check for execError if it wasn't printed.
+                    if (execError) {
+                         // Print unhandled errors
+                         window.printToOutput("\nTraceback (most recent call last):\n" + String(execError), 'stderr');
+                    }
+                    
+                    // Add a newline at the end if needed
+                    // window.printToOutput("\n");
+
+                } catch (err) {
+                    output.textContent += "\nSystem Error: " + err;
+                    // Ensure REPL restarts
+                    setTimeout(() => {
+                        window.startPythonREPL();
+                    }, 500);
+                }
             } else {
-                previewDoc.open();
-                previewDoc.write(htmlVal + css + js);
-                previewDoc.close();
+                // WEB MODE (HTML/CSS/JS)
+                const htmlVal = $('#code-html').val() || '';
+                const cssVal = $('#code-css').val() || '';
+                const jsVal = $('#code-js').val() || '';
+                
+                const css = '<style>' + cssVal + '</style>';
+                // Safe JS Injection using string concatenation
+                const js = '\n<script>\ntry {\n' + jsVal + '\n} catch(err) { console.error(err); }\n' + '<' + '/script>';
+
+                // document.write is blocked by Chrome in some cases. Use innerHTML.
+                if (previewDoc.documentElement) {
+                    previewDoc.documentElement.innerHTML = htmlVal + css + js;
+                } else {
+                    previewDoc.open();
+                    previewDoc.write(htmlVal + css + js);
+                    previewDoc.close();
+                }
             }
         };
 
@@ -13293,37 +13573,272 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
             $('#code-html').val('');
             $('#code-css').val('');
             $('#code-js').val('');
+            $('#code-python').val('');
+            
+            // Clear Python Output if active
+            if (!$('#panel-python').hasClass('hidden')) {
+                $('#python-output-panel').empty();
+                
+                // Unblock REPL loop so it respawns input
+                clearPendingInput();
 
-            window.runCode(); // Clear preview in Web mode
+                if (window.pythonREPLActive) {
+                    window.printToOutput("Python 3.10 (Pyodide) Interactive Shell\nType code below.\n", 'stdout');
+                } else {
+                    // Ensure REPL is started if not active
+                    window.startPythonREPL();
+                }
+            } else {
+                window.runCode(); // Clear preview in Web mode
+            }
         };
 
         window.toggleEditorPanel = (type) => {
-            const panel = $(`#panel-${type}`);
-            const btn = $(`#btn-toggle-${type}`);
+            if (type === 'python') {
+                const pyPanel = $('#panel-python');
+                const pyBtn = $('#btn-toggle-python');
+                const isHidden = pyPanel.hasClass('hidden');
 
-            if (panel.hasClass('hidden')) {
-                panel.removeClass('hidden');
-                btn.removeClass('opacity-50 grayscale');
+                if (isHidden) {
+                    // ACTIVATE PYTHON MODE
+                    // Hide Web Panels
+                    $('#panel-html, #panel-css, #panel-js').addClass('hidden');
+                    // Reset Web Buttons
+                    $('#btn-toggle-html, #btn-toggle-css, #btn-toggle-js').addClass('opacity-50 grayscale');
+                    
+                    // Show Python Panel (Logic Removed: We now hide the editor container entirely)
+                    pyPanel.removeClass('hidden'); 
+                    pyBtn.removeClass('opacity-50 grayscale');
+                    
+                    // Hide Editor Container & Drag Handle (Full Screen Terminal)
+                    $('#editor-container').addClass('hidden');
+                    $('#drag-handle').addClass('hidden');
 
-                // Auto-open HTML if CSS or JS is opened
-                if (type === 'css' || type === 'js') {
+                    // Hide Run Button (REPL only)
+                    $('#btn-run').addClass('hidden').removeClass('flex');
+
+                    // Show Python Output Panel, Hide Iframe (Console khtam)
+                    $('#python-output-panel').removeClass('hidden');
+                    $('#code-preview').addClass('hidden');
+                    
+                    // Initialize REPL if not running
+                    setTimeout(() => {
+                         if (!window.pythonREPLActive) {
+                             window.printToOutput("Python 3.10 (Pyodide) Interactive Shell\nType code below.\n", 'stdout');
+                             window.startPythonREPL();
+                         }
+                    }, 500);
+
+                } else {
+                    // DEACTIVATE PYTHON MODE -> Return to Web Mode
+                    pyPanel.addClass('hidden');
+                    pyBtn.addClass('opacity-50 grayscale');
+                    
+                    // Show Editor Container & Drag Handle
+                    $('#editor-container').removeClass('hidden');
+                    $('#drag-handle').removeClass('hidden');
+                    
+                    // Hide Run Button
+                    $('#btn-run').addClass('hidden').removeClass('flex');
+                    
+                    // Stop REPL
+                    window.pythonREPLActive = false;
+                    clearPendingInput();
+
+                    // Restore HTML Panel (Default)
                     $('#panel-html').removeClass('hidden');
-                    $('#btn-toggle-html').removeClass('opacity-50 grayscale');
+
+                    // Restore Iframe, Hide Python Output
+                    $('#python-output-panel').addClass('hidden');
+                    $('#code-preview').removeClass('hidden');
                 }
             } else {
-                panel.addClass('hidden');
-                btn.addClass('opacity-50 grayscale');
+                // WEB MODE (CSS/JS)
+                // Ensure Python is off
+                if (!$('#panel-python').hasClass('hidden')) {
+                    $('#panel-python').addClass('hidden');
+                    $('#btn-toggle-python').addClass('opacity-50 grayscale');
+                    
+                    // Restore Editor Container & Drag Handle
+                    $('#editor-container').removeClass('hidden');
+                    $('#drag-handle').removeClass('hidden');
+                    
+                    // Restore Run Button
+                    $('#btn-run').removeClass('hidden').addClass('flex');
+
+                    // Stop REPL
+                    window.pythonREPLActive = false;
+                    clearPendingInput();
+
+                    // Restore Iframe, Hide Python Output
+                    $('#python-output-panel').addClass('hidden');
+                    $('#code-preview').removeClass('hidden');
+                }
+
+                const panel = $(`#panel-${type}`);
+                const btn = $(`#btn-toggle-${type}`);
+
+                if (panel.hasClass('hidden')) {
+                    panel.removeClass('hidden');
+                    btn.removeClass('opacity-50 grayscale');
+
+                    // Auto-open HTML if CSS or JS is opened
+                    if (type === 'css' || type === 'js') {
+                        $('#panel-html').removeClass('hidden');
+                        $('#btn-toggle-html').removeClass('opacity-50 grayscale');
+                    }
+                } else {
+                    panel.addClass('hidden');
+                    btn.addClass('opacity-50 grayscale');
+                }
             }
         };
 
         // Shift+Enter Shortcut
         $(document).ready(() => {
-            $('#code-html, #code-css, #code-js').on('keydown', function (e) {
+            $('#code-html, #code-css, #code-js, #code-python').on('keydown', function(e) {
                 if (e.shiftKey && e.key === 'Enter') {
                     e.preventDefault();
                     window.runCode();
                 }
             });
+        });
+
+
+
+        // --- BADGE SYSTEM LOGIC ---
+        window.renderBadges = async () => {
+            const container = $('#badges-grid');
+            container.empty();
+
+            if (!userProfile || userProfile.role !== 'student') {
+                container.html(`<div class="col-span-full text-center py-4 text-slate-400 text-xs italic">Badges are only for students.</div>`);
+                return;
+            }
+
+            // Fetch latest arcade progress if not cached
+            let arcade = window.allArcadeProgress ? window.allArcadeProgress.find(p => p.user_id === currentUser.id) : null;
+            if (!arcade && client) {
+                const { data } = await client.from('user_arcade_progress').select('*').eq('user_id', currentUser.id).maybeSingle();
+                arcade = data;
+            }
+
+            // Fetch submission stats
+            const mySubs = window.allSubmissions ? window.allSubmissions.filter(s => s.student_id === currentUser.id && s.status === 'graded') : [];
+            const avgGrade = mySubs.length ? (mySubs.reduce((a, b) => a + b.grade, 0) / mySubs.length) : 0;
+
+            const badges = [
+                {
+                    id: 'html_master',
+                    title: 'HTML Master',
+                    desc: 'Reach "Hard" level in HTML Arcade',
+                    icon: 'code-2',
+                    color: 'orange',
+                    unlocked: arcade?.html_level === 'hard'
+                },
+                {
+                    id: 'css_pro',
+                    title: 'CSS Pro',
+                    desc: 'Reach "Hard" level in CSS Arcade',
+                    icon: 'palette',
+                    color: 'cyan',
+                    unlocked: arcade?.css_level === 'hard'
+                },
+                {
+                    id: 'js_wizard',
+                    title: 'JS Wizard',
+                    desc: 'Reach "Hard" level in JS Arcade',
+                    icon: 'zap',
+                    color: 'yellow',
+                    unlocked: arcade?.js_level === 'hard'
+                },
+                {
+                    id: 'bug_hunter',
+                    title: 'Bug Hunter',
+                    desc: 'Score > 500 in Syntax Balloons',
+                    icon: 'bug',
+                    color: 'rose',
+                    // Mock check: If they played Balloons enough to have a level > 1
+                    unlocked: (arcade?.syntax_balloons_score > 500) || false
+                },
+                {
+                    id: 'speed_coder',
+                    title: 'Speed Coder',
+                    desc: 'Complete 5 Speed Challenges',
+                    icon: 'timer',
+                    color: 'purple',
+                    unlocked: (arcade?.css_level === 'moderate' || arcade?.css_level === 'hard') // Mock logic
+                },
+                {
+                    id: 'task_master',
+                    title: 'Task Master',
+                    desc: 'Complete 10+ Assignments',
+                    icon: 'clipboard-check',
+                    color: 'emerald',
+                    unlocked: mySubs.length >= 10
+                },
+                {
+                    id: 'top_performer',
+                    title: 'Top Performer',
+                    desc: 'Maintain 90%+ Average Grade',
+                    icon: 'star',
+                    color: 'indigo',
+                    unlocked: avgGrade >= 90 && mySubs.length >= 3
+                },
+                {
+                    id: 'streak_7',
+                    title: '7-Day Streak',
+                    desc: 'Login for 7 consecutive days',
+                    icon: 'flame',
+                    color: 'amber',
+                    unlocked: false // Placeholder for future logic
+                }
+            ];
+
+            badges.forEach(b => {
+                const opacity = b.unlocked ? 'opacity-100' : 'opacity-40 grayscale';
+                const bg = b.unlocked ? `bg-${b.color}-50 dark:bg-${b.color}-900/20` : 'bg-slate-100 dark:bg-slate-800';
+                const border = b.unlocked ? `border-${b.color}-200 dark:border-${b.color}-800/50` : 'border-slate-200 dark:border-slate-700';
+                const text = b.unlocked ? `text-${b.color}-600 dark:text-${b.color}-400` : 'text-slate-400';
+                const lockIcon = b.unlocked ? '' : `<div class="absolute top-2 right-2 text-slate-400"><i data-lucide="lock" class="w-3 h-3"></i></div>`;
+
+                container.append(
+                    '<div class="relative p-4 rounded-2xl border ' + border + ' ' + bg + ' ' + opacity + ' transition-all flex flex-col items-center text-center group hover:scale-[1.02]">' +
+                        lockIcon +
+                        '<div class="w-10 h-10 rounded-full bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 flex items-center justify-center mb-3 shadow-sm ' + text + '">' +
+                            '<i data-lucide="' + b.icon + '" class="w-5 h-5"></i>' +
+                        '</div>' +
+                        '<h5 class="font-black text-[10px] uppercase tracking-wider text-slate-900 dark:text-slate-200 mb-1">' + b.title + '</h5>' +
+                        '<p class="text-[8px] font-bold text-slate-400 leading-tight">' + b.desc + '</p>' +
+                    '</div>'
+                );
+            });
+            lucide.createIcons();
+        };
+
+        // --- AUTO-INIT PYTHON ENGINE ---
+        // Pre-load Pyodide immediately so it's ready when user clicks Run
+        window.addEventListener('load', async () => {
+            console.log("Page Loaded. Initializing Python Engine...");
+            // Wait for CDN script if needed
+            let checks = 0;
+            const waitForPyodide = setInterval(async () => {
+                if (window.loadPyodide) {
+                    clearInterval(waitForPyodide);
+                    try {
+                        await loadPyodideEngine();
+                        console.log("Python Engine Ready (Background Load)");
+                    } catch (e) {
+                        console.error("Background Load Error:", e);
+                    }
+                } else {
+                    checks++;
+                    if (checks > 50) { // 5 seconds timeout
+                        clearInterval(waitForPyodide);
+                        console.warn("Pyodide CDN script not found after 5s");
+                    }
+                }
+            }, 100);
         });
 
     </script>
@@ -13467,12 +13982,12 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
     <!-- RESIZABLE SPLIT VIEW SCRIPT -->
     <script>
-        (function () {
+        (function() {
             function initResize() {
                 const handle = document.getElementById('drag-handle');
                 const editorContainer = document.getElementById('editor-container');
                 const outputContainer = document.getElementById('output-container');
-
+                
                 if (!handle || !editorContainer || !outputContainer) return;
 
                 let isDragging = false;
@@ -13482,17 +13997,17 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     isDragging = true;
                     startY = e.clientY;
                     startHeight = editorContainer.getBoundingClientRect().height;
-
+                    
                     document.body.style.cursor = 'row-resize';
                     // Visual feedback
                     handle.classList.remove('bg-[#131417]');
                     handle.classList.add('bg-[#444857]');
-
+                    
                     // Disable iframe pointer events
                     const iframe = document.getElementById('code-preview');
                     if (iframe) iframe.style.pointerEvents = 'none';
 
-                    e.preventDefault();
+                    e.preventDefault(); 
                 });
 
                 document.addEventListener('mousemove', (e) => {
@@ -13500,13 +14015,13 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
 
                     const container = editorContainer.parentElement;
                     const containerHeight = container.getBoundingClientRect().height;
-
+                    
                     const deltaY = e.clientY - startY;
                     const newHeight = startHeight + deltaY;
-
+                    
                     // Calculate percentage
                     let newHeightPercent = (newHeight / containerHeight) * 100;
-
+                    
                     // Constraints
                     if (newHeightPercent < 10) newHeightPercent = 10;
                     if (newHeightPercent > 90) newHeightPercent = 90;
@@ -13521,7 +14036,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                         // Reset visual feedback
                         handle.classList.remove('bg-[#444857]');
                         handle.classList.add('bg-[#131417]');
-
+                        
                         const iframe = document.getElementById('code-preview');
                         if (iframe) iframe.style.pointerEvents = '';
                     }
@@ -13539,19 +14054,19 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
     <!-- NUCLEAR FAILSAFE SCRIPT -->
     <script>
         // Emergency Loader Removal (Run independently of other scripts)
-        (function () {
-            setTimeout(function () {
+        (function() {
+            setTimeout(function() {
                 var loader = document.getElementById('global-loader');
                 if (loader && getComputedStyle(loader).display !== 'none') {
                     console.error('⚠️ CRITICAL: Global loader stuck. Force removing via Failsafe.');
                     loader.style.display = 'none'; // Force hide
-
+                    
                     // Attempt to recover UI
                     var dashboard = document.getElementById('dashboard-layout');
                     var auth = document.getElementById('auth-wrapper');
-
-                    if (dashboard && auth &&
-                        dashboard.classList.contains('hidden') &&
+                    
+                    if (dashboard && auth && 
+                        dashboard.classList.contains('hidden') && 
                         auth.classList.contains('hidden')) {
                         // If both hidden, show Auth by default to be safe
                         console.warn('⚠️ UI State lost. Defaulting to Auth Screen.');
@@ -13562,7 +14077,7 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
         })();
 
         // Global Error Handler for Loader
-        window.addEventListener('error', function (event) {
+        window.addEventListener('error', function(event) {
             console.error('Global Script Error:', event.message);
             var loader = document.getElementById('global-loader');
             if (loader) loader.style.display = 'none';
