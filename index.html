@@ -9705,8 +9705,6 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 const formData = new FormData();
                 formData.append('file', file);
                 formData.append('upload_preset', UPLO_PRESET);
-                formData.append('folder', `personal_storage/${uid}`);
-                formData.append('public_id', `${file.name.split('.')[0]}_${Date.now()}`);
 
                 const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
                     method: 'POST',
@@ -9801,8 +9799,6 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     const formData = new FormData();
                     formData.append('file', file);
                     formData.append('upload_preset', UPLO_PRESET);
-                    formData.append('folder', `personal_storage/${uid}`);
-                    formData.append('public_id', `${file.name.split('.')[0]}_${Date.now()}`); // Allowed in unsigned upload
 
                     const res = await fetch(`https://api.cloudinary.com/v1_1/${CLOUD_NAME}/auto/upload`, {
                         method: 'POST',
