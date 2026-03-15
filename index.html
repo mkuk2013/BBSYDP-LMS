@@ -6958,18 +6958,31 @@
 
         window.sendBirthdayWish = async (modalId) => {
             try {
-                const button = event.currentTarget;
+                const button = event.currentTarget.closest('button');
                 const originalText = button.innerHTML;
                 button.disabled = true;
                 button.innerHTML = '<i data-lucide="loader-2" class="w-5 h-5 animate-spin mx-auto"></i>';
                 lucide.createIcons();
 
-                const { error } = await client.from('birthday_wishes').insert({
+                // Double check for duplicates before inserting
+                const { data: existing } = await client.from('birthday_wishes')
+                    .select('id')
+                    .eq('student_id', currentUser.id);
+                
+                if (existing && existing.length > 0) {
+                    showToast("You have already sent your wish! ❤️", "info");
+                    const modal = bootstrap.Modal.getInstance(document.getElementById(modalId));
+                    if (modal) modal.hide();
+                    localStorage.setItem('bday_wish_2026', 'true');
+                    return;
+                }
+
+                const { data: wishData, error } = await client.from('birthday_wishes').insert({
                     student_id: currentUser.id,
                     student_name: userProfile.name,
                     admin_name: 'Mukesh Kumar',
                     created_at: new Date().toISOString()
-                });
+                }).select();
 
                 if (error) {
                     if (error.code === '42P01') { 
@@ -6986,6 +6999,16 @@
                 if (modal) modal.hide();
                 
                 localStorage.setItem('bday_wish_2026', 'true');
+
+                // AUTOMATED REPLY LOGIC
+                // After 1.5 seconds, automatically mark as replied to trigger the student's notification
+                if (wishData && wishData[0]) {
+                    setTimeout(async () => {
+                        await client.from('birthday_wishes')
+                            .update({ replied: true })
+                            .eq('id', wishData[0].id);
+                    }, 1500);
+                }
 
             } catch (err) {
                 showToast("Failed to send wish: " + err.message, "error");
@@ -7159,12 +7182,24 @@
             if (isMarch15) {
                 // Student Side
                 if (userProfile.role === 'student') {
-                    if (!sessionStorage.getItem('birthdayModalShown')) {
-                        setTimeout(() => {
-                            window.showBirthdayModal?.();
-                            sessionStorage.setItem('birthdayModalShown', 'true');
-                        }, 3000);
-                    }
+                    // Check database first to ensure student only wishes once
+                    client.from('birthday_wishes')
+                        .select('id')
+                        .eq('student_id', currentUser.id)
+                        .then(({ data, error }) => {
+                            if (!error && (data && data.length > 0)) {
+                                localStorage.setItem('bday_wish_2026', 'true');
+                                return;
+                            }
+                            
+                            if (!sessionStorage.getItem('birthdayModalShown') && !localStorage.getItem('bday_wish_2026')) {
+                                setTimeout(() => {
+                                    window.showBirthdayModal?.();
+                                    sessionStorage.setItem('birthdayModalShown', 'true');
+                                }, 3000);
+                            }
+                        });
+                }
 
                     // Listen for Admin Replies
                     if (window.client && typeof client.channel === 'function') {
