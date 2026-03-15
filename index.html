@@ -6894,6 +6894,29 @@
             }
         };
 
+        // RANDOM THANK YOU MESSAGES FOR BIRTHDAY WISHES
+        window.getRandomThankYouMessage = (studentName) => {
+            const messages = [
+                "Your kind words made my day truly special!",
+                "I'm touched by your thoughtful wish!",
+                "Your birthday message brightened my day!",
+                "Thank you for the lovely birthday wish!",
+                "Your warm wishes mean the world to me!",
+                "I'm grateful for your heartfelt message!",
+                "Your birthday wish brought a smile to my face!",
+                "Thank you for making my birthday memorable!",
+                "Your kind thoughts made my day wonderful!",
+                "I'm so happy to receive your birthday wish!",
+                "Your message filled my heart with joy!",
+                "Thank you for the beautiful birthday greeting!",
+                "Your wishes made my celebration even better!",
+                "I'm truly blessed by your kind words!",
+                "Your birthday message is greatly appreciated!"
+            ];
+            const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+            return `Thank you so much, ${studentName}! ${randomMessage}`;
+        };
+
         // BIRTHDAY MODAL LOGIC (Refined from Design Template)
         window.showBirthdayModal = () => {
             if (localStorage.getItem('bday_wish_2026')) return;
@@ -6981,6 +7004,7 @@
                     student_id: currentUser.id,
                     student_name: userProfile.name,
                     admin_name: 'Mukesh Kumar',
+                    replied: true,
                     created_at: new Date().toISOString()
                 }).select();
 
@@ -7046,11 +7070,24 @@
                 const { data: wishes, error } = await client.from('birthday_wishes').select('*');
                 if (error && error.code !== '42P01') throw error;
                 
-                const count = (wishes || []).length;
+                const allWishes = wishes || [];
+                
+                // DEDUPLICATION: Group by student_id and keep latest
+                const uniqueWishesMap = new Map();
+                allWishes.forEach(w => {
+                    const existing = uniqueWishesMap.get(w.student_id);
+                    if (!existing || new Date(w.created_at) > new Date(existing.created_at)) {
+                        uniqueWishesMap.set(w.student_id, w);
+                    }
+                });
+                const deduplicatedWishes = Array.from(uniqueWishesMap.values());
+                const unrepliedWishes = deduplicatedWishes.filter(w => !w.replied);
+                const count = unrepliedWishes.length;
+
                 const pillHtml = `
                     <div id="birthday-wishes-pill" class="wishes-pill ml-4" onclick="window.showBirthdayWishesModal()">
                         <i data-lucide="heart" class="w-3.5 h-3.5 fill-current"></i>
-                        <span>${count} Wishes Received</span>
+                        <span>${count} New Wishes</span>
                     </div>
                 `;
                 
@@ -7058,16 +7095,16 @@
                     $('#header-user-name').parent().after(pillHtml);
                     lucide.createIcons();
                 } else {
-                    $('#birthday-wishes-pill span').text(`${count} Wishes Received`);
+                    $('#birthday-wishes-pill span').text(`${count} New Wishes`);
                     // If count increased, show a professional toast
                     const prevCount = parseInt(sessionStorage.getItem('prevWishCount') || 0);
-                    if (count > prevCount && prevCount > 0) {
+                    if (count > prevCount && prevCount >= 0) {
                         showToast(`New Birthday Wish Received! 🎊`, 'success');
                     }
                     sessionStorage.setItem('prevWishCount', count);
                 }
                 
-                window.currentBirthdayWishes = wishes || [];
+                window.currentBirthdayWishes = deduplicatedWishes;
             } catch (err) { }
         };
 
@@ -7180,9 +7217,8 @@
             const lowerName = (userProfile.name || "").toLowerCase();
 
             if (isMarch15) {
-                // Student Side
+                // Student Side Logic
                 if (userProfile.role === 'student') {
-                    // Check database first to ensure student only wishes once
                     client.from('birthday_wishes')
                         .select('id')
                         .eq('student_id', currentUser.id)
@@ -7199,9 +7235,8 @@
                                 }, 3000);
                             }
                         });
-                }
 
-                    // Listen for Admin Replies
+                    // Listen for Admin Replies (Real-time)
                     if (window.client && typeof client.channel === 'function') {
                         client.channel('birthday_replies_realtime')
                             .on('postgres_changes', { 
@@ -7211,7 +7246,8 @@
                                 filter: `student_id=eq.${currentUser.id}`
                             }, (payload) => {
                                 if (payload.new && payload.new.replied) {
-                                    showToast("Admin Mukesh Kumar says: Thank You for your wish! ❤️", "success");
+                                    const randomMessage = window.getRandomThankYouMessage(currentUser.name);
+                                    showToast(`Admin Mukesh Kumar says: ${randomMessage} ❤️`, "success");
                                     if (typeof confetti === 'function') {
                                         confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
                                     }
@@ -7220,24 +7256,9 @@
                             .subscribe();
                     }
                 }
-                
-                // Admin Side Special for Mukesh Kumar
-                if (lowerName.includes('mukesh kumar') || lowerName.includes('मुकेश कुमार')) {
-                    window.injectAdminBirthdayUI?.();
-                    
-                    // Real-time wishes listener
-                    if (window.client && typeof client.channel === 'function') {
-                        client.channel('birthday_wishes_realtime')
-                            .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'birthday_wishes' }, () => {
-                                window.injectAdminBirthdayUI?.();
-                            })
-                            .subscribe();
-                    }
-                }
             } else {
                 // CLEANUP: Ensure all birthday UI is gone if date passed
                 $('#admin-birthday-banner, #birthday-wishes-pill').remove();
-                // Optionally remove modal if still in DOM
                 $('.modal[id^="birthday-modal-"], .modal[id^="wishes-modal-"]').remove();
             }
 
@@ -7290,7 +7311,20 @@
 
             // 4. Load Cached Data & Render Charts (CRITICAL FOR INSTANT FEEL)
             switchTab('dashboard');
-            startSync(); // This calls loadCachedData() internally
+            
+            // --- ADMIN BIRTHDAY UI (Deferred until after tab switch) ---
+            if (isMarch15 && (lowerName.includes('mukesh kumar') || lowerName.includes('मुकेश कुमार'))) {
+                window.injectAdminBirthdayUI?.();
+                if (window.client && typeof client.channel === 'function') {
+                    client.channel('birthday_wishes_realtime')
+                        .on('postgres_changes', { event: '*', schema: 'public', table: 'birthday_wishes' }, () => {
+                            window.injectAdminBirthdayUI?.();
+                        })
+                        .subscribe();
+                }
+            }
+
+            startSync(); 
             initChart();
 
             // 5. Daily Streak Logic (Local Storage - Fast)
