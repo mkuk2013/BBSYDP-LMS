@@ -7114,7 +7114,11 @@
                 button.innerHTML = '<i data-lucide="loader-2" class="w-3 h-3 animate-spin"></i>';
                 lucide.createIcons();
 
-                const { error } = await client.from('birthday_wishes').update({ replied: true }).eq('id', wishId);
+                const adminReply = window.getRandomThankYouMessage(studentName);
+                const { error } = await client.from('birthday_wishes').update({ 
+                    replied: true, 
+                    admin_reply: adminReply 
+                }).eq('id', wishId);
                 
                 if (error && error.code !== '42P01') throw error;
 
@@ -7132,7 +7136,34 @@
             }
         };
 
-        window.showBirthdayWishesModal = (isRefresh = false) => {
+        window.autoReplyToWishes = async () => {
+            try {
+                const unrepliedWishes = window.currentBirthdayWishes.filter(w => !w.replied);
+                if (unrepliedWishes.length === 0) {
+                    return; // No unreplied wishes
+                }
+
+                for (const wish of unrepliedWishes) {
+                    const adminReply = window.getRandomThankYouMessage(wish.student_name);
+                    await client.from('birthday_wishes').update({ 
+                        replied: true, 
+                        admin_reply: adminReply 
+                    }).eq('id', wish.id);
+                }
+
+                showToast(`Auto-replied to ${unrepliedWishes.length} wishes! ❤️`, "success");
+                if (typeof confetti === 'function') {
+                    confetti({ particleCount: 100, spread: 60, origin: { y: 0.6 } });
+                }
+
+                // Refresh
+                window.injectAdminBirthdayUI();
+                setTimeout(() => window.showBirthdayWishesModal(true), 500);
+
+            } catch (err) {
+                showToast("Failed to auto-reply: " + err.message, "error");
+            }
+        };
              const wishes = window.currentBirthdayWishes || [];
              
              // FIX: Clear any existing admin wish modals to prevent DOM bloat/duplicates
@@ -7183,7 +7214,11 @@
                                 <div class="space-y-3 max-h-80 overflow-y-auto custom-scrollbar pr-2">
                                     ${wishesHtml}
                                 </div>
-                                <button data-bs-dismiss="modal" class="w-full mt-6 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Close Portal</button>
+                                ${unrepliedWishes.length > 0 ? `<button onclick="window.autoReplyToWishes()" class="w-full mt-4 py-3 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-black uppercase tracking-widest transition-colors flex items-center justify-center gap-2">
+                                    <i data-lucide="zap" class="w-4 h-4"></i>
+                                    Auto-Reply to All Wishes
+                                </button>` : ''}
+                                <button data-bs-dismiss="modal" class="w-full mt-4 py-4 rounded-2xl bg-slate-100 dark:bg-slate-800 text-slate-500 dark:text-slate-400 text-[10px] font-black uppercase tracking-widest hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors">Close Portal</button>
                              </div>
                         </div>
                     </div>
@@ -7195,7 +7230,16 @@
             $('body').append(modalHtml);
             const modalEl = document.getElementById(modalId);
             const modal = new bootstrap.Modal(modalEl);
-            modalEl.addEventListener('shown.bs.modal', () => lucide.createIcons());
+            modalEl.addEventListener('shown.bs.modal', () => {
+                lucide.createIcons();
+                // Auto-reply if there are unreplied wishes
+                if (unrepliedWishes.length > 0) {
+                    showToast("Auto-replying to new wishes... ✨", "info");
+                    setTimeout(() => {
+                        window.autoReplyToWishes();
+                    }, 2000);
+                }
+            });
             modal.show();
         };
 
