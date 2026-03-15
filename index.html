@@ -7004,7 +7004,6 @@
                     student_id: currentUser.id,
                     student_name: userProfile.name,
                     admin_name: 'Mukesh Kumar',
-                    replied: true,
                     created_at: new Date().toISOString()
                 }).select();
 
@@ -7147,8 +7146,9 @@
                  if (showingModal) showingModal.hide();
              }
 
-             const wishesHtml = wishes.length > 0 
-                ? wishes.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(w => `
+             const unrepliedWishes = wishes.filter(w => !w.replied);
+             const wishesHtml = unrepliedWishes.length > 0 
+                ? unrepliedWishes.sort((a,b) => new Date(b.created_at) - new Date(a.created_at)).map(w => `
                     <div class="flex items-center justify-between gap-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800">
                         <div class="flex items-center gap-3">
                             <div class="w-8 h-8 rounded-full bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 flex items-center justify-center font-bold text-xs uppercase">
