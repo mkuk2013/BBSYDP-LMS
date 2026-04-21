@@ -5270,76 +5270,109 @@
         }
 
         window.notifyAssignmentUpload = async (taskData) => {
-            const students = (window.allUsersCache || []).filter(u => u.role === 'student');
-            if(students.length === 0) return;
+            let students = (window.allUsersCache || []).filter(u => u.role === 'student' && u.email && u.email.includes('@'));
+            
+            // Fallback: Fetch students if cache is empty
+            if (students.length === 0) {
+                console.log("[Email System] User cache empty, fetching fresh student list...");
+                const { data } = await client.from('profiles').select('*').eq('role', 'student');
+                students = (data || []).filter(u => u.email && u.email.includes('@'));
+            }
+
+            if (students.length === 0) {
+                console.warn("[Email System] No students with valid emails found for notification.");
+                return;
+            }
             
             console.log(`[Email System] Distributing 'New Assignment' Notification to ${students.length} students...`);
             let failCount = 0;
 
             for (const s of students) {
                 const params = {
-                    to_name: s.name || "Student",
-                    to_email: s.email,
-                    assignment_title: taskData.title,
-                    assignment_desc: taskData.description || "A new assignment has been uploaded to the LMS.",
-                    deadline: taskData.deadline || "No deadline"
+                    to_name: (s.name || "Student").toString(),
+                    to_email: s.email.trim(),
+                    assignment_title: (taskData.title || "New Assignment").toString(),
+                    assignment_desc: (taskData.description || "A new assignment has been uploaded to the LMS.").toString(),
+                    deadline: (taskData.deadline || "No deadline").toString()
                 };
 
                 if (window.EMAILJS_CONFIG.PUBLIC_KEY && window.EMAILJS_CONFIG.SERVICE_ID) {
                     try {
+                        console.log(`[Email System] Sending to ${params.to_email}...`, params);
                         await emailjs.send(window.EMAILJS_CONFIG.SERVICE_ID, window.EMAILJS_CONFIG.TEMPLATE_NEW_TASK, params);
-                    } catch(e) { console.error("EmailJS Error:", e); failCount++; }
+                    } catch(e) { 
+                        console.error(`EmailJS Error for ${s.email}:`, e); 
+                        failCount++; 
+                    }
                 } else {
                     console.log(`[Simulated Email Sent] TO: ${s.email} | SUBJECT: New Assignment: ${taskData.title}`);
                 }
             }
             if(!window.EMAILJS_CONFIG.PUBLIC_KEY) showToast(`Simulation: Assignment Email Sent to ${students.length} students`, 'info');
+            else if (failCount === 0) showToast(`Notification sent to ${students.length} students.`, "success");
+            else showToast(`Sent with ${failCount} errors. Check console (F12).`, "warning");
         };
 
         window.notifyAllPendingAssignments = async () => {
             const btn = document.getElementById('btn-notify-all');
-            if(btn) btn.innerHTML = '<i class="w-4 h-4 animate-spin border-2 border-white border-t-transparent rounded-full mr-2"></i> Sending...';
+            const originalHtml = btn ? btn.innerHTML : '';
+            if(btn) btn.innerHTML = '<i class="w-4 h-4 animate-spin border-2 border-white border-t-transparent rounded-full mr-2"></i> Processing...';
             
             try {
-                // Ensure latest cache
+                console.log("[Email System] Starting bulk reminder calculation...");
+                // Fetch fresh data for accuracy
                 const { data: users } = await client.from('profiles').select('*');
-                const { data: tasks } = await client.from('tasks').select('*').eq('is_active', true);
+                const { data: tasks } = await client.from('tasks').select('*'); // Removed is_active filter
                 const { data: subs } = await client.from('submissions').select('*');
 
-                const students = (users || []).filter(u => u.role === 'student');
+                const students = (users || []).filter(u => u.role === 'student' && u.email && u.email.includes('@'));
                 const totalTasks = tasks ? tasks.length : 0;
                 let sentCount = 0;
+                let failCount = 0;
+
+                console.log(`[Email System] Found ${students.length} students with valid emails and ${totalTasks} total assignments.`);
 
                 for (const s of students) {
-                    const mySubs = (subs || []).filter(sub => sub.student_id === (s.uid || s.id));
+                    const userId = s.uid || s.id;
+                    const mySubs = (subs || []).filter(sub => sub.student_id === userId);
                     const pendingCount = totalTasks - mySubs.length;
 
                     if (pendingCount > 0) {
-                        sentCount++;
                         const params = {
-                            to_name: s.name || "Student",
-                            to_email: s.email,
-                            pending_count: pendingCount,
-                            total_tasks: totalTasks
+                            to_name: (s.name || "Student").toString(),
+                            to_email: s.email.trim(),
+                            pending_count: pendingCount.toString(),
+                            total_tasks: totalTasks.toString()
                         };
 
                         if (window.EMAILJS_CONFIG.PUBLIC_KEY && window.EMAILJS_CONFIG.SERVICE_ID) {
                             try {
+                                console.log(`[Email System] Notifying ${params.to_email} about ${pendingCount} pending tasks...`, params);
                                 await emailjs.send(window.EMAILJS_CONFIG.SERVICE_ID, window.EMAILJS_CONFIG.TEMPLATE_REMINDER, params);
-                            } catch(err) { console.error("EmailJS Error:", err); }
+                                sentCount++;
+                            } catch(err) { 
+                                console.error(`EmailJS Error for ${s.email}:`, err); 
+                                failCount++;
+                            }
                         } else {
                             console.log(`[Simulated Alert] TO: ${s.email} | MSG: You have ${pendingCount} pending assignments!`);
+                            sentCount++;
                         }
                     }
                 }
                 
-                showToast(window.EMAILJS_CONFIG.PUBLIC_KEY ? `Sent ${sentCount} reminders successfully.` : `Simulation: Sent ${sentCount} reminders.`, "success");
+                if (sentCount === 0 && failCount === 0) {
+                    showToast("No students have pending assignments.", "info");
+                } else {
+                    showToast(window.EMAILJS_CONFIG.PUBLIC_KEY ? `Sent ${sentCount} reminders successfully.` : `Simulation: Sent ${sentCount} reminders.`, "success");
+                    if (failCount > 0) showToast(`${failCount} emails failed. Check console.`, "warning");
+                }
             } catch (err) {
                 console.error("Alert Error:", err);
                 showToast("Failed to run alert notifications.", "error");
             }
             
-            if(btn) btn.innerHTML = '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Notify Pending';
+            if(btn) btn.innerHTML = originalHtml;
             if(window.lucide) window.lucide.createIcons();
         };
 
@@ -12598,7 +12631,8 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                 title: $('#new-task-title').val(),
                 description: $('#new-task-desc').val(),
                 hints: $('#new-task-hints').val(),
-                deadline: safeDeadline
+                deadline: safeDeadline,
+                is_active: true
             };
 
             const refFile = document.getElementById('new-task-ref').files[0];
