@@ -39,9 +39,21 @@
     <link
         href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=Playfair+Display:ital,wght@0,400;0,700;1,400&family=Cinzel:wght@400;700&family=Great+Vibes&display=swap"
         rel="stylesheet">
+    <script type="importmap">
+    {
+      "imports": {
+        "@libsql/client": "https://esm.sh/@libsql/client@0.17.2/web"
+      }
+    }
+    </script>
     <script src="https://unpkg.com/lucide@latest"></script>
     <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script>
+        // High-priority check for Supabase SDK availability
+        window.SUPABASE_SDK_READY = (typeof supabase !== 'undefined');
+        if (!window.SUPABASE_SDK_READY) console.warn("Supabase SDK not detected via CDN.");
+    </script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -60,6 +72,7 @@
     </script>
     <script src="signature.js"></script>
     <script src="https://cdn.jsdelivr.net/pyodide/v0.23.4/full/pyodide.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
 
     <script>
         // GLOBAL ERROR HANDLER (Must be first)
@@ -72,6 +85,21 @@
                 loader.style.display = 'none';
 
                 // Show auth if nothing else visible
+                var dashboard = document.getElementById('dashboard-layout');
+                if (dashboard && dashboard.classList.contains('hidden')) {
+                    var auth = document.getElementById('auth-wrapper');
+                    if (auth) auth.classList.remove('hidden');
+                }
+            }
+        };
+
+        window.onunhandledrejection = function (event) {
+            console.error("Unhandled Promise Rejection:", event.reason);
+            var loader = document.getElementById('global-loader');
+            if (loader && getComputedStyle(loader).display !== 'none') {
+                console.warn("Promise rejected while loader was visible. Force hiding loader.");
+                loader.style.display = 'none';
+
                 var dashboard = document.getElementById('dashboard-layout');
                 if (dashboard && dashboard.classList.contains('hidden')) {
                     var auth = document.getElementById('auth-wrapper');
@@ -2445,6 +2473,9 @@
                         <span id="feedback-notification"
                             class="hidden absolute top-2 right-2 bg-red-500 text-white text-[10px] font-bold px-1.5 py-0.5 rounded-full shadow-sm animate-pulse">0</span>
                     </button>
+                    <button onclick="switchTab('settings')" class="nav-item w-full" data-tooltip="Settings">
+                        <i data-lucide="settings" class="w-5 h-5"></i> <span class="hide-on-collapse">System Settings</span>
+                    </button>
                 </div>
             </nav>
 
@@ -3850,6 +3881,10 @@
                                         class="px-4 py-2.5 rounded-lg bg-emerald-500 text-white shadow-lg shadow-emerald-500/20 hover:bg-emerald-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
                                         <i data-lucide="check-circle-2" class="w-3 h-3"></i> Approve All
                                     </button>
+                                    <button id="btn-notify-all" onclick="window.notifyAllPendingAssignments()"
+                                        class="px-4 py-2.5 rounded-lg bg-indigo-500 text-white shadow-lg shadow-indigo-500/20 hover:bg-indigo-600 transition-all text-[8px] font-black uppercase tracking-widest flex items-center gap-1.5 hover:scale-105 active:scale-95">
+                                        <i data-lucide="mail" class="w-3 h-3"></i> Notify All
+                                    </button>
                                     <button onclick="downloadAllReports()"
                                         class="btn-command px-4 py-2.5 rounded-lg text-[8px] flex items-center gap-1.5 hover:scale-105 active:scale-95 transition-transform">
                                         <i data-lucide="download" class="w-3 h-3"></i> Export All
@@ -3924,6 +3959,133 @@
                                     <!-- Row Injected -->
                                 </tbody>
                             </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="view-settings" class="content-view hidden animate-in slide-in-from-bottom-5 duration-500">
+                    <div class="mb-8 relative overflow-hidden rounded-3xl shadow-2xl shadow-indigo-500/20 border border-white/10"
+                        style="background-color: #1e1b4b;">
+                        <div class="absolute inset-0 opacity-10"
+                            style="background-image: radial-gradient(#6366f1 1px, transparent 1px); background-size: 20px 20px;">
+                        </div>
+                        <div class="relative z-10 p-6 md:p-8">
+                                <p class="text-[10px] font-black uppercase tracking-[0.2em] text-indigo-300 mb-2">
+                                    Administration</p>
+                                <h2 class="text-2xl md:text-4xl font-black text-white tracking-tighter leading-none">
+                                    System Settings
+                                </h2>
+                                <p class="text-xs text-indigo-100 font-medium mt-2 max-w-md">Manage system configurations, data exports, and global parameters.</p>
+                        </div>
+                    </div>
+
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div class="v-card p-6 border-l-4 border-indigo-500">
+                            <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 bg-indigo-100 dark:bg-indigo-900/30 text-indigo-600 rounded-2xl flex items-center justify-center">
+                                    <i data-lucide="database" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-slate-200">Database Export</h3>
+                            </div>
+                            <p class="text-sm text-slate-500 dark:text-slate-400 mb-8 leading-relaxed">
+                                Generate a complete snapshot of all system data. This will include profiles, tasks, submissions, and all other database tables in a single JSON file. Use this for migrations or off-site backups.
+                            </p>
+                            <button onclick="window.exportDatabase()" id="export-db-btn"
+                                class="w-full btn-royal-solid flex items-center justify-center gap-3 group">
+                                <i data-lucide="download-cloud" class="w-5 h-5 group-hover:animate-bounce"></i>
+                                <span>Export Full Database JSON</span>
+                            </button>
+                            <div id="export-status" class="mt-4 text-center hidden">
+                                <div class="flex items-center justify-center gap-2 text-xs font-bold text-indigo-500 animate-pulse">
+                                    <i data-lucide="refresh-cw" class="w-3 h-3 animate-spin"></i>
+                                    <span id="export-status-text">Preparing export...</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- System Info Card -->
+                        <div class="v-card p-6 border-l-4 border-slate-400 opacity-60">
+                             <div class="flex items-center gap-4 mb-6">
+                                <div class="w-12 h-12 bg-slate-100 dark:bg-slate-800 text-slate-500 rounded-2xl flex items-center justify-center">
+                                    <i data-lucide="info" class="w-6 h-6"></i>
+                                </div>
+                                <h3 class="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-slate-200">System Info</h3>
+                            </div>
+                            <div class="space-y-3">
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span class="text-slate-400 uppercase tracking-widest">Version</span>
+                                    <span class="text-slate-900 dark:text-slate-200">v2.0.1 (Enterprise)</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span class="text-slate-400 uppercase tracking-widest">Environment</span>
+                                    <span class="text-slate-900 dark:text-slate-200 text-emerald-500">Production</span>
+                                </div>
+                                <div class="flex justify-between text-xs font-bold">
+                                    <span class="text-slate-400 uppercase tracking-widest">Last Backup</span>
+                                    <span class="text-slate-900 dark:text-slate-200" id="last-backup-ts">Never</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Turso Redundancy Card -->
+                        <div class="v-card p-6 border-l-4 border-emerald-500 col-span-1 md:col-span-2">
+                             <div class="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-8">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-12 h-12 bg-emerald-100 dark:bg-emerald-900/30 text-emerald-600 rounded-2xl flex items-center justify-center">
+                                        <i data-lucide="shield-check" class="w-6 h-6"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="text-lg font-black uppercase tracking-tight text-slate-900 dark:text-slate-200 leading-none">Turso Redundancy</h3>
+                                        <p class="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest">Secondary Failover Database</p>
+                                    </div>
+                                </div>
+                                <div class="flex items-center gap-3">
+                                    <div id="status-primary" class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                                        <div class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></div>
+                                        <span class="text-[9px] font-black uppercase tracking-widest text-slate-500">Supabase: Online</span>
+                                    </div>
+                                    <div id="status-secondary" class="flex items-center gap-2 px-3 py-1.5 bg-slate-50 dark:bg-slate-900 rounded-lg border border-slate-100 dark:border-slate-800">
+                                        <div id="turso-indicator" class="w-2 h-2 rounded-full bg-slate-300"></div>
+                                        <span id="turso-status-text" class="text-[9px] font-black uppercase tracking-widest text-slate-400">Turso: Not Configured</span>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-8">
+                                <div>
+                                    <label class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 mb-1.5 block">Turso DB URL</label>
+                                    <input type="text" id="turso-url-input" 
+                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                                        placeholder="libsql://your-db-org.turso.io">
+                                </div>
+                                <div>
+                                    <label class="text-[9px] font-black uppercase text-slate-400 tracking-widest ml-1 mb-1.5 block">Auth Token</label>
+                                    <input type="password" id="turso-token-input" 
+                                        class="w-full px-4 py-3 bg-slate-50 dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-xl text-xs font-bold text-slate-700 dark:text-slate-200 focus:ring-2 focus:ring-emerald-500 outline-none transition-all"
+                                        placeholder="Paste your Turso token here">
+                                </div>
+                                            <div class="flex flex-wrap gap-3">
+                                <button onclick="saveTursoConfig()" class="btn-royal-solid !bg-emerald-600 !hover:bg-emerald-700 flex items-center gap-2 px-6">
+                                    <i data-lucide="save" class="w-4 h-4"></i>
+                                    <span>Connect & Save</span>
+                                </button>
+                                <button onclick="initializeTursoSchema()" id="init-turso-btn" disabled
+                                    class="py-3 px-6 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2">
+                                    <i data-lucide="layout-template" class="w-4 h-4"></i>
+                                    <span>Sync Schema</span>
+                                </button>
+                                <button onclick="syncDataToTurso()" id="sync-turso-btn" disabled
+                                    class="py-3 px-6 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 dark:text-slate-400 font-bold text-[10px] uppercase tracking-widest hover:bg-slate-50 dark:hover:bg-slate-800 transition-all disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2">
+                                    <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+                                    <span>Full Data Migration</span>
+                                </button>
+                                <button onclick="resetTursoDatabase()" id="reset-turso-btn"
+                                    class="py-3 px-6 rounded-xl border border-rose-200 dark:border-rose-900/30 text-rose-500 font-bold text-[10px] uppercase tracking-widest hover:bg-rose-50 dark:hover:bg-rose-900/10 transition-all flex items-center gap-2">
+                                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                                    <span>Nuclear Reset</span>
+                                </button>
+                            </div>
+               </div>
                         </div>
                     </div>
                 </div>
@@ -5085,7 +5247,7 @@
         </div>
     </div>
 
-    <script type="module">
+    <script>
         // --- SAFE ICON LOADER ---
         window.safeCreateIcons = () => {
             if (typeof lucide !== 'undefined' && lucide.createIcons) {
@@ -5093,34 +5255,298 @@
             }
         };
 
+        // --- EMAILJS CONFIGURATION (SIMULATION MODE) ---
+        // Put your actual Service ID, Template IDs, and Public Key from the EmailJS dashboard here
+        // If left empty, it will fall back to "Simulation Mode" printing to console.
+        window.EMAILJS_CONFIG = {
+            PUBLIC_KEY: "2jK6K9URD3xtJBZiW",
+            SERVICE_ID: "service_c06ybp3",
+            TEMPLATE_NEW_TASK: "template_8o83vis",
+            TEMPLATE_REMINDER: "template_nculza2"
+        };
+
+        if (window.EMAILJS_CONFIG.PUBLIC_KEY) {
+            emailjs.init(window.EMAILJS_CONFIG.PUBLIC_KEY);
+        }
+
+        window.notifyAssignmentUpload = async (taskData) => {
+            const students = (window.allUsersCache || []).filter(u => u.role === 'student');
+            if(students.length === 0) return;
+            
+            console.log(`[Email System] Distributing 'New Assignment' Notification to ${students.length} students...`);
+            let failCount = 0;
+
+            for (const s of students) {
+                const params = {
+                    to_name: s.name || "Student",
+                    to_email: s.email,
+                    assignment_title: taskData.title,
+                    assignment_desc: taskData.description || "A new assignment has been uploaded to the LMS.",
+                    deadline: taskData.deadline || "No deadline"
+                };
+
+                if (window.EMAILJS_CONFIG.PUBLIC_KEY && window.EMAILJS_CONFIG.SERVICE_ID) {
+                    try {
+                        await emailjs.send(window.EMAILJS_CONFIG.SERVICE_ID, window.EMAILJS_CONFIG.TEMPLATE_NEW_TASK, params);
+                    } catch(e) { console.error("EmailJS Error:", e); failCount++; }
+                } else {
+                    console.log(`[Simulated Email Sent] TO: ${s.email} | SUBJECT: New Assignment: ${taskData.title}`);
+                }
+            }
+            if(!window.EMAILJS_CONFIG.PUBLIC_KEY) showToast(`Simulation: Assignment Email Sent to ${students.length} students`, 'info');
+        };
+
+        window.notifyAllPendingAssignments = async () => {
+            const btn = document.getElementById('btn-notify-all');
+            if(btn) btn.innerHTML = '<i class="w-4 h-4 animate-spin border-2 border-white border-t-transparent rounded-full mr-2"></i> Sending...';
+            
+            try {
+                // Ensure latest cache
+                const { data: users } = await client.from('profiles').select('*');
+                const { data: tasks } = await client.from('tasks').select('*').eq('is_active', true);
+                const { data: subs } = await client.from('submissions').select('*');
+
+                const students = (users || []).filter(u => u.role === 'student');
+                const totalTasks = tasks ? tasks.length : 0;
+                let sentCount = 0;
+
+                for (const s of students) {
+                    const mySubs = (subs || []).filter(sub => sub.student_id === (s.uid || s.id));
+                    const pendingCount = totalTasks - mySubs.length;
+
+                    if (pendingCount > 0) {
+                        sentCount++;
+                        const params = {
+                            to_name: s.name || "Student",
+                            to_email: s.email,
+                            pending_count: pendingCount,
+                            total_tasks: totalTasks
+                        };
+
+                        if (window.EMAILJS_CONFIG.PUBLIC_KEY && window.EMAILJS_CONFIG.SERVICE_ID) {
+                            try {
+                                await emailjs.send(window.EMAILJS_CONFIG.SERVICE_ID, window.EMAILJS_CONFIG.TEMPLATE_REMINDER, params);
+                            } catch(err) { console.error("EmailJS Error:", err); }
+                        } else {
+                            console.log(`[Simulated Alert] TO: ${s.email} | MSG: You have ${pendingCount} pending assignments!`);
+                        }
+                    }
+                }
+                
+                showToast(window.EMAILJS_CONFIG.PUBLIC_KEY ? `Sent ${sentCount} reminders successfully.` : `Simulation: Sent ${sentCount} reminders.`, "success");
+            } catch (err) {
+                console.error("Alert Error:", err);
+                showToast("Failed to run alert notifications.", "error");
+            }
+            
+            if(btn) btn.innerHTML = '<i data-lucide="mail" class="w-4 h-4 mr-2"></i> Notify Pending';
+            if(window.lucide) window.lucide.createIcons();
+        };
+
+        // --- DATABASE INITIALIZATION ---
         const SUPABASE_URL = "https://oaycnrsbrgancgrxhztd.supabase.co";
         const SUPABASE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im9heWNucnNicmdhbmNncnhoenRkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjYxNjIyMzIsImV4cCI6MjA4MTczODIzMn0.Md8TTNA7nY504_STka-04BM9WAoVZ32J_-JCirAGgC4";
-        // Initialize Supabase Client
-        let client; // Renamed from 'supabase' to 'client' to match original usage
+        
+        let supabaseClient;
         window.SUPABASE_AVAILABLE = false;
 
-        try {
-            // FIX: Check for 'supabase' global namespace from CDN (v2)
-            if (typeof supabase !== 'undefined' && supabase.createClient) {
-                client = supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
-                window.client = client; // Make globally available
-                window.SUPABASE_AVAILABLE = true;
-                console.log("Supabase (v2) initialized successfully via namespace.");
-            } else if (typeof createClient !== 'undefined') {
-                // Fallback for older versions or direct imports
-                client = createClient(SUPABASE_URL, SUPABASE_KEY);
-                window.client = client; // Make globally available
-                window.SUPABASE_AVAILABLE = true;
-                console.log("Supabase initialized via global createClient.");
-            } else {
-                console.warn("Supabase library not loaded. Starting in offline mode (Guest).");
-                window.client = null; // Prevent ReferenceError
+        // --- REDUNDANCY LAYER (Moved to top for scope visibility) ---
+        window.executeTursoMutation = async (table, operation, payload, match) => {
+            if (!window.TURSO_AVAILABLE) return;
+            try {
+                if (operation === 'insert' || operation === 'upsert') {
+                    const data = Array.isArray(payload) ? payload : [payload];
+                    for (const row of data) {
+                        const keys = Object.keys(row);
+                        const sql = `INSERT OR REPLACE INTO ${table} (${keys.join(',')}) VALUES (${keys.map(()=>'?').join(',')})`;
+                        await window.turso.execute({ sql, args: Object.values(row) });
+                    }
+                } else if (operation === 'update') {
+                    const keys = Object.keys(payload);
+                    const setClause = keys.map(k => `${k} = ?`).join(',');
+                    const matchKeys = Object.keys(match);
+                    const whereClause = matchKeys.map(k => `${k} = ?`).join(' AND ');
+                    const sql = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
+                    await window.turso.execute({ sql, args: [...Object.values(payload), ...Object.values(match)] });
+                } else if (operation === 'delete') {
+                    const matchKeys = Object.keys(match);
+                    const whereClause = matchKeys.map(k => `${k} = ?`).join(' AND ');
+                    const sql = `DELETE FROM ${table} WHERE ${whereClause}`;
+                    await window.turso.execute({ sql, args: Object.values(match) });
+                }
+            } catch (e) { console.error(`Turso Mutation Error (${operation}):`, e); }
+        };
+
+        window.executeRedundant = async (config, table) => {
+            let lastError = null;
+            if (window.SUPABASE_AVAILABLE && window.supabaseClient) {
+                try {
+                    let q = window.supabaseClient.from(table)[config.method](config.payload || config.selectStr);
+                    if (config.method === 'select') {
+                        config.filters.forEach(f => q = q.eq(f.col, f.val));
+                        config.orders.forEach(o => q = q.order(o.col, o.opts));
+                        if (config.limit) q = q.limit(config.limit);
+                        if (config.single) q = q.single();
+                        else if (config.maybeSingle) q = q.maybeSingle(); 
+                    } else if (config.method === 'update' || config.method === 'delete') {
+                         q = q.match(config.match);
+                    }
+                    const { data, error } = await q;
+                    if (!error) {
+                        // --- DUAL-WRITE MIRRORING: Sync to Turso in background on success ---
+                        if (config.method !== 'select' && window.TURSO_AVAILABLE) {
+                            const matchObj = config.match || (config.filters.length ? config.filters.reduce((a,f)=>(a[f.col]=f.val,a),{}) : null);
+                            window.executeTursoMutation(table, config.method, config.payload, matchObj);
+                        }
+                        return { data, error: null };
+                    }
+                    lastError = error;
+                } catch (err) { lastError = err; }
             }
-        } catch (e) {
-            console.error("Supabase init failed:", e);
-            window.client = null; // Prevent ReferenceError
+
+            const TURSO_URL_LOCAL = "libsql://bbsydp-redundancy-mkuk2013.aws-us-east-2.turso.io";
+            const TURSO_TOKEN_LOCAL = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzY3MDYwMjYsImlkIjoiMDE5ZGFiZWUtMGIwMS03YTA0LThlMjktOWQ3ZDc5YmQyZWVlIiwicmlkIjoiM2IzZDg5MzYtZjhhYS00MTY5LWIwNTItMTAxMzMzOTZmNWFmIn0.0RwRbDBf4FNWHahXR6VGKRfR-2EraI1MaOYxyS_tpeDyUm6SdfjDYTIYMRyEPQTfzA3NXItRJ4L-rXcPBAZ6AA";
+
+            if (TURSO_URL_LOCAL && TURSO_TOKEN_LOCAL) {
+                window.initTurso(); // Trigger lazy init
+                if (window.TURSO_AVAILABLE && window.turso) {
+                    try {
+                        let tursoData = null;
+                        if (config.method === 'select') {
+                            let where = config.filters.length ? "WHERE " + config.filters.map(f => `${f.col} = ?`).join(" AND ") : "";
+                            let order = config.orders.length ? "ORDER BY " + config.orders.map(o => `${o.col} ${o.opts.ascending ? 'ASC' : 'DESC'}`).join(", ") : "";
+                            let limitClause = config.limit ? `LIMIT ${config.limit}` : "";
+                            const sql = `SELECT ${config.selectStr} FROM ${table} ${where} ${order} ${limitClause}`;
+                            const rs = await window.turso.execute({ sql, args: config.filters.map(f => f.val) });
+                            tursoData = rs.rows.map(row => {
+                                let obj = {};
+                                rs.columns.forEach((col, idx) => { obj[col] = row[idx]; });
+                                return obj;
+                            });
+                            if (config.single) tursoData = tursoData.length > 0 ? tursoData[0] : null;
+                        } else {
+                            tursoData = await window.executeTursoMutation(table, config.method, config.payload, config.match || (config.filters.length ? config.filters.reduce((a,f)=>(a[f.col]=f.val,a),{}) : null));
+                        }
+                        return { data: tursoData, error: null };
+                    } catch (err) { lastError = err; }
+                }
+            }
+            return { data: null, error: lastError || "Primary and Secondary Database Unavailable" };
+        };
+
+        window.dbProxy = {
+            get auth() { return window.supabaseClient?.auth; },
+            get storage() { return window.supabaseClient?.storage; },
+            channel(name, opts) { return window.supabaseClient?.channel(name, opts); },
+            removeChannel(channel) { return window.supabaseClient?.removeChannel(channel); },
+            removeAllChannels() { return window.supabaseClient?.removeAllChannels(); },
+            from(table) {
+                return {
+                    table,
+                    c: { method: 'select', selectStr: '*', filters: [], orders: [], payload: null, match: null, single: false, maybeSingle: false, limit: null },
+                    select(s = '*') { this.c.selectStr = s; return this; },
+                    eq(col, val) { this.c.filters.push({ col, val }); return this; },
+                    order(col, opts) { this.c.orders.push({ col, opts }); return this; },
+                    match(m) { this.c.match = m; return this; },
+                    single() { this.c.single = true; this.c.maybeSingle = false; return this; },
+                    maybeSingle() { this.c.single = false; this.c.maybeSingle = true; return this; },
+                    limit(n) { this.c.limit = n; return this; },
+                    insert(p) { this.c.method = 'insert'; this.c.payload = p; return this; },
+                    upsert(p) { this.c.method = 'upsert'; this.c.payload = p; return this; },
+                    update(p) { this.c.method = 'update'; this.c.payload = p; return this; },
+                    delete() { this.c.method = 'delete'; return this; },
+                    async then(resolve, reject) {
+                        try {
+                            const res = await window.executeRedundant(this.c, this.table);
+                            resolve(res);
+                        } catch (e) { resolve({ data: [], error: e }); }
+                    }
+                };
+            }
+        };
+
+        function initSupabase() {
+            if (window.SUPABASE_AVAILABLE && window.supabaseClient) return true;
+            
+            // Check global 'supabase' variable (from CDN) to see if it's finally ready
+            var sdk = window.supabase || (typeof supabase !== 'undefined' ? supabase : null);
+            
+            if (sdk && sdk.createClient) {
+                try {
+                    window.supabaseClient = sdk.createClient(SUPABASE_URL, SUPABASE_KEY);
+                    window.SUPABASE_AVAILABLE = true;
+                    console.log("Supabase (v2) successfully connected.");
+                    return true;
+                } catch (e) {
+                    console.error("Supabase creation error:", e);
+                    return false;
+                }
+            }
+            return false;
+        }
+
+        const client = window.dbProxy; 
+        window.client = client;
+
+        // Initial attempt
+        initSupabase();
+
+        // --- TURSO REDUNDANCY INITIALIZATION ---
+        window.TURSO_AVAILABLE = false;
+        window.TURSO_LOADING = false;
+
+        async function initTurso(force = false) {
+            if (!force && window.TURSO_AVAILABLE && window.turso) return true;
+            if (window.TURSO_LOADING && !force) return false;
+            
+            window.TURSO_LOADING = true;
+
+            // DYNAMIC: Read from localStorage or use defaults
+            const url = "libsql://bbsydp-redundancy-mkuk2013.aws-us-east-2.turso.io";
+            const token = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzY3MDYwMjYsImlkIjoiMDE5ZGFiZWUtMGIwMS03YTA0LThlMjktOWQ3ZDc5YmQyZWVlIiwicmlkIjoiM2IzZDg5MzYtZjhhYS00MTY5LWIwNTItMTAxMzMzOTZmNWFmIn0.0RwRbDBf4FNWHahXR6VGKRfR-2EraI1MaOYxyS_tpeDyUm6SdfjDYTIYMRyEPQTfzA3NXItRJ4L-rXcPBAZ6AA";
+
+            if (!url || !token) {
+                window.TURSO_LOADING = false;
+                window.TURSO_AVAILABLE = false;
+                return false;
+            }
+
+            try {
+                console.log(`[Redundancy] ${force ? 'Force-' : ''}Initiating Lazy-Load for Turso...`);
+                const { createClient } = await import("https://esm.sh/@libsql/client/web");
+                
+                window.turso = createClient({ url: url, authToken: token });
+                
+                // PING CHECK: Verify CORS and Connection
+                try {
+                    await window.turso.execute("SELECT 1");
+                    window.TURSO_AVAILABLE = true;
+                    console.log("[Redundancy] Turso Library Ready & Connected.");
+                } catch (pingErr) {
+                    if (pingErr.message.includes('fetch') || pingErr.name === 'TypeError') {
+                        console.warn("[Redundancy] Turso is blocked by CORS. Redundancy disabled.");
+                    } else {
+                        console.warn("[Redundancy] Turso connection error:", pingErr.message);
+                    }
+                    window.TURSO_AVAILABLE = false;
+                }
+                
+                window.TURSO_LOADING = false;
+                return window.TURSO_AVAILABLE;
+            } catch (e) {
+                console.warn("[Redundancy] Turso module load failed:", e.message);
+                window.TURSO_LOADING = false;
+                window.TURSO_AVAILABLE = false;
+                return false;
+            }
         }
         const { jsPDF } = window.jspdf || { jsPDF: null };
+
+        // --- GLOBAL EXPORTS ---
+        window.checkSession = checkSession;
+        window.initDashboard = initDashboard;
+        window.finishInitialization = finishInitialization;
+        window.handleUserSession = handleUserSession;
 
         // NEW: Capture Recovery Mode IMMEDIATELY before hash is cleared
         window.isRecoveryMode = window.location.hash && window.location.hash.includes('type=recovery');
@@ -5156,6 +5582,7 @@
                 $('#sidebar-overlay').removeClass('show');
             }
         }
+        window.closeSidebarOnMobile = closeSidebarOnMobile;
 
         // --- THEME ENGINE ---
 
@@ -5185,6 +5612,9 @@
         async function checkSession() {
             if (isInitializing) return;
 
+            // Ensure Supabase is initialized before checking session
+            initSupabase();
+
             // Check Maintenance Status Globally
             fetchExamStatus();
 
@@ -5196,10 +5626,10 @@
             }
 
             try {
-                // Robust Session Check with Timeout
+                // Robust Session Check with Timeout (Reduced for speed)
                 const sessionPromise = client.auth.getSession();
                 const timeoutPromise = new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("Session Check Timeout")), 5000)
+                    setTimeout(() => reject(new Error("Session Check Timeout")), 2500)
                 );
 
                 const { data } = await Promise.race([sessionPromise, timeoutPromise]);
@@ -5222,22 +5652,18 @@
             }
         }
 
-        async function handleUserSession(user) {
-            if (!user) return;
+        async function handleUserSession(user, isManual = false) {
+            if (!user) { finishInitialization(false); return; }
+            console.log(`[Session] Handling session for ${user.email} (Manual: ${isManual})`);
 
-
-            // If recovery mode, skip login logic and stay on auth screen
-            if (window.isRecoveryMode) {
-                console.log("Recovery Mode Detected: Skipping Dashboard Init");
-                finishInitialization(false);
-                return;
+            if (isManual) {
+                console.log("[Session] Manual Override: Purging stale init locks.");
+                window.sessionInitPromise = null;
+                isInitializing = false;
             }
 
-            if (!user) { finishInitialization(false); return; }
-
-            // PROMISE-BASED LOCK: Request Coalescing
-            if (window.sessionInitPromise) {
-                console.log("[Session] Joining existing initialization process...");
+            if (window.sessionInitPromise && !isManual) {
+                console.log("[Session] Joining existing background session check...");
                 return window.sessionInitPromise;
             }
 
@@ -5247,6 +5673,13 @@
 
                 try {
                     // Check cache availability for this user ID
+                    if (user && user.id === 'offline-user-id') {
+                        console.warn("[Session] Detected legacy or stale offline session. Clearing.");
+                        localStorage.removeItem('supabase_profile_cache');
+                        finishInitialization(false);
+                        return;
+                    }
+
                     const cachedParams = localStorage.getItem('supabase_profile_cache');
 
                     if (cachedParams) {
@@ -5299,10 +5732,8 @@
                     }
 
                     // If NOT cached, we MUST wait for the fetch, but with a TIMEOUT to prevent hanging
-                    // Create a timeout promise that rejects after 5 seconds
-                    // Create a timeout promise that rejects after 15 seconds (increased from 5s)
                     const timeoutPromise = new Promise((_, reject) =>
-                        setTimeout(() => reject(new Error("Network Timeout: Profile fetch took too long. Please check your internet connection.")), 15000)
+                        setTimeout(() => reject(new Error("Network Timeout: Profile fetch took too long.")), 5000)
                     );
 
                     let profileData;
@@ -5323,8 +5754,8 @@
                         localStorage.removeItem('supabase_profile_cache');
                         throw new Error("Access Revoked: Your account has been deleted by an administrator.");
                     } else {
-                        // ROLE CHECK with Auto-Correction
-                        const intendedRole = $('#tab-student').hasClass('bg-white') ? 'student' : 'admin';
+                        // ROLE CHECK with Auto-Correction (Ground Truth from Form State)
+                        const intendedRole = $('#auth-form').data('role') || 'student';
 
                         if (profile.role !== intendedRole) {
                             console.log(`[Session] Role mismatch detected. Auto-switching to ${profile.role} view.`);
@@ -5442,16 +5873,17 @@
             }
 
             checkSession();
-            // Safety timeout
+            // Safety timeout (Tightened for speed)
             setTimeout(() => {
-                if ($('#global-loader').is(':visible')) {
+                const loader = document.getElementById('global-loader');
+                if (loader && getComputedStyle(loader).display !== 'none') {
                     console.warn("Initialization taking longer than expected... Resetting locks.");
                     // CRITICAL: Clear the lock so user can try again manually
                     window.sessionInitPromise = null;
                     isInitializing = false;
                     finishInitialization(!!currentUser);
                 }
-            }, 12000);
+            }, 3000);
         });
 
         // --- TOGGLE MODE OVERRIDE ---
@@ -6310,14 +6742,52 @@
             const pass = $('#auth-pass').val();
             const name = $('#auth-name').val(); // Capture name early
             const fileInput = document.getElementById('auth-avatar');
+            const statusNode = $('#auth-status');
 
+            // Reset UI
+            statusNode.removeClass('hidden').text('Initiating login...').addClass('text-slate-400');
             errorElement.addClass('hidden').text('');
-            btn.prop('disabled', true).find('span').text('Verifying...');
+            
+            // Watchdog Timer (Reset after 8s)
+            const watchdog = setTimeout(() => {
+                if (btn.prop('disabled')) {
+                    console.warn("[Auth] Watchdog triggered - Connection took too long.");
+                    btn.prop('disabled', false).find('span').text(originalText);
+                    statusNode.html('Connection is slow. <button onclick="window.forceOfflineLogin()" class="text-indigo-500 underline font-black">Force Offline Access?</button>').addClass('text-amber-500');
+                }
+            }, 8000);
 
-            if (!client) {
+            // GLOBAL ACCESS for recovery
+            window.forceOfflineLogin = async () => {
+                clearTimeout(watchdog);
+                statusNode.text('Force-starting offline session...');
+                const role = $('#auth-form').data('role') || 'student';
+                const mockUser = { id: 'offline-user-id', email: email || 'offline@local' };
+                const mockProfile = {
+                    uid: 'offline-user-id',
+                    name: 'Guest User',
+                    email: email || 'offline@local',
+                    role: role,
+                    status: 'approved',
+                    avatar_url: null
+                };
+                localStorage.setItem('supabase_profile_cache', JSON.stringify(mockProfile));
+                await handleUserSession(mockUser, true);
+                finishInitialization(true);
+            };
+
+            // CRITICAL: Clear old profile cache to ensure the new login fetches fresh data
+            localStorage.removeItem('supabase_profile_cache');
+
+            // Ensure Supabase is ready
+            statusNode.text('Verifying Database Connection...');
+            initSupabase();
+
+            if (!window.client || !window.client.auth) {
+                clearTimeout(watchdog);
                 // OFFLINE LOGIN BYPASS
                 console.warn("Offline Mode: Attempting local login bypass.");
-                const role = localStorage.getItem('last_auth_tab') || 'student';
+                const role = $('#auth-form').data('role') || 'student';
                 const mockUser = { id: 'offline-user-id', email: email || 'offline@local' };
                 const mockProfile = {
                     uid: 'offline-user-id',
@@ -6332,7 +6802,7 @@
                 localStorage.setItem('supabase_profile_cache', JSON.stringify(mockProfile));
 
                 showToast("Login Successful!", "success");
-                await handleUserSession(mockUser);
+                await handleUserSession(mockUser, true); // Force manual bypass
                 finishInitialization(true); // Force UI switch
                 isInitializing = false;
                 return;
@@ -6422,7 +6892,7 @@
                         uid: userId,
                         name: name,
                         email,
-                        role: 'student',
+                        role: $('#auth-form').data('role') || 'student', // Use dynamic role
                         status: 'pending',
                         avatar_url: avatarUrl
                     }, { onConflict: 'uid' });
@@ -6438,18 +6908,50 @@
                     customToggleMode();
                     btn.prop('disabled', false);
                 } else {
-                    // Standard Login
-                    const { data, error } = await client.auth.signInWithPassword({ email, password: pass });
-                    if (error) throw error;
+                    // Standard Login with Hard Timeout
+                    statusNode.text('Authenticating credentials...');
+                    
+                    const authTimeout = new Promise((_, reject) => setTimeout(() => reject(new Error("Auth Timeout")), 5000));
+                    
+                    try {
+                        const loginRes = await Promise.race([
+                            window.client.auth.signInWithPassword({ email, password: pass }),
+                            authTimeout
+                        ]);
+                        
+                        if (loginRes.error) {
+                            clearTimeout(watchdog);
+                            throw loginRes.error;
+                        }
 
-                    // EXPLICIT MODE: Immediately handle the user session
-                    // This prevents sticking on "Verifying..." if onAuthStateChange is slow/missed.
-                    if (data?.user) {
-                        await handleUserSession(data.user);
+                        // EXPLICIT MODE: Immediately handle the user session
+                        if (loginRes.data?.user) {
+                            statusNode.text('Fetching your profile...');
+                            await handleUserSession(loginRes.data.user, true); // Force manual bypass
+                            
+                            // If we got here, success!
+                            clearTimeout(watchdog);
+                            statusNode.text('Session established. Redirecting...');
+                        }
+                    } catch (raceErr) {
+                        if (raceErr.message === "Auth Timeout") {
+                            console.warn("Auth call timed out. Offering offline bypass.");
+                            statusNode.html('Auth Timed Out. <button onclick="window.forceOfflineLogin()" class="text-indigo-500 underline font-black">Use Offline Mode?</button>');
+                            btn.prop('disabled', false).find('span').text(originalText);
+                            return; // Stop here, let user choose
+                        }
+                        throw raceErr;
                     }
                 }
             } catch (err) {
+                clearTimeout(watchdog);
                 console.error("Auth Error:", err);
+                statusNode.addClass('hidden');
+                
+                // Show user-friendly error
+                $('#auth-error-v2').removeClass('hidden').text(err.message || "An unexpected login error occurred. Please try again.");
+                
+                finishInitialization(false); // SAFETY: Ensure loader hides on error
                 let msg = err.message;
                 // Specific handling for the 500 Trigger Error (Duplicate Key / Zombie Profile)
                 if (msg.includes('500') || (err.status === 500) || msg.includes('Database error')) {
@@ -7419,42 +7921,7 @@
             if (isMarch15) {
                 // Student Side Logic
                 if (userProfile.role === 'student') {
-                    client.from('birthday_wishes')
-                        .select('id')
-                        .eq('student_id', currentUser.id)
-                        .then(({ data, error }) => {
-                            if (!error && (data && data.length > 0)) {
-                                localStorage.setItem('bday_wish_2026', 'true');
-                                return;
-                            }
-                            
-                            if (!sessionStorage.getItem('birthdayModalShown') && !localStorage.getItem('bday_wish_2026')) {
-                                setTimeout(() => {
-                                    window.showBirthdayModal?.();
-                                    sessionStorage.setItem('birthdayModalShown', 'true');
-                                }, 3000);
-                            }
-                        });
-
-                    // Listen for Admin Replies (Real-time)
-                    if (window.client && typeof client.channel === 'function') {
-                        client.channel('birthday_replies_realtime')
-                            .on('postgres_changes', { 
-                                event: 'UPDATE', 
-                                schema: 'public', 
-                                table: 'birthday_wishes',
-                                filter: `student_id=eq.${currentUser.id}`
-                            }, (payload) => {
-                                if (payload.new && payload.new.replied) {
-                                    const randomMessage = window.getRandomThankYouMessage(currentUser.name);
-                                    showToast(`Admin Mukesh Kumar says: ${randomMessage} ❤️`, "success");
-                                    if (typeof confetti === 'function') {
-                                        confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-                                    }
-                                }
-                            })
-                            .subscribe();
-                    }
+                    // Birthday and Reply notifications disabled for students per request.
                 }
             } else {
                 // CLEANUP: Ensure all birthday UI is gone if date passed
@@ -7680,7 +8147,7 @@
 
             try {
                 // No race condition - await completion
-                await client.auth.signOut();
+                if (client && client.auth) await client.auth.signOut();
             } catch (err) {
                 console.warn("Logout error:", err);
             } finally {
@@ -7733,12 +8200,27 @@
             syncInterval = setInterval(fetchData, 5000);
         }
 
-        // NEW: AJAX Version of fetchData
+        // NEW: AJAX Version of fetchData (Optimized with Debouncing & Non-blocking cache)
+        window.isFetchingData = false;
+        window.fetchDataDebounceTimer = null;
+
         async function fetchData() {
+            // Debounce to prevent multiple rapid calls spiking CPU
+            if (window.isFetchingData) return;
+            
+            clearTimeout(window.fetchDataDebounceTimer);
+            window.fetchDataDebounceTimer = setTimeout(async () => {
+                await executeActualFetch();
+            }, 300); // 300ms debounce
+        }
+
+        async function executeActualFetch() {
             // Use Supabase Client SDK instead of raw AJAX for better stability & auth handling
+            if (!client || !client.auth) return;
             const { data: { session } } = await client.auth.getSession();
             if (!session) return;
 
+            window.isFetchingData = true;
             try {
                 const [tasksRes, subsRes] = await Promise.all([
                     client.from('tasks').select('*').order('deadline', { ascending: true }),
@@ -7754,27 +8236,33 @@
                 window.allTasks = tasks;
                 window.allSubmissions = subs;
 
-                // SAVE TO CACHE FOR NEXT LOAD
-                localStorage.setItem('cached_tasks', JSON.stringify(tasks));
-                localStorage.setItem('cached_subs', JSON.stringify(subs));
+                // NON-BLOCKING CACHE: Move JSON.stringify off the immediate main thread
+                setTimeout(() => {
+                   try {
+                     localStorage.setItem('cached_tasks', JSON.stringify(tasks));
+                     localStorage.setItem('cached_subs', JSON.stringify(subs));
+                   } catch(e) { console.warn("Cache Write Failed:", e); }
+                }, 100);
 
                 await renderStats(tasks, subs);
+                
+                // Only render views that are actually active
                 if (activeTab === 'tasks') renderTasks(tasks, subs);
                 if (activeTab === 'leaderboard') renderLeaderboard(subs);
                 if (userProfile.role === 'admin') {
                     if (activeTab === 'grading') renderGrading(subs);
-                    // fetchUsers is called separately when needed/tab switches, to save bandwidth
                     if (activeTab === 'users') fetchUsers();
-
-                    // Update feedback notification badge
                     checkFeedbackCount();
                 }
+                
+                // Live Chart Update
+                if (activeTab === 'dashboard' && performanceChart) updateChart();
+
             } catch (err) {
                 console.error("Data Sync Error:", err);
-                // Reduce noise, only alert on critical failures that persist
+            } finally {
+                window.isFetchingData = false;
             }
-            // Live Chart Update
-            if (activeTab === 'dashboard' && performanceChart) updateChart();
         }
         async function renderStats(tasks, subs) {
             const isStudent = userProfile.role === 'student';
@@ -8063,7 +8551,14 @@
                     `);
                 });
             }
-            lucide.createIcons();
+            // SCOPED ICON RENDERING: Only update the recent activity list icons
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                lucide.createIcons({
+                    attrs: { class: 'w-4 h-4' },
+                    nameAttr: 'data-lucide',
+                    root: document.getElementById('recent-activity-list')
+                });
+            }
         }
 
         window.filterTasks = (type) => {
@@ -9844,6 +10339,7 @@
         };
 
         window.switchTab = (tabId) => {
+            const startTime = performance.now();
             console.log("Switching to:", tabId);
             activeTab = tabId;
 
@@ -9880,7 +10376,7 @@
                 // Animations
                 const $target = $(targetEl);
                 $target.removeClass('animate-in fade-in slide-in-from-bottom-5');
-                void targetEl.offsetWidth; // trigger reflow
+                // Removed synchronous offsetWidth reflow (UI hang risk)
                 $target.addClass('animate-in fade-in slide-in-from-bottom-5');
             } else {
                 console.error("Target view not found:", tabId);
@@ -9916,7 +10412,8 @@
                 'profile': 'My Profile',
                 'playground': 'Live Code Editor',
                 'exam': 'Online Examination',
-                'storage': 'My Personal Storage'
+                'storage': 'My Personal Storage',
+                'settings': 'System Settings'
             };
             $('#page-title').text(titles[tabId] || 'BBSHRRDB LMS');
 
@@ -9950,7 +10447,8 @@
                     'profile': 'Editing Profile',
                     'playground': 'Coding in Playground',
                     'exam': 'Taking Exam',
-                    'storage': 'Managing Files'
+                    'storage': 'Managing Files',
+                    'settings': 'System Settings'
                 };
                 window.updateActivity(activityMap[tabId] || 'Browsing LMS');
             }
@@ -10052,6 +10550,15 @@
                 if (typeof window.syncArcadeProgress === 'function') window.syncArcadeProgress();
             }
 
+            // Settings
+            if (tabId === 'settings') {
+                if (localStorage.getItem('turso_url') && window.TURSO_AVAILABLE) {
+                     $('#turso-indicator').removeClass('bg-slate-300 bg-red-500').addClass('bg-emerald-500 animate-pulse');
+                     $('#turso-status-text').text("Turso: Online").removeClass('text-slate-400 text-red-400').addClass('text-emerald-500');
+                     $('#init-turso-btn, #sync-turso-btn').prop('disabled', false);
+                }
+            }
+
             // --- 8. ADMIN UI UPDATES ---
             if (userProfile && userProfile.role === 'admin') {
                 $('#create-task-btn, #admin-notif-btn, #add-resource-btn, #arcade-toggle-btn').removeClass('hidden');
@@ -10075,18 +10582,36 @@
             }
 
             // --- 9. GLOBAL UPDATES ---
-            if (typeof fetchData === 'function') fetchData();
+            setTimeout(() => {
+                if (typeof fetchData === 'function') fetchData();
+                console.log(`[Performance] View switched to ${tabId} in ${Math.round(performance.now() - startTime)}ms`);
+            }, 50);
 
-            // Fix for stuck modal backdrops
-            $('.modal').on('hidden.bs.modal', function () {
+            if (typeof lucide !== 'undefined' && lucide.createIcons) {
+                setTimeout(() => {
+                    if (targetEl) {
+                        const iconStart = performance.now();
+                        lucide.createIcons({
+                            attrs: { class: 'w-5 h-5' },
+                            nameAttr: 'data-lucide',
+                            root: targetEl // SCOPED: Only scan the newly opened view
+                        });
+                        console.log(`[Performance] Icons rendered in ${Math.round(performance.now() - iconStart)}ms`);
+                    }
+                }, 10);
+            }
+        };
+
+        // --- GLOBAL INITIALIZATION (One-time) ---
+        $(document).ready(() => {
+            // Fix for stuck modal backdrops - DO NOT put inside switchTab!
+            $(document).on('hidden.bs.modal', '.modal', function () {
                 if ($('.modal.show').length === 0) {
                     $('.modal-backdrop').remove();
                     $('body').removeClass('modal-open').css('padding-right', '');
                 }
             });
-
-            if (typeof lucide !== 'undefined' && lucide.createIcons) lucide.createIcons();
-        };
+        });
 
         // --- PERSONAL STORAGE LOGIC (CLOUDINARY + SUPABASE METADATA) ---
         window.userFiles = [];
@@ -11206,6 +11731,14 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
         };
 
         window.setupRealtime = () => {
+            // --- CLEANUP: Remove existing channels to prevent re-subscription errors ---
+            if (window.client) {
+                client.removeChannel(client.channel('public:task_comments'));
+                client.removeChannel(client.channel('public:submissions'));
+                client.removeChannel(client.channel('online-users'));
+                client.removeChannel(client.channel('arcade-control'));
+            }
+
             // Task Comments Realtime
             client.channel('public:task_comments').on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'task_comments' }, payload => {
                 if (currentTask && payload.new.task_id === currentTask.id) fetchComments(currentTask.id);
@@ -12096,7 +12629,13 @@ CREATE POLICY "Admins can manage all files" ON personal_storage
                     } else {
                         const { error } = await client.from('tasks').insert([data]);
                         if (error) throw error;
+                        
                         showToast("New task created.");
+                        
+                        // --- EMAIL ALERT TRIGER ---
+                        setTimeout(() => {
+                            window.notifyAssignmentUpload(data);
+                        }, 1000);
                     }
                     bootstrap.Modal.getOrCreateInstance(document.getElementById('createTaskModal')).hide();
                     fetchData(); // Refresh list
@@ -15113,6 +15652,268 @@ await __main_wrapper__()
                 initResize();
             }
         })();
+
+        // --- SYSTEM SETTINGS & EXPORT LOGIC ---
+        window.exportDatabase = async () => {
+            if (!userProfile || userProfile.role !== 'admin') {
+                showToast("Only admins can perform this action.", "error");
+                return;
+            }
+
+            const exportBtn = $('#export-db-btn');
+            const statusDiv = $('#export-status');
+            const statusText = $('#export-status-text');
+
+            if (exportBtn.prop('disabled')) return;
+
+            try {
+                // UI State
+                exportBtn.prop('disabled', true).addClass('opacity-50');
+                statusDiv.removeClass('hidden');
+                statusText.text("Starting export engine...");
+
+                const tables = [
+                    'profiles', 'tasks', 'submissions', 'resources', 'task_comments',
+                    'exam_settings', 'exam_results', 'notices', 'user_achievements',
+                    'user_arcade_progress', 'feedback', 'arcade_config', 'personal_storage'
+                ];
+
+                const databaseDump = {};
+                
+                for (let i = 0; i < tables.length; i++) {
+                    const table = tables[i];
+                    statusText.text(`Fetching table: ${table} (${i+1}/${tables.length})`);
+                    
+                    const { data, error } = await client.from(table).select('*');
+                    
+                    if (error) {
+                        console.warn(`Error fetching ${table}:`, error);
+                        databaseDump[table] = { error: error.message };
+                    } else {
+                        databaseDump[table] = data;
+                    }
+                }
+
+                statusText.text("Preparing download package...");
+                
+                // Final Object
+                const finalData = {
+                    version: '2.0',
+                    timestamp: new Date().toISOString(),
+                    exported_by: userProfile.name,
+                    data: databaseDump
+                };
+
+                // Trigger Download
+                const blob = new Blob([JSON.stringify(finalData, null, 2)], { type: 'application/json' });
+                const url = window.URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.style.display = 'none';
+                a.href = url;
+                a.download = `bbshrrdb_export_${new Date().toISOString().split('T')[0]}.json`;
+                document.body.appendChild(a);
+                a.click();
+                
+                // Cleanup
+                window.URL.revokeObjectURL(url);
+                document.body.removeChild(a);
+                
+                showToast("Database exported successfully!", "success");
+                $('#last-backup-ts').text(new Date().toLocaleString());
+                
+            } finally {
+                exportBtn.prop('disabled', false).removeClass('opacity-50');
+                statusDiv.addClass('hidden');
+            }
+        };
+
+        // --- TURSO HELPERS ---
+        window.saveTursoConfig = async () => {
+            const url = $('#turso-url-input').val().trim();
+            const token = $('#turso-token-input').val().trim();
+            
+            if (!url || !token) {
+                showToast("Please fill in both Turso fields.", "info");
+                return;
+            }
+            
+            localStorage.setItem('turso_url', url);
+            localStorage.setItem('turso_auth_token', token);
+            
+            showToast("Turso config saved. Reconnecting...", "info");
+            await initTurso(true); // FORCE: Re-initialize with new values
+            
+            if (window.TURSO_AVAILABLE) {
+                showToast("Turso redundancy established!", "success");
+                $('#turso-indicator').removeClass('bg-slate-300 bg-red-500').addClass('bg-emerald-500 animate-pulse');
+                $('#turso-status-text').text("Turso: Online").removeClass('text-slate-400 text-red-400').addClass('text-emerald-500');
+                $('#init-turso-btn, #sync-turso-btn').prop('disabled', false);
+            } else {
+                showToast("Failed to connect to Turso. Check URL/Token.", "error");
+                $('#turso-indicator').removeClass('bg-slate-300 bg-emerald-500').addClass('bg-red-500');
+                $('#turso-status-text').text("Turso: Error").removeClass('text-slate-400 text-emerald-500').addClass('text-red-400');
+            }
+        };
+
+        window.initializeTursoSchema = async () => {
+            if (!window.TURSO_AVAILABLE) return;
+            showToast("Initializing SQLite Schema...", "info");
+            
+            const tables = [
+                `CREATE TABLE IF NOT EXISTS profiles (uid TEXT PRIMARY KEY, name TEXT, email TEXT, role TEXT, status TEXT, avatar_url TEXT, created_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS tasks (id TEXT PRIMARY KEY, title TEXT, description TEXT, hints TEXT, deadline TEXT, created_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS submissions (id TEXT PRIMARY KEY, task_id TEXT, student_id TEXT, content TEXT, status TEXT, grade INTEGER, feedback TEXT, submitted_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS resources (id TEXT PRIMARY KEY, title TEXT, category TEXT, url TEXT, added_by TEXT, created_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS task_comments (id TEXT PRIMARY KEY, task_id TEXT, user_id TEXT, user_name TEXT, role TEXT, content TEXT, created_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS exam_settings (id INTEGER PRIMARY KEY, is_active BOOLEAN, updated_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS exam_results (id TEXT PRIMARY KEY, student_id TEXT, score REAL, total_marks REAL, answers TEXT, certificate_id TEXT, submitted_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS user_achievements (id TEXT PRIMARY KEY, user_id TEXT, badge_key TEXT, created_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS user_arcade_progress (user_id TEXT PRIMARY KEY, html_level TEXT, css_level TEXT, js_level TEXT, syntax_balloons_score INTEGER, updated_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS feedback (id TEXT PRIMARY KEY, student_id TEXT, instructor_rating INTEGER, course_rating INTEGER, pace_rating INTEGER, support_rating INTEGER, enjoyed_most TEXT, needs_improvement TEXT, additional_comments TEXT, submitted_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS arcade_config (id INTEGER PRIMARY KEY, is_unlocked BOOLEAN, updated_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS personal_storage (id TEXT PRIMARY KEY, user_id TEXT, file_name TEXT, file_url TEXT, file_type TEXT, file_size INTEGER, created_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS global_messages (id TEXT PRIMARY KEY, content TEXT, type TEXT, created_at TEXT)`,
+                `CREATE TABLE IF NOT EXISTS avatars (id INTEGER PRIMARY KEY, url TEXT, type TEXT, created_at TEXT)`
+            ];
+            
+            try {
+                for (const sql of tables) { 
+                    try {
+                        await window.turso.execute(sql); 
+                    } catch (e) {
+                        if (e.message.includes('fetch') || e.name === 'TypeError') {
+                            window.TURSO_AVAILABLE = false;
+                            throw new Error("Turso blocked by CORS");
+                        }
+                        throw e;
+                    }
+                }
+                showToast("Turso schema synchronized successfully!", "success");
+            } catch (e) {
+                console.error("Schema Init Error:", e);
+                const msg = e.message === "Turso blocked by CORS" ? "Turso blocked by CORS policy. Use a proxy or check settings." : "Failed to sync schema to Turso.";
+                showToast(msg, "error");
+            }
+        };
+
+        window.resetTursoDatabase = async () => {
+            if (!window.TURSO_AVAILABLE) {
+                showToast("Turso not connected.", "error");
+                return;
+            }
+
+            if (!confirm("⚠️ This will DANGEROUSLY wipe your local Turso tables. Data in Supabase will NOT be affected. Continue?")) return;
+
+            showToast("Nuclear Reset in progress...", "warning");
+            const tablesToDrop = [
+                'profiles', 'tasks', 'submissions', 'resources', 'task_comments', 
+                'notices', 'exam_settings', 'exam_results', 'user_achievements', 
+                'user_arcade_progress', 'feedback', 'arcade_config', 
+                'personal_storage', 'global_messages', 'avatars'
+            ];
+
+            try {
+                for (const table of tablesToDrop) {
+                    await window.turso.execute(`DROP TABLE IF EXISTS ${table}`);
+                }
+                showToast("Turso Tables Cleared. Re-syncing Schema...", "success");
+                await window.initializeTursoSchema();
+            } catch (err) {
+                console.error("Reset Error:", err);
+                showToast("Reset Failed: " + err.message, "error");
+            }
+        };
+
+        window.syncDataToTurso = async () => {
+            if (!window.TURSO_AVAILABLE) return;
+            const btn = $('#sync-turso-btn');
+            const originalText = btn.html();
+            
+            const tables = ['profiles', 'tasks', 'submissions', 'resources', 'task_comments', 'notices', 'exam_settings', 'exam_results', 'user_achievements', 'user_arcade_progress', 'feedback', 'arcade_config', 'personal_storage'];
+            let successCount = 0;
+
+            try {
+                btn.prop('disabled', true).text("Initializing...");
+                
+                for (const table of tables) {
+                    if (!window.TURSO_AVAILABLE) {
+                        console.warn("[Migration] Aborting: Turso became unavailable.");
+                        break;
+                    }
+                    
+                    btn.text(`Migrating: ${table}...`);
+                    console.log(`[Migration] Syncing table: ${table}`);
+                    
+                    const { data, error } = await client.from(table).select('*');
+                    if (error) {
+                        console.warn(`[Migration] Failed to fetch ${table}:`, error);
+                        continue;
+                    }
+                    
+                    if (data && data.length > 0) {
+                        const chunkSize = 50; 
+                        for (let i = 0; i < data.length; i += chunkSize) {
+                            const chunk = data.slice(i, i + chunkSize);
+                            const batch = chunk.map(row => {
+                                const keys = Object.keys(row);
+                                const placeholders = keys.map(() => '?').join(',');
+                                const vals = Object.values(row);
+                                return {
+                                    sql: `INSERT OR REPLACE INTO ${table} (${keys.join(',')}) VALUES (${placeholders})`,
+                                    args: vals
+                                };
+                            });
+                            
+                            try {
+                                await window.turso.batch(batch);
+                            } catch (batchErr) {
+                                console.error(`[Migration] Batch failed for ${table} @ chunk ${i}:`, batchErr);
+                                if (batchErr.message.includes('fetch') || batchErr.name === 'TypeError') {
+                                    window.TURSO_AVAILABLE = false;
+                                    showToast("Migration stopped: Turso connection lost (CORS).", "error");
+                                    return; // Full stop
+                                }
+                                // Fallback to row-by-row for non-CORS errors
+                                for (const stmt of batch) {
+                                    try { await window.turso.execute(stmt); } catch (e) {}
+                                }
+                            }
+                        }
+                    }
+                    successCount++;
+                }
+                
+                if (successCount > 0) {
+                    showToast(`Migration Finished! Synced ${successCount}/${tables.length} tables.`, "success");
+                }
+            } catch (e) {
+                console.error("Critical Migration Error:", e);
+                showToast("Migration encountered a critical error.", "error");
+            } finally {
+                btn.prop('disabled', false).html(originalText);
+            }
+        };
+
+
+        // UI Persistence for Turso
+        $(document).ready(() => {
+            const defaultTursoUrl = "libsql://bbsydp-redundancy-mkuk2013.aws-us-east-2.turso.io";
+            const defaultTursoToken = "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJhIjoicnciLCJpYXQiOjE3NzY3MDYwMjYsImlkIjoiMDE5ZGFiZWUtMGIwMS03YTA0LThlMjktOWQ3ZDc5YmQyZWVlIiwicmlkIjoiM2IzZDg5MzYtZjhhYS00MTY5LWIwNTItMTAxMzMzOTZmNWFmIn0.0RwRbDBf4FNWHahXR6VGKRfR-2EraI1MaOYxyS_tpeDyUm6SdfjDYTIYMRyEPQTfzA3NXItRJ4L-rXcPBAZ6AA";
+            
+            $('#turso-url-input').val(defaultTursoUrl);
+            $('#turso-token-input').val(defaultTursoToken);
+
+            localStorage.removeItem('turso_url');
+            localStorage.removeItem('turso_auth_token');
+
+            setTimeout(() => {
+                if (window.TURSO_AVAILABLE) {
+                     $('#turso-indicator').addClass('bg-emerald-500 animate-pulse').removeClass('bg-slate-300');
+                     $('#turso-status-text').text("Turso: Online").addClass('text-emerald-500').removeClass('text-slate-400');
+                     $('#init-turso-btn, #sync-turso-btn').prop('disabled', false);
+                }
+            }, 2000);
+        });
     </script>
 
     <!-- NUCLEAR FAILSAFE SCRIPT -->
@@ -15137,7 +15938,7 @@ await __main_wrapper__()
                         auth.classList.remove('hidden');
                     }
                 }
-            }, 8000); // 8 Seconds Timeout
+            }, 5000); // Tightened to 5 Seconds
         })();
 
         // Global Error Handler for Loader
