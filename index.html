@@ -5292,7 +5292,7 @@
                     to_name: (s.name || "Student").toString(),
                     to_email: s.email.trim(),
                     assignment_title: (taskData.title || "New Assignment").toString(),
-                    assignment_desc: (taskData.description || "A new assignment has been uploaded to the LMS.").toString(),
+                    assignment_desc: (taskData.description || "A new assignment has been uploaded to the BBSHRRDB LMS.").toString(),
                     deadline: (taskData.deadline || "No deadline").toString()
                 };
 
@@ -5316,38 +5316,55 @@
         window.notifyAllPendingAssignments = async () => {
             const btn = document.getElementById('btn-notify-all');
             const originalHtml = btn ? btn.innerHTML : '';
-            if(btn) btn.innerHTML = '<i class="w-4 h-4 animate-spin border-2 border-white border-t-transparent rounded-full mr-2"></i> Processing...';
+            if(btn) btn.innerHTML = '<i class="w-4 h-4 animate-spin border-2 border-white border-t-transparent rounded-full mr-2"></i> Filtering...';
             
             try {
-                console.log("[Email System] Starting bulk reminder calculation...");
-                // Fetch fresh data for accuracy
+                console.log("[Email System] Building professional recent-task reminders...");
+                
+                // Fetch fresh data
                 const { data: users } = await client.from('profiles').select('*');
-                const { data: tasks } = await client.from('tasks').select('*'); // Removed is_active filter
+                const { data: tasks } = await client.from('tasks').select('*').order('created_at', { ascending: false });
                 const { data: subs } = await client.from('submissions').select('*');
 
                 const students = (users || []).filter(u => u.role === 'student' && u.email && u.email.includes('@'));
-                const totalTasks = tasks ? tasks.length : 0;
+                
+                // --- RECENT FILTER: Only tasks from the last 7 days ---
+                const sevenDaysAgo = new Date();
+                sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 7);
+                
+                const recentTasks = (tasks || []).filter(t => new Date(t.created_at) > sevenDaysAgo);
+                const totalRecentCount = recentTasks.length;
+
+                console.log(`[Email System] Found ${totalRecentCount} tasks uploaded in the last 7 days.`);
+                
                 let sentCount = 0;
                 let failCount = 0;
-
-                console.log(`[Email System] Found ${students.length} students with valid emails and ${totalTasks} total assignments.`);
 
                 for (const s of students) {
                     const userId = s.uid || s.id;
                     const mySubs = (subs || []).filter(sub => sub.student_id === userId);
-                    const pendingCount = totalTasks - mySubs.length;
+                    
+                    // Filter: Which of the RECENT tasks are missing?
+                    const pendingRecent = recentTasks.filter(t => !mySubs.some(sub => sub.task_id === t.id));
+                    
+                    if (pendingRecent.length > 0) {
+                        // Build a professional text list (EmailJS doesn't support HTML in variables)
+                        const tasksListText = pendingRecent.map(t => {
+                            const deadlineStr = t.deadline ? new Date(t.deadline).toLocaleDateString(undefined, { weekday: 'short', month: 'short', day: 'numeric' }) : "No deadline";
+                            return `🔹 ${t.title}\n🗓️ Due: ${deadlineStr}`;
+                        }).join('\n\n');
 
-                    if (pendingCount > 0) {
                         const params = {
                             to_name: (s.name || "Student").toString(),
                             to_email: s.email.trim(),
-                            pending_count: pendingCount.toString(),
-                            total_tasks: totalTasks.toString()
+                            pending_count: pendingRecent.length.toString(),
+                            total_tasks: totalRecentCount.toString(),
+                            recent_tasks_list: tasksListText 
                         };
 
                         if (window.EMAILJS_CONFIG.PUBLIC_KEY && window.EMAILJS_CONFIG.SERVICE_ID) {
                             try {
-                                console.log(`[Email System] Notifying ${params.to_email} about ${pendingCount} pending tasks...`, params);
+                                console.log(`[Email System] Sending Recent Reminder to ${params.to_email}...`, params);
                                 await emailjs.send(window.EMAILJS_CONFIG.SERVICE_ID, window.EMAILJS_CONFIG.TEMPLATE_REMINDER, params);
                                 sentCount++;
                             } catch(err) { 
@@ -5355,17 +5372,17 @@
                                 failCount++;
                             }
                         } else {
-                            console.log(`[Simulated Alert] TO: ${s.email} | MSG: You have ${pendingCount} pending assignments!`);
+                            console.log(`[Simulated] Recent Reminder for ${s.email} (${pendingRecent.length} tasks)`);
                             sentCount++;
                         }
                     }
                 }
                 
                 if (sentCount === 0 && failCount === 0) {
-                    showToast("No students have pending assignments.", "info");
+                    showToast("No students have pending assignments from the last 7 days.", "info");
                 } else {
-                    showToast(window.EMAILJS_CONFIG.PUBLIC_KEY ? `Sent ${sentCount} reminders successfully.` : `Simulation: Sent ${sentCount} reminders.`, "success");
-                    if (failCount > 0) showToast(`${failCount} emails failed. Check console.`, "warning");
+                    showToast(`${sentCount} BBSHRRDB professional reminders sent.`, "success");
+                    if (failCount > 0) showToast(`${failCount} failed. Check console.`, "warning");
                 }
             } catch (err) {
                 console.error("Alert Error:", err);
