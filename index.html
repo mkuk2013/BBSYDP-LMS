@@ -5411,14 +5411,14 @@
                         const sql = `INSERT OR REPLACE INTO ${table} (${keys.join(',')}) VALUES (${keys.map(()=>'?').join(',')})`;
                         await window.turso.execute({ sql, args: Object.values(row) });
                     }
-                } else if (operation === 'update') {
+                } else if (operation === 'update' && match && Object.keys(match).length > 0) {
                     const keys = Object.keys(payload);
                     const setClause = keys.map(k => `${k} = ?`).join(',');
                     const matchKeys = Object.keys(match);
                     const whereClause = matchKeys.map(k => `${k} = ?`).join(' AND ');
                     const sql = `UPDATE ${table} SET ${setClause} WHERE ${whereClause}`;
                     await window.turso.execute({ sql, args: [...Object.values(payload), ...Object.values(match)] });
-                } else if (operation === 'delete') {
+                } else if (operation === 'delete' && match && Object.keys(match).length > 0) {
                     const matchKeys = Object.keys(match);
                     const whereClause = matchKeys.map(k => `${k} = ?`).join(' AND ');
                     const sql = `DELETE FROM ${table} WHERE ${whereClause}`;
@@ -5432,20 +5432,35 @@
             if (window.SUPABASE_AVAILABLE && window.supabaseClient) {
                 try {
                     let q = window.supabaseClient.from(table)[config.method](config.payload || config.selectStr);
-                    if (config.method === 'select') {
-                        config.filters.forEach(f => q = q.eq(f.col, f.val));
-                        config.orders.forEach(o => q = q.order(o.col, o.opts));
-                        if (config.limit) q = q.limit(config.limit);
-                        if (config.single) q = q.single();
-                        else if (config.maybeSingle) q = q.maybeSingle(); 
-                    } else if (config.method === 'update' || config.method === 'delete') {
-                         q = q.match(config.match);
+                    
+                    // Apply filters for ALL methods that support them (Select, Update, Delete)
+                    if (['select', 'update', 'delete'].includes(config.method)) {
+                        config.filters.forEach(f => {
+                            if (f.op === 'eq') q = q.eq(f.col, f.val);
+                            else if (f.op === 'neq') q = q.neq(f.col, f.val);
+                            else if (f.op === 'in') q = q.in(f.col, f.val);
+                            else if (f.op === 'gt') q = q.gt(f.col, f.val);
+                            else if (f.op === 'lt') q = q.lt(f.col, f.val);
+                        });
+                        
+                        // Only call match if it's explicitly provided as an object
+                        if (config.match && typeof config.match === 'object') {
+                            q = q.match(config.match);
+                        }
+
+                        if (config.method === 'select') {
+                            config.orders.forEach(o => q = q.order(o.col, o.opts));
+                            if (config.limit) q = q.limit(config.limit);
+                             if (config.single) q = q.single();
+                            else if (config.maybeSingle) q = q.maybeSingle(); 
+                        }
                     }
+
                     const { data, error } = await q;
                     if (!error) {
                         // --- DUAL-WRITE MIRRORING: Sync to Turso in background on success ---
                         if (config.method !== 'select' && window.TURSO_AVAILABLE) {
-                            const matchObj = config.match || (config.filters.length ? config.filters.reduce((a,f)=>(a[f.col]=f.val,a),{}) : null);
+                            const matchObj = config.match || (config.filters.length ? config.filters.filter(f=>f.op==='eq').reduce((a,f)=>(a[f.col]=f.val,a),{}) : null);
                             window.executeTursoMutation(table, config.method, config.payload, matchObj);
                         }
                         return { data, error: null };
@@ -5463,7 +5478,11 @@
                     try {
                         let tursoData = null;
                         if (config.method === 'select') {
-                            let where = config.filters.length ? "WHERE " + config.filters.map(f => `${f.col} = ?`).join(" AND ") : "";
+                            let where = config.filters.length ? "WHERE " + config.filters.map(f => {
+                                if (f.op === 'eq') return `${f.col} = ?`;
+                                if (f.op === 'neq') return `${f.col} != ?`;
+                                return `${f.col} = ?`;
+                            }).join(" AND ") : "";
                             let order = config.orders.length ? "ORDER BY " + config.orders.map(o => `${o.col} ${o.opts.ascending ? 'ASC' : 'DESC'}`).join(", ") : "";
                             let limitClause = config.limit ? `LIMIT ${config.limit}` : "";
                             const sql = `SELECT ${config.selectStr} FROM ${table} ${where} ${order} ${limitClause}`;
@@ -5475,7 +5494,8 @@
                             });
                             if (config.single) tursoData = tursoData.length > 0 ? tursoData[0] : null;
                         } else {
-                            tursoData = await window.executeTursoMutation(table, config.method, config.payload, config.match || (config.filters.length ? config.filters.reduce((a,f)=>(a[f.col]=f.val,a),{}) : null));
+                            const matchObj = config.match || (config.filters.length ? config.filters.filter(f=>f.op==='eq').reduce((a,f)=>(a[f.col]=f.val,a),{}) : null);
+                            tursoData = await window.executeTursoMutation(table, config.method, config.payload, matchObj);
                         }
                         return { data: tursoData, error: null };
                     } catch (err) { lastError = err; }
@@ -5495,7 +5515,11 @@
                     table,
                     c: { method: 'select', selectStr: '*', filters: [], orders: [], payload: null, match: null, single: false, maybeSingle: false, limit: null },
                     select(s = '*') { this.c.selectStr = s; return this; },
-                    eq(col, val) { this.c.filters.push({ col, val }); return this; },
+                    eq(col, val) { this.c.filters.push({ col, val, op: 'eq' }); return this; },
+                    neq(col, val) { this.c.filters.push({ col, val, op: 'neq' }); return this; },
+                    in(col, val) { this.c.filters.push({ col, val, op: 'in' }); return this; },
+                    gt(col, val) { this.c.filters.push({ col, val, op: 'gt' }); return this; },
+                    lt(col, val) { this.c.filters.push({ col, val, op: 'lt' }); return this; },
                     order(col, opts) { this.c.orders.push({ col, opts }); return this; },
                     match(m) { this.c.match = m; return this; },
                     single() { this.c.single = true; this.c.maybeSingle = false; return this; },
